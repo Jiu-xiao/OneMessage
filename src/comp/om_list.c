@@ -81,3 +81,18 @@ uint16_t om_list_find(const om_list_t list,
 
   return 0;
 }
+
+om_status_t om_list_through(om_list_t list,
+                            om_status_t (*check)(const void* data,
+                                                 const void* source),
+                            void* arg) {
+  OM_ASSENT(list == NULL || check == NULL);
+
+  om_status_t status = OM_OK;
+
+  om_node_t node = list->head;
+  for (uint16_t i = 1; i <= list->number; i++) {
+    if (check(node->data, arg)) status = OM_ERROR;
+    node = node->next;
+  }
+};

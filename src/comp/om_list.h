@@ -37,3 +37,8 @@ om_status_t om_list_delete(om_list_t list, uint16_t number);
 uint16_t om_list_find(const om_list_t list,
                       bool (*check)(const void* data, const void* source),
                       void* arg);
+
+om_status_t om_list_through(om_list_t list,
+                            om_status_t (*check)(const void* data,
+                                                 const void* source),
+                            void* arg);
