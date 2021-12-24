@@ -78,3 +78,5 @@ om_status_t om_core_del_puber(om_list_head_t* head);
 om_status_t om_core_del_topic(om_list_head_t* head);
 
 om_topic_t* om_core_find_topic(const char* name);
+
+void om_error(const char* file, uint32_t line);

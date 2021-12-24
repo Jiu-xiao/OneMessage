@@ -102,7 +102,7 @@ om_status_t om_core_del_suber(om_list_head_t* head) {
     om_list_head_t* pos;
     om_list_for_each(pos, &sub->target->link) {
       om_link_t* link = om_list_entry(pos, om_link_t, self);
-      if (link->source = sub) {
+      if (link->source == sub) {
         om_list_del(&link->self);
         om_free(link);
         break;
@@ -128,7 +128,7 @@ om_status_t om_core_del_puber(om_list_head_t* head) {
 om_status_t om_core_del_topic(om_list_head_t* head) {
   OM_ASSENT(head);
   om_topic_t* topic = om_list_entry(head, om_topic_t, self);
-  OM_CHECK(topic != &topic_list);
+  OM_CHECK((void*)topic != (void*)&topic_list);
 
   om_list_head_t* pos;
   om_del_all(pos, &topic->link, om_core_delink);
@@ -147,4 +147,11 @@ om_topic_t* om_core_find_topic(const char* name) {
     if (!strncmp(name, topic->name, OM_TOPIC_MAX_NAME_LEN)) return topic;
   }
   return NULL;
+}
+
+void om_error(const char* file, uint32_t line) {
+  (void)(file);
+  (void)(line);
+  while (1) {
+  };
 }

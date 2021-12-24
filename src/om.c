@@ -9,6 +9,7 @@ om_status_t om_init() {
   om_topic_t* log = om_core_topic_create("log");
   om_core_add_topic(log);
 #endif
+  return OM_OK;
 }
 
 om_status_t om_config_topic(om_topic_t* topic, om_config_t* config) {
@@ -145,11 +146,13 @@ om_status_t om_sync() {
       }
     }
   }
+
+  return OM_OK;
 }
 
 om_topic_t* om_create_topic(const char* name, om_config_t* config) {
   OM_ASSENT(name);
-  OM_ASSENT(topic);
+  OM_ASSENT(config);
 
   om_topic_t* topic = om_core_topic_create(name);
   om_config_topic(topic, config);
@@ -178,4 +181,5 @@ om_puber_t* om_create_puber(om_config_t* config) {
 om_status_t om_deinit() {
   om_list_head_t* pos;
   om_del_all(pos, &topic_list, om_core_del_topic);
+  return OM_OK;
 }

@@ -17,9 +17,9 @@ typedef enum {
 
 #ifdef DEBUG
 #define OM_ASSENT(arg) \
-  if (!(arg)) return OM_ERROR_NULL;
+  if (!(arg)) om_error(__FILE__, __LINE__);
 #define OM_CHECK(arg) \
-  if (!(arg)) return OM_ERROR;
+  if (!(arg)) om_error(__FILE__, __LINE__);
 
 #else
 #define OM_ASSENT(arg) (void)0;
