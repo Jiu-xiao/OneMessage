@@ -1,10 +1,10 @@
 #include "om_config.h"
+#ifndef __OM_CONFIG_H_
+#define __OM_CONFIG_H_
 
-#ifndef OM_USE_USER_MALLOC
-
+#if !OM_USE_USER_MALLOC
 #define om_malloc malloc
 #define om_free free
-
 #endif
 
 typedef enum {
@@ -16,15 +16,20 @@ typedef enum {
 } om_status_t;
 
 #ifdef DEBUG
-
 #define OM_ASSENT(arg) \
   if (!(arg)) return OM_ERROR_NULL;
 #define OM_CHECK(arg) \
   if (!(arg)) return OM_ERROR;
 
 #else
-
 #define OM_ASSENT(arg) (void)0;
 #define OM_CHECK(arg) (void)0;
+#endif
+
+#if OM_VIRTUAL_TIME
+#define om_time_t uint32_t
+#define om_time_update(time) time++
+#define om_time_get(time) time
+#endif
 
 #endif

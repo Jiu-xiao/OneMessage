@@ -1,0 +1,181 @@
+#include "om.h"
+
+om_time_t time_handle;
+extern om_list_head_t topic_list;
+om_config_t EMPTY_CONFIG = {.arg = NULL, .op = OM_CONFIG_END};
+
+om_status_t om_init() {
+#if OM_LOG_OUTPUT
+  om_topic_t* log = om_core_topic_create("log");
+  om_core_add_topic(log);
+#endif
+}
+
+om_status_t om_config_topic(om_topic_t* topic, om_config_t* config) {
+  OM_ASSENT(config);
+  OM_ASSENT(topic);
+
+  for (; config->op != OM_CONFIG_END; config++) {
+    switch (config->op) {
+      case OM_USER_FUN_FILTER:
+        topic->user_fun.filter = config->arg;
+        break;
+      case OM_USER_FUN_DECODE:
+        topic->user_fun.decode = config->arg;
+        break;
+      case OM_LINK: {
+        om_topic_t* target = config->arg;
+        om_core_link(topic, target);
+      } break;
+      case OM_ADD_PUBER:
+        om_core_add_puber(topic, config->arg);
+        break;
+      case OM_ADD_SUBER:
+        om_core_add_suber(topic, config->arg);
+        break;
+      default:
+        return OM_ERROR;
+    }
+  }
+
+  return OM_OK;
+}
+
+om_status_t om_config_suber(om_suber_t* sub, om_config_t* config) {
+  OM_ASSENT(config);
+  OM_ASSENT(sub);
+
+  for (; config->op != OM_CONFIG_END; config++) {
+    switch (config->op) {
+      case OM_USER_FUN_FILTER:
+        sub->user_fun.filter = config->arg;
+        break;
+      case OM_USER_FUN_APPLY:
+        sub->user_fun.apply = config->arg;
+      default:
+        return OM_ERROR;
+    }
+  }
+
+  return OM_OK;
+}
+
+om_status_t om_config_puber(om_puber_t* pub, om_config_t* config) {
+  OM_ASSENT(config);
+  OM_ASSENT(pub);
+
+  for (; config->op != OM_CONFIG_END; config++) {
+    switch (config->op) {
+      case OM_USER_FUN_NEW:
+        pub->user_fun.new = config->arg;
+        break;
+      case OM_USER_FUN_GET:
+        pub->user_fun.get = config->arg;
+        break;
+      default:
+        return OM_ERROR;
+    }
+  }
+
+  return OM_OK;
+}
+
+om_status_t _om_publish(om_topic_t* topic, om_msg_t* msg) {
+  OM_ASSENT(topic);
+  OM_ASSENT(msg);
+
+  if (topic->user_fun.filter == NULL || topic->user_fun.filter(msg) == OM_OK) {
+    if (topic->user_fun.decode) topic->user_fun.decode(msg);
+
+    om_list_head_t* pos;
+    om_list_for_each(pos, &topic->suber) {
+      om_suber_t* sub = om_list_entry(pos, om_suber_t, self);
+      if (sub->isLink) {
+        _om_publish(sub->target, msg);
+      } else {
+        if (sub->user_fun.filter == NULL ||
+            sub->user_fun.filter(msg) == OM_OK) {
+          memcpy(&sub->msg_buff, msg, sizeof(om_msg_t));
+          if (sub->user_fun.apply) sub->user_fun.apply(&sub->msg_buff);
+        }
+      }
+    }
+  }
+
+  return OM_OK;
+}
+
+om_status_t om_publish_with_name(const char* name, void* buff, size_t size) {
+  OM_ASSENT(name);
+  OM_ASSENT(buff);
+
+  om_topic_t* topic = om_core_find_topic(name);
+  if (topic == NULL) return OM_ERROR_NULL;
+
+  om_time_update(time_handle);
+  om_msg_t msg = {.buff = buff, .size = size, .time = om_time_get(time_handle)};
+
+  return _om_publish(topic, &msg);
+}
+
+om_status_t om_publish_with_handle(om_topic_t* topic, void* buff, size_t size) {
+  OM_ASSENT(topic);
+  OM_ASSENT(buff);
+
+  om_time_update(time_handle);
+  om_msg_t msg = {.buff = buff, .size = size, .time = om_time_get(time_handle)};
+
+  return _om_publish(topic, &msg);
+}
+
+om_status_t om_sync() {
+  om_list_head_t *pos1, *pos2;
+  om_list_for_each(pos1, &topic_list) {
+    om_topic_t* topic = om_list_entry(pos1, om_topic_t, self);
+    om_list_for_each(pos2, &topic->puber) {
+      om_puber_t* pub = om_list_entry(pos2, om_puber_t, self);
+      OM_ASSENT(pub->user_fun.get);
+      OM_ASSENT(pub->user_fun.new);
+
+      if (pub->user_fun.new(&pub->msg_buff) == OM_OK &&
+          pub->user_fun.get(&pub->msg_buff) == OM_OK) {
+        om_time_update(time_handle);
+        pub->msg_buff.time = om_time_get(time_handle);
+        _om_publish(topic, &pub->msg_buff);
+      }
+    }
+  }
+}
+
+om_topic_t* om_create_topic(const char* name, om_config_t* config) {
+  OM_ASSENT(name);
+  OM_ASSENT(topic);
+
+  om_topic_t* topic = om_core_topic_create(name);
+  om_config_topic(topic, config);
+
+  return topic;
+}
+
+om_suber_t* om_create_suber(om_config_t* config) {
+  OM_ASSENT(config);
+
+  om_suber_t* sub = om_core_suber_create(NULL);
+  om_config_suber(sub, config);
+
+  return sub;
+}
+
+om_puber_t* om_create_puber(om_config_t* config) {
+  OM_ASSENT(config);
+
+  om_puber_t* pub = om_core_puber_create(NULL);
+  om_config_puber(pub, config);
+
+  return pub;
+}
+
+om_status_t om_deinit() {
+  om_list_head_t* pos;
+  om_del_all(pos, &topic_list, om_core_del_topic);
+}

@@ -1,44 +1,58 @@
 #include "om_def.h"
 #include "om_lib.h"
 
-typedef struct _node {
-  void* data;
-  size_t size;
-  struct _node* next;
-} om_node_data_t;
+typedef struct _om_list_head {
+  struct _om_list_head *next, *prev;
+} om_list_head_t;
 
-typedef om_node_data_t* om_node_t;
+#define LIST_HEAD_INIT(name) \
+  { &(name), &(name) }
 
-typedef struct list {
-  om_node_t head;
-  uint16_t number;
-} om_list_data_t;
+#define LIST_HEAD(name) om_list_head_t name = LIST_HEAD_INIT(name)
 
-typedef om_list_data_t* om_list_t;
+#define om_offsetof(TYPE, MEMBER) ((size_t) & ((TYPE *)0)->MEMBER)
 
-om_node_t om_node_create(void* data, size_t size);
+#define om_container_of(ptr, type, member)                \
+  ({                                                      \
+    const typeof(((type *)0)->member) *__mptr = (ptr);    \
+    (type *)((char *)__mptr - om_offsetof(type, member)); \
+  })
 
-void om_node_delete(om_node_t node);
+#define om_list_for_each(pos, head) \
+  for (pos = (head)->next; pos != (head); pos = pos->next)
 
-void om_node_connect(om_node_t left, om_node_t right);
+#define om_list_for_each_safe(pos, n, head) \
+  for (pos = (head)->next, n = pos->next; pos != (head); pos = n, n = pos->next)
 
-void om_node_across(om_node_t node);
+#define om_list_entry(ptr, type, member) om_container_of(ptr, type, member)
 
-om_node_t om_list_get(om_list_t list, uint16_t number);
+void _INIT_LIST_HEAD(om_list_head_t *list);
 
-om_node_t om_list_end(om_list_t list);
+#define INIT_LIST_HEAD(arg) _INIT_LIST_HEAD(arg)
 
-om_status_t om_list_add(om_list_t list, om_node_t new_node);
+#define om_del_all(_pos, source, del_fun) \
+  om_list_for_each(_pos, source) {        \
+    if (om_list_empty(source))            \
+      break;                              \
+    else                                  \
+      del_fun(_pos);                      \
+  }
 
-om_list_t om_list_init(void* data, size_t size);
+void om_list_add(om_list_head_t *new, om_list_head_t *head);
 
-om_status_t om_list_delete(om_list_t list, uint16_t number);
+void om_list_add_tail(om_list_head_t *new, om_list_head_t *head);
 
-uint16_t om_list_find(const om_list_t list,
-                      bool (*check)(const void* data, const void* source),
-                      void* arg);
+void om_list_del(om_list_head_t *entry);
 
-om_status_t om_list_through(om_list_t list,
-                            om_status_t (*check)(const void* data,
-                                                 const void* source),
-                            void* arg);
+void om_list_del_init(om_list_head_t *entry);
+
+void om_list_replace(om_list_head_t *old, om_list_head_t *new);
+
+int om_list_empty(const om_list_head_t *head);
+
+void __list_del(om_list_head_t *prev, om_list_head_t *next);
+
+void __list_add(om_list_head_t *new, om_list_head_t *prev,
+                om_list_head_t *next);
+
+void __list_del_entry(om_list_head_t *entry);
