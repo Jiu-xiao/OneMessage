@@ -28,15 +28,17 @@ om_status_t om_config_topic(om_topic_t* topic, om_config_t* config) {
         topic->user_fun.decode = config->arg;
         break;
       case OM_LINK: {
-        om_topic_t* target = config->arg;
-        om_core_link(topic, target);
+        om_topic_t** target = config->arg;
+        om_core_link(topic, *target);
       } break;
-      case OM_ADD_PUBER:
-        om_core_add_puber(topic, config->arg);
-        break;
-      case OM_ADD_SUBER:
-        om_core_add_suber(topic, config->arg);
-        break;
+      case OM_ADD_PUBER: {
+        om_puber_t** pub = config->arg;
+        om_core_add_puber(topic, *pub);
+      } break;
+      case OM_ADD_SUBER: {
+        om_suber_t** sub = config->arg;
+        om_core_add_suber(topic, *sub);
+      } break;
       default:
         return OM_ERROR;
     }

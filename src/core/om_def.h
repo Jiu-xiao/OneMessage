@@ -1,6 +1,11 @@
-#include "om_config.h"
 #ifndef __OM_CONFIG_H_
 #define __OM_CONFIG_H_
+
+#ifdef OM_TEST
+#include "om_config_template.h"
+#else
+#include "om_config.h"
+#endif
 
 #if !OM_USE_USER_MALLOC
 #define om_malloc malloc
