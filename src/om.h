@@ -4,6 +4,7 @@
 #define om_topic_add_suber om_core_add_suber
 #define om_add_topic om_core_add_topic
 #define om_topic_link om_core_link
+#define om_find_topic om_core_find_topic
 
 typedef enum {
   OM_USER_FUN_FILTER,
@@ -21,6 +22,11 @@ typedef struct {
   om_config_op_t op;
   void* arg;
 } om_config_t;
+
+typedef struct {
+  char data[OM_LOG_MAX_LEN];
+  om_time_t time;
+} om_log_t;
 
 om_status_t om_init();
 
@@ -46,4 +52,9 @@ om_puber_t* om_create_puber(om_config_t* config);
 
 om_status_t om_deinit();
 
-extern om_config_t EMPTY_CONFIG;
+#if OM_LOG_OUTPUT
+om_topic_t* om_get_log_handle();
+om_status_t om_print_log(om_log_t* log, const char* format, ...);
+#endif
+
+extern om_config_t OM_EMPTY_CONFIG;

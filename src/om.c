@@ -2,12 +2,15 @@
 
 om_time_t time_handle;
 extern om_list_head_t topic_list;
-om_config_t EMPTY_CONFIG = {.arg = NULL, .op = OM_CONFIG_END};
+#if OM_LOG_OUTPUT
+static om_topic_t* om_log;
+#endif
+om_config_t OM_EMPTY_CONFIG = {.arg = NULL, .op = OM_CONFIG_END};
 
 om_status_t om_init() {
 #if OM_LOG_OUTPUT
-  om_topic_t* log = om_core_topic_create("log");
-  om_core_add_topic(log);
+  om_log = om_core_topic_create("om_log");
+  om_core_add_topic(om_log);
 #endif
   return OM_OK;
 }
@@ -113,7 +116,6 @@ om_status_t om_publish_with_name(const char* name, void* buff, size_t size) {
   om_topic_t* topic = om_core_find_topic(name);
   if (topic == NULL) return OM_ERROR_NULL;
 
-  om_time_update(time_handle);
   om_msg_t msg = {.buff = buff, .size = size, .time = om_time_get(time_handle)};
 
   return _om_publish(topic, &msg);
@@ -123,13 +125,16 @@ om_status_t om_publish_with_handle(om_topic_t* topic, void* buff, size_t size) {
   OM_ASSENT(topic);
   OM_ASSENT(buff);
 
-  om_time_update(time_handle);
   om_msg_t msg = {.buff = buff, .size = size, .time = om_time_get(time_handle)};
 
   return _om_publish(topic, &msg);
 }
 
 om_status_t om_sync() {
+#if OM_VIRTUAL_TIME
+  om_time_update(time_handle);
+#endif
+
   om_list_head_t *pos1, *pos2;
   om_list_for_each(pos1, &topic_list) {
     om_topic_t* topic = om_list_entry(pos1, om_topic_t, self);
@@ -140,7 +145,6 @@ om_status_t om_sync() {
 
       if (pub->user_fun.new(&pub->msg_buff) == OM_OK &&
           pub->user_fun.get(&pub->msg_buff) == OM_OK) {
-        om_time_update(time_handle);
         pub->msg_buff.time = om_time_get(time_handle);
         _om_publish(topic, &pub->msg_buff);
       }
@@ -183,3 +187,17 @@ om_status_t om_deinit() {
   om_del_all(pos, &topic_list, om_core_del_topic);
   return OM_OK;
 }
+
+#if OM_LOG_OUTPUT
+inline om_topic_t* om_get_log_handle() { return om_log; }
+
+om_status_t om_print_log(om_log_t* log, const char* format, ...) {
+  int i = 0;
+  va_list vArgList;
+  va_start(vArgList, format);
+  vsnprintf(log->data, OM_LOG_MAX_LEN, format, vArgList);
+  va_end(vArgList);
+  log->time = om_time_get(time_handle);
+  return om_publish_with_handle(om_log, log, sizeof(om_log_t));
+}
+#endif

@@ -3,8 +3,6 @@
 #include "om_list.h"
 #include "om_mutex.h"
 
-#define OM_TOPIC_MAX_NAME_LEN (10)
-
 typedef struct {
   size_t size;
   void* buff;

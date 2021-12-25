@@ -2,3 +2,4 @@ build/*
 .vscode/*
 test/main.c
 CMakeLists.txt
+config/om_config.h

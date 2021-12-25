@@ -15,7 +15,7 @@ typedef enum {
   OM_ERROR_TIMEOUT
 } om_status_t;
 
-#ifdef DEBUG
+#ifdef OM_DEBUG
 #define OM_ASSENT(arg) \
   if (!(arg)) om_error(__FILE__, __LINE__);
 #define OM_CHECK(arg) \
