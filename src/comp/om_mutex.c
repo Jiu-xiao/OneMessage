@@ -2,7 +2,7 @@
 
 om_mutex_t om_mutex_init() {
   om_mutex_t mutex = om_malloc(sizeof(om_mutex_data_t));
-  mutex = false;
+  *mutex = false;
   return mutex;
 }
 

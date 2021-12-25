@@ -192,7 +192,6 @@ om_status_t om_deinit() {
 inline om_topic_t* om_get_log_handle() { return om_log; }
 
 om_status_t om_print_log(om_log_t* log, const char* format, ...) {
-  int i = 0;
   va_list vArgList;
   va_start(vArgList, format);
   vsnprintf(log->data, OM_LOG_MAX_LEN, format, vArgList);
