@@ -65,7 +65,7 @@ static om_config_t topic_config2[] = {{OM_LINK, &topic}, {OM_CONFIG_END, NULL}};
 
 START_TEST(publish) {
   om_init();
-  om_status_t res;
+  om_status_t res = OM_OK;
   sub = om_create_suber(sub_config);
   pub = om_create_puber(pub_config);
   ck_assert_msg(sub, "sub 指针为 NULL.");
