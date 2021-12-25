@@ -59,8 +59,8 @@
 
     om_config_t topic_config1[] = {{OM_USER_FUN_FILTER, filter_fun},
                                    {OM_USER_FUN_DECODE, decode_fun},
-                                   {OM_ADD_PUBER, pub},
-                                   {OM_ADD_SUBER, sub},
+                                   {OM_ADD_PUBER, &pub},
+                                   {OM_ADD_SUBER, &sub},
                                    {OM_CONFIG_END, NULL}};
 创建话题一
 
@@ -69,7 +69,7 @@
 话题二配置
 链接到话题一
 
-    om_config_t topic_config2[] = {{OM_USER_FUN_LINK, topic},
+    om_config_t topic_config2[] = {{OM_LINK, &topic},
                                    {OM_CONFIG_END, NULL}};
 
 创建话题二
