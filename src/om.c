@@ -78,6 +78,10 @@ om_status_t om_config_puber(om_puber_t *pub, om_config_t *config) {
       case OM_USER_FUN_GET:
         pub->user_fun.get = config->arg;
         break;
+      case OM_PUB_FREQ:
+        pub->freq.reload = OM_CALL_FREQ / *((float *)config->arg);
+        pub->freq.counter = pub->freq.reload;
+        break;
       default:
         return OM_ERROR;
     }
@@ -150,11 +154,14 @@ om_status_t om_sync() {
       om_puber_t *pub = om_list_entry(pos2, om_puber_t, self);
       OM_ASSENT(pub->user_fun.get);
       OM_ASSENT(pub->user_fun.new);
-
-      if (pub->user_fun.new(&pub->msg_buff) == OM_OK &&
-          pub->user_fun.get(&pub->msg_buff) == OM_OK) {
-        pub->msg_buff.time = om_time_get(time_handle);
-        _om_publish(topic, &pub->msg_buff);
+      pub->freq.counter--;
+      if (pub->freq.counter <= 0) {
+        pub->freq.counter += pub->freq.reload;
+        if (pub->user_fun.new(&pub->msg_buff) == OM_OK &&
+            pub->user_fun.get(&pub->msg_buff) == OM_OK) {
+          pub->msg_buff.time = om_time_get(time_handle);
+          _om_publish(topic, &pub->msg_buff);
+        }
       }
     }
   }
@@ -184,7 +191,7 @@ om_suber_t *om_create_suber(om_config_t *config) {
 om_puber_t *om_create_puber(om_config_t *config) {
   OM_ASSENT(config);
 
-  om_puber_t *pub = om_core_puber_create(NULL);
+  om_puber_t *pub = om_core_puber_create(OM_CALL_FREQ);
   om_config_puber(pub, config);
 
   return pub;

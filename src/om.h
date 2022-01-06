@@ -15,6 +15,7 @@ typedef enum {
   OM_LINK,
   OM_ADD_SUBER,
   OM_ADD_PUBER,
+  OM_PUB_FREQ,
   OM_CONFIG_END
 } om_config_op_t;
 

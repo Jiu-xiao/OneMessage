@@ -37,9 +37,11 @@ om_status_t om_core_add_suber(om_topic_t* topic, om_suber_t* sub) {
   return OM_OK;
 }
 
-om_puber_t* om_core_puber_create() {
+om_puber_t* om_core_puber_create(float freq) {
   om_puber_t* puber = om_malloc(sizeof(*puber));
   memset(puber, 0, sizeof(*puber));
+  puber->freq.reload = OM_CALL_FREQ / freq;
+  puber->freq.counter = puber->freq.reload;
 
   return puber;
 }

@@ -8,7 +8,10 @@ static char str3[] = "This is str3";
 static bool msg_new = false, filter = false, decode = false, apply = false,
             get = false;
 
+static int call_counter = 0;
+
 static om_status_t new_fun(om_msg_t *msg) {
+  call_counter++;
   if (msg_new)
     return OM_OK;
   else
@@ -48,8 +51,11 @@ static om_puber_t *pub;
 static om_topic_t *topic;
 static om_topic_t *topic2;
 
+float pub_freq = 12.5;
+
 static om_config_t pub_config[] = {{OM_USER_FUN_NEW, new_fun},
                                    {OM_USER_FUN_GET, get_fun},
+                                   {OM_PUB_FREQ, &pub_freq},
                                    {OM_CONFIG_END, NULL}};
 
 static om_config_t sub_config[] = {{OM_USER_FUN_APPLY, apply_fun},
@@ -78,12 +84,16 @@ START_TEST(publish) {
   res += om_add_topic(topic2);
   ck_assert_msg(!res, "话题加入队列失败。");
 
-  om_sync();
+  for (int i = 0; i < 10000; i++) om_sync();
+  ck_assert_msg(call_counter == 125, "new_fun调用了%d次，应为125次",
+                call_counter);
+
   ck_assert_msg(!get, "意外调用了apply函数。");
   ck_assert_msg(!filter, "意外调用了filter函数。");
   ck_assert_msg(!decode, "意外调用了decode函数。");
   msg_new = true;
-  om_sync();
+
+  for (int i = 0; i < 1000; i++) om_sync();
   ck_assert_msg(get, "未调用apply函数。");
   ck_assert_msg(filter, "未调用filter函数。");
   ck_assert_msg(decode, "未调用decode函数。");

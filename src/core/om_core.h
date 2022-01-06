@@ -32,6 +32,10 @@ typedef struct {
     om_user_fun_t get;
   } user_fun;
   om_msg_t msg_buff;
+  struct {
+    float reload;
+    float counter;
+  } freq;
 } om_puber_t;
 
 typedef struct {
@@ -58,7 +62,7 @@ om_suber_t* om_core_suber_create(om_topic_t* link);
 
 om_status_t om_core_add_suber(om_topic_t* topic, om_suber_t* sub);
 
-om_puber_t* om_core_puber_create();
+om_puber_t* om_core_puber_create(float freq);
 
 om_status_t om_core_add_puber(om_topic_t* topic, om_puber_t* pub);
 
