@@ -3,7 +3,7 @@
 om_time_t time_handle;
 extern om_list_head_t topic_list;
 #if OM_LOG_OUTPUT
-static om_topic_t* om_log;
+static om_topic_t *om_log;
 #endif
 om_config_t OM_EMPTY_CONFIG = {.arg = NULL, .op = OM_CONFIG_END};
 
@@ -15,7 +15,7 @@ om_status_t om_init() {
   return OM_OK;
 }
 
-om_status_t om_config_topic(om_topic_t* topic, om_config_t* config) {
+om_status_t om_config_topic(om_topic_t *topic, om_config_t *config) {
   OM_ASSENT(config);
   OM_ASSENT(topic);
 
@@ -28,15 +28,15 @@ om_status_t om_config_topic(om_topic_t* topic, om_config_t* config) {
         topic->user_fun.decode = config->arg;
         break;
       case OM_LINK: {
-        om_topic_t** target = config->arg;
+        om_topic_t **target = config->arg;
         om_core_link(topic, *target);
       } break;
       case OM_ADD_PUBER: {
-        om_puber_t** pub = config->arg;
+        om_puber_t **pub = config->arg;
         om_core_add_puber(topic, *pub);
       } break;
       case OM_ADD_SUBER: {
-        om_suber_t** sub = config->arg;
+        om_suber_t **sub = config->arg;
         om_core_add_suber(topic, *sub);
       } break;
       default:
@@ -47,7 +47,7 @@ om_status_t om_config_topic(om_topic_t* topic, om_config_t* config) {
   return OM_OK;
 }
 
-om_status_t om_config_suber(om_suber_t* sub, om_config_t* config) {
+om_status_t om_config_suber(om_suber_t *sub, om_config_t *config) {
   OM_ASSENT(config);
   OM_ASSENT(sub);
 
@@ -66,7 +66,7 @@ om_status_t om_config_suber(om_suber_t* sub, om_config_t* config) {
   return OM_OK;
 }
 
-om_status_t om_config_puber(om_puber_t* pub, om_config_t* config) {
+om_status_t om_config_puber(om_puber_t *pub, om_config_t *config) {
   OM_ASSENT(config);
   OM_ASSENT(pub);
 
@@ -86,23 +86,29 @@ om_status_t om_config_puber(om_puber_t* pub, om_config_t* config) {
   return OM_OK;
 }
 
-om_status_t _om_publish(om_topic_t* topic, om_msg_t* msg) {
+om_status_t _om_publish(om_topic_t *topic, om_msg_t *msg) {
   OM_ASSENT(topic);
   OM_ASSENT(msg);
 
   if (topic->user_fun.filter == NULL || topic->user_fun.filter(msg) == OM_OK) {
     if (topic->user_fun.decode) topic->user_fun.decode(msg);
 
-    om_list_head_t* pos;
+    if (topic->msg.buff) om_free(topic->msg.buff);
+    topic->msg.buff = om_malloc(msg->size);
+    memcpy(topic->msg.buff, msg->buff, msg->size);
+    topic->msg.size = msg->size;
+
+    om_list_head_t *pos;
     om_list_for_each(pos, &topic->suber) {
-      om_suber_t* sub = om_list_entry(pos, om_suber_t, self);
+      om_suber_t *sub = om_list_entry(pos, om_suber_t, self);
       if (sub->isLink) {
-        _om_publish(sub->target, msg);
+        _om_publish(sub->target, &topic->msg);
       } else {
         if (sub->user_fun.filter == NULL ||
-            sub->user_fun.filter(msg) == OM_OK) {
-          memcpy(&sub->msg_buff, msg, sizeof(om_msg_t));
-          if (sub->user_fun.apply) sub->user_fun.apply(&sub->msg_buff);
+            sub->user_fun.filter(&topic->msg) == OM_OK) {
+          sub->msg_buff.buff = topic->msg.buff;
+          sub->msg_buff.size = topic->msg.size;
+          if (sub->user_fun.apply) sub->user_fun.apply(&topic->msg);
         }
       }
     }
@@ -111,11 +117,11 @@ om_status_t _om_publish(om_topic_t* topic, om_msg_t* msg) {
   return OM_OK;
 }
 
-om_status_t om_publish_with_name(const char* name, void* buff, size_t size) {
+om_status_t om_publish_with_name(const char *name, void *buff, size_t size) {
   OM_ASSENT(name);
   OM_ASSENT(buff);
 
-  om_topic_t* topic = om_core_find_topic(name);
+  om_topic_t *topic = om_core_find_topic(name);
   if (topic == NULL) return OM_ERROR_NULL;
 
   om_msg_t msg = {.buff = buff, .size = size, .time = om_time_get(time_handle)};
@@ -123,7 +129,7 @@ om_status_t om_publish_with_name(const char* name, void* buff, size_t size) {
   return _om_publish(topic, &msg);
 }
 
-om_status_t om_publish_with_handle(om_topic_t* topic, void* buff, size_t size) {
+om_status_t om_publish_with_handle(om_topic_t *topic, void *buff, size_t size) {
   OM_ASSENT(topic);
   OM_ASSENT(buff);
 
@@ -139,9 +145,9 @@ om_status_t om_sync() {
 
   om_list_head_t *pos1, *pos2;
   om_list_for_each(pos1, &topic_list) {
-    om_topic_t* topic = om_list_entry(pos1, om_topic_t, self);
+    om_topic_t *topic = om_list_entry(pos1, om_topic_t, self);
     om_list_for_each(pos2, &topic->puber) {
-      om_puber_t* pub = om_list_entry(pos2, om_puber_t, self);
+      om_puber_t *pub = om_list_entry(pos2, om_puber_t, self);
       OM_ASSENT(pub->user_fun.get);
       OM_ASSENT(pub->user_fun.new);
 
@@ -156,44 +162,44 @@ om_status_t om_sync() {
   return OM_OK;
 }
 
-om_topic_t* om_create_topic(const char* name, om_config_t* config) {
+om_topic_t *om_create_topic(const char *name, om_config_t *config) {
   OM_ASSENT(name);
   OM_ASSENT(config);
 
-  om_topic_t* topic = om_core_topic_create(name);
+  om_topic_t *topic = om_core_topic_create(name);
   om_config_topic(topic, config);
 
   return topic;
 }
 
-om_suber_t* om_create_suber(om_config_t* config) {
+om_suber_t *om_create_suber(om_config_t *config) {
   OM_ASSENT(config);
 
-  om_suber_t* sub = om_core_suber_create(NULL);
+  om_suber_t *sub = om_core_suber_create(NULL);
   om_config_suber(sub, config);
 
   return sub;
 }
 
-om_puber_t* om_create_puber(om_config_t* config) {
+om_puber_t *om_create_puber(om_config_t *config) {
   OM_ASSENT(config);
 
-  om_puber_t* pub = om_core_puber_create(NULL);
+  om_puber_t *pub = om_core_puber_create(NULL);
   om_config_puber(pub, config);
 
   return pub;
 }
 
 om_status_t om_deinit() {
-  om_list_head_t* pos;
+  om_list_head_t *pos;
   om_del_all(pos, &topic_list, om_core_del_topic);
   return OM_OK;
 }
 
 #if OM_LOG_OUTPUT
-inline om_topic_t* om_get_log_handle() { return om_log; }
+inline om_topic_t *om_get_log_handle() { return om_log; }
 
-om_status_t om_print_log(om_log_t* log, const char* format, ...) {
+om_status_t om_print_log(om_log_t *log, const char *format, ...) {
   va_list vArgList;
   va_start(vArgList, format);
   vsnprintf(log->data, OM_LOG_MAX_LEN, format, vArgList);

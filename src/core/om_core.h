@@ -12,6 +12,7 @@ typedef struct {
 typedef om_status_t (*om_user_fun_t)(om_msg_t* msg);
 
 typedef struct {
+  om_msg_t msg;
   char name[OM_TOPIC_MAX_NAME_LEN];
   bool enable;
   om_list_head_t self;
