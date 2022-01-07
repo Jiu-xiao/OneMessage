@@ -34,7 +34,7 @@ typedef enum {
 #if OM_VIRTUAL_TIME
 #define om_time_t uint32_t
 #define om_time_update(time) time++
-#define om_time_get(time) time
+#define om_time_get(time) *time
 #endif
 
 #endif

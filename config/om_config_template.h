@@ -20,8 +20,13 @@
 #define om_mutex_unlock(arg) pthread_mutex_unlock(arg)
 
 /* 将运行时间作为消息发出的时间 */
-#define OM_VIRTUAL_TIME (1)
-// TODO:支持真实时间的记录
+#define OM_VIRTUAL_TIME (0)
+
+#if !OM_VIRTUAL_TIME
+#include <time.h>
+#define om_time_t time_t
+#define om_time_get(_time) time(NULL)
+#endif
 
 /* 开启"om_log"话题作为OneMessage的日志输出 */
 #define OM_LOG_OUTPUT (1)
