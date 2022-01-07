@@ -206,12 +206,13 @@ om_status_t om_deinit() {
 #if OM_LOG_OUTPUT
 inline om_topic_t *om_get_log_handle() { return om_log; }
 
-om_status_t om_print_log(om_log_t *log, const char *format, ...) {
+om_status_t om_print_log(const char *format, ...) {
+  om_log_t log;
   va_list vArgList;
   va_start(vArgList, format);
-  vsnprintf(log->data, OM_LOG_MAX_LEN, format, vArgList);
+  vsnprintf(log.data, OM_LOG_MAX_LEN, format, vArgList);
   va_end(vArgList);
-  log->time = om_time_get(time_handle);
-  return om_publish_with_handle(om_log, log, sizeof(om_log_t));
+  log.time = om_time_get(time_handle);
+  return om_publish_with_handle(om_log, &log, sizeof(om_log_t));
 }
 #endif

@@ -55,7 +55,7 @@ om_status_t om_deinit();
 
 #if OM_LOG_OUTPUT
 om_topic_t* om_get_log_handle();
-om_status_t om_print_log(om_log_t* log, const char* format, ...);
+om_status_t om_print_log(const char* format, ...);
 #endif
 
 extern om_config_t OM_EMPTY_CONFIG;

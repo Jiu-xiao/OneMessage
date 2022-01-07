@@ -123,8 +123,7 @@ START_TEST(om_log) {
 
   ck_assert_msg(topic_log, "获取不到log话题。");
   om_topic_add_suber(topic_log, sub);
-  om_log_t om_log;
-  om_print_log(&om_log, "%s", str_log);
+  om_print_log("%s", str_log);
   ck_assert_msg(!strncmp(str_log, sub->msg_buff.buff, OM_LOG_MAX_LEN),
                 "log发送失败。");
   om_deinit();
