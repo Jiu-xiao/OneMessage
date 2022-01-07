@@ -1,0 +1,3 @@
+[submodule "example"]
+	path = example
+	url = https://gitee.com/jiu-xiao/msg-example.git
