@@ -1,17 +1,26 @@
 #include "om.h"
 
-om_time_t time_handle;
+static om_time_t time_handle;
+
 extern om_list_head_t topic_list;
+
+om_mutex_t om_mutex_handle;
+
+om_config_t OM_EMPTY_CONFIG = {.arg = NULL, .op = OM_CONFIG_END};
+
 #if OM_LOG_OUTPUT
 static om_topic_t *om_log;
 #endif
-om_config_t OM_EMPTY_CONFIG = {.arg = NULL, .op = OM_CONFIG_END};
 
 om_status_t om_init() {
+  om_mutex_init(&om_mutex_handle);
+  om_mutex_unlock(&om_mutex_handle);
+
 #if OM_LOG_OUTPUT
   om_log = om_core_topic_create("om_log");
   om_core_add_topic(om_log);
 #endif
+
   return OM_OK;
 }
 
@@ -121,31 +130,53 @@ om_status_t _om_publish(om_topic_t *topic, om_msg_t *msg) {
   return OM_OK;
 }
 
-om_status_t om_publish_with_name(const char *name, void *buff, size_t size) {
+om_status_t om_publish_with_name(const char *name, void *buff, size_t size,
+                                 bool block) {
   OM_ASSENT(name);
   OM_ASSENT(buff);
+
+  if (block)
+    om_mutex_lock(&om_mutex_handle);
+  else if (om_mutex_trylock(&om_mutex_handle) != OM_OK)
+    return OM_ERROR_BUSY;
 
   om_topic_t *topic = om_core_find_topic(name);
   if (topic == NULL) return OM_ERROR_NULL;
 
   om_msg_t msg = {.buff = buff, .size = size, .time = om_time_get(time_handle)};
 
-  return _om_publish(topic, &msg);
+  om_status_t res = _om_publish(topic, &msg);
+
+  om_mutex_unlock(&om_mutex_handle);
+
+  return res;
 }
 
-om_status_t om_publish_with_handle(om_topic_t *topic, void *buff, size_t size) {
+om_status_t om_publish_with_handle(om_topic_t *topic, void *buff, size_t size,
+                                   bool block) {
   OM_ASSENT(topic);
   OM_ASSENT(buff);
 
+  if (block)
+    om_mutex_lock(&om_mutex_handle);
+  else if (om_mutex_trylock(&om_mutex_handle) != OM_OK)
+    return OM_ERROR_BUSY;
+
   om_msg_t msg = {.buff = buff, .size = size, .time = om_time_get(time_handle)};
 
-  return _om_publish(topic, &msg);
+  om_status_t res = _om_publish(topic, &msg);
+
+  om_mutex_unlock(&om_mutex_handle);
+
+  return res;
 }
 
 om_status_t om_sync() {
 #if OM_VIRTUAL_TIME
   om_time_update(time_handle);
 #endif
+
+  om_mutex_lock(&om_mutex_handle);
 
   om_list_head_t *pos1, *pos2;
   om_list_for_each(pos1, &topic_list) {
@@ -165,6 +196,8 @@ om_status_t om_sync() {
       }
     }
   }
+
+  om_mutex_unlock(&om_mutex_handle);
 
   return OM_OK;
 }
@@ -213,6 +246,6 @@ om_status_t om_print_log(const char *format, ...) {
   vsnprintf(log.data, OM_LOG_MAX_LEN, format, vArgList);
   va_end(vArgList);
   log.time = om_time_get(time_handle);
-  return om_publish_with_handle(om_log, &log, sizeof(om_log_t));
+  return om_publish_with_handle(om_log, &log, sizeof(om_log_t), true);
 }
 #endif

@@ -102,10 +102,10 @@ START_TEST(publish) {
 
   ck_assert_msg(om_find_topic("topic") == topic, "无法根据名称寻找话题。");
 
-  om_publish_with_name("topic2", str2, sizeof(str2));
+  om_publish_with_name("topic2", str2, sizeof(str2), true);
   ck_assert_msg(!strncmp(str_tmp, str2, 20), "publish数据损坏。");
 
-  om_publish_with_name("topic2", str3, sizeof(str3));
+  om_publish_with_name("topic2", str3, sizeof(str3), true);
   ck_assert_msg(strncmp(str_tmp, str3, 20), "filter函数未生效。");
 
   res = om_deinit();

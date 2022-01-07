@@ -1,7 +1,6 @@
 #include "om_def.h"
 #include "om_lib.h"
 #include "om_list.h"
-#include "om_mutex.h"
 
 typedef struct {
   size_t size;

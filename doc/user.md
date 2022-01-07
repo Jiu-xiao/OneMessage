@@ -20,17 +20,18 @@
 使用自定义配置创建  
 `om_suber_t* sub = om_create_suber(&your_config);`
 ## 创建话题配置
-| 操作               | 参数           | 功能                       | 状态 |
-| ------------------ | -------------- | -------------------------- | ---- |
-| OM_USER_FUN_FILTER | 函数入口       | 设置话题过滤函数           | 可选 |
-| OM_USER_FUN_GET    | 函数入口       | 发布者获取数据函数         | 必须 |
-| OM_USER_FUN_DECODE | 函数入口       | 话题数据解码函数           | 可选 |
-| OM_USER_FUN_NEW    | 函数入口       | 发布者检测新数据函数       | 必须 |
-| OM_USER_FUN_APPLY  | 函数入口       | 订阅者应用数据函数         | 可选 |
-| OM_LINK            | 链接的目标话题 | 将话题作为目标话题的发布者 | 可选 |
-| OM_ADD_SUBER       | 订阅者         | 添加订阅者                 | 可选 |
-| OM_ADD_PUBER       | 发布者         | 添加发布者                 | 可选 |
-| OM_CONFIG_END      | NULL           | config结束标志             | 必须 |
+| 操作               | 参数               | 功能                       | 状态 |
+| ------------------ | ------------------ | -------------------------- | ---- |
+| OM_USER_FUN_FILTER | 函数入口           | 设置话题过滤函数           | 可选 |
+| OM_USER_FUN_GET    | 函数入口           | 发布者获取数据函数         | 必须 |
+| OM_USER_FUN_DECODE | 函数入口           | 话题数据解码函数           | 可选 |
+| OM_USER_FUN_NEW    | 函数入口           | 发布者检测新数据函数       | 必须 |
+| OM_USER_FUN_APPLY  | 函数入口           | 订阅者应用数据函数         | 可选 |
+| OM_LINK            | 链接的目标话题     | 将话题作为目标话题的发布者 | 可选 |
+| OM_ADD_SUBER       | 订阅者             | 添加订阅者                 | 可选 |
+| OM_ADD_PUBER       | 发布者             | 添加发布者                 | 可选 |
+| OM_PUB_FREQ        | 刷新频率（float*） | 添加发布者                 | 可选 |
+| OM_CONFIG_END      | NULL               | config结束标志             | 必须 |
 ----
 发布者配置
 设置NEW和GET函数
@@ -90,12 +91,13 @@
     om_status_t om_config_puber(om_puber_t* pub, om_config_t* config);
 
 ## 主动发布
-    om_status_t om_publish_with_name(const char* name, void* buff, size_t size);
+    om_status_t om_publish_with_name(const char* name, void* buff, size_t size, bool block);
 
-    om_status_t om_publish_with_handle(om_topic_t* topic, void* buff, size_t size);
+    om_status_t om_publish_with_handle(om_topic_t* topic, void* buff, size_t size, bool block);
+block参数决定当其他线程发布时是否阻塞
 ## log
-    om_get_log_handle();
-    om_status_t om_print_log(om_log_t* log, const char* format, ...);
+    om_topic_t* om_get_log_handle();
+    om_status_t om_print_log(const char* format, ...);
 ## 其他API
 | 函数名             | 功能               |
 | ------------------ | ------------------ |
