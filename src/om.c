@@ -103,6 +103,8 @@ om_status_t _om_publish(om_topic_t *topic, om_msg_t *msg) {
   OM_ASSENT(topic);
   OM_ASSENT(msg);
 
+  msg->time = om_time_get(&time_handle);
+
   if (topic->user_fun.filter == NULL || topic->user_fun.filter(msg) == OM_OK) {
     if (topic->user_fun.decode) topic->user_fun.decode(msg);
 
@@ -110,6 +112,7 @@ om_status_t _om_publish(om_topic_t *topic, om_msg_t *msg) {
     topic->msg.buff = om_malloc(msg->size);
     memcpy(topic->msg.buff, msg->buff, msg->size);
     topic->msg.size = msg->size;
+    topic->msg.time = msg->time;
 
     om_list_head_t *pos;
     om_list_for_each(pos, &topic->suber) {
@@ -119,8 +122,7 @@ om_status_t _om_publish(om_topic_t *topic, om_msg_t *msg) {
       } else {
         if (sub->user_fun.filter == NULL ||
             sub->user_fun.filter(&topic->msg) == OM_OK) {
-          sub->msg_buff.buff = topic->msg.buff;
-          sub->msg_buff.size = topic->msg.size;
+          memcpy(&sub->msg_buff, &topic->msg, sizeof(topic->msg));
           if (sub->user_fun.apply) sub->user_fun.apply(&topic->msg);
         }
       }
@@ -143,8 +145,7 @@ om_status_t om_publish_with_name(const char *name, void *buff, size_t size,
   om_topic_t *topic = om_core_find_topic(name);
   if (topic == NULL) return OM_ERROR_NULL;
 
-  om_msg_t msg = {
-      .buff = buff, .size = size, .time = om_time_get(&time_handle)};
+  om_msg_t msg = {.buff = buff, .size = size};
 
   om_status_t res = _om_publish(topic, &msg);
 
@@ -163,8 +164,7 @@ om_status_t om_publish_with_handle(om_topic_t *topic, void *buff, size_t size,
   else if (om_mutex_trylock(&om_mutex_handle) != OM_OK)
     return OM_ERROR_BUSY;
 
-  om_msg_t msg = {
-      .buff = buff, .size = size, .time = om_time_get(&time_handle)};
+  om_msg_t msg = {.buff = buff, .size = size};
 
   om_status_t res = _om_publish(topic, &msg);
 
@@ -192,7 +192,6 @@ om_status_t om_sync() {
         pub->freq.counter += pub->freq.reload;
         if (pub->user_fun.new(&pub->msg_buff) == OM_OK &&
             pub->user_fun.get(&pub->msg_buff) == OM_OK) {
-          pub->msg_buff.time = om_time_get(&time_handle);
           _om_publish(topic, &pub->msg_buff);
         }
       }
@@ -247,7 +246,6 @@ om_status_t om_print_log(const char *format, ...) {
   va_start(vArgList, format);
   vsnprintf(log.data, OM_LOG_MAX_LEN, format, vArgList);
   va_end(vArgList);
-  log.time = om_time_get(&time_handle);
   return om_publish_with_handle(om_log, &log, sizeof(om_log_t), true);
 }
 #endif
