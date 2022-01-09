@@ -29,6 +29,23 @@ typedef struct {
   om_time_t time;
 } om_log_t;
 
+typedef enum {
+  OM_LOG_COLOR_RED,
+  OM_LOG_COLOR_GREEN,
+  OM_LOG_COLOR_BLUE,
+  OM_LOG_COLOR_YELLOW,
+  OM_LOG_COLOR_DEFAULT,
+  OM_LOG_COLOR_NUMBER
+} om_log_color_t;
+
+typedef enum {
+  OM_LOG_DEFAULT = OM_LOG_COLOR_DEFAULT,
+  OM_LOG_WARNING = OM_LOG_COLOR_YELLOW,
+  OM_LOG_ERROR = OM_LOG_COLOR_RED,
+  OM_LOG_PASS = OM_LOG_COLOR_GREEN,
+  OM_LOG_NOTICE = OM_LOG_COLOR_BLUE
+} om_log_level_t;
+
 om_status_t om_init();
 
 om_status_t om_config_topic(om_topic_t* topic, om_config_t* config);
@@ -57,7 +74,8 @@ om_status_t om_deinit();
 
 #if OM_LOG_OUTPUT
 om_topic_t* om_get_log_handle();
-om_status_t om_print_log(const char* format, ...);
+om_status_t om_print_log(char* name, om_log_level_t level, const char* format,
+                         ...);
 #endif
 
 extern om_config_t OM_EMPTY_CONFIG;

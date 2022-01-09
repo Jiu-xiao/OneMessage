@@ -97,7 +97,15 @@
 block参数决定当其他线程发布时是否阻塞
 ## log
     om_topic_t* om_get_log_handle();
-    om_status_t om_print_log(const char* format, ...);
+    om_status_t om_print_log(char* name, om_log_level_t level, const char* format,...);
+
+| Level          | Color                |
+| -------------- | -------------------- |
+| OM_LOG_DEFAULT | OM_LOG_COLOR_DEFAULT |
+| OM_LOG_WARNING | OM_LOG_COLOR_YELLOW  |
+| OM_LOG_ERROR   | OM_LOG_COLOR_RED     |
+| OM_LOG_PASS    | OM_LOG_COLOR_GREEN   |
+| OM_LOG_NOTICE  | OM_LOG_COLOR_BLUE    |
 ## 其他API
 | 函数名             | 功能               |
 | ------------------ | ------------------ |

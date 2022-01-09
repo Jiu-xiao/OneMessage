@@ -1,12 +1,21 @@
 #include "om.h"
 
+#if OM_VIRTUAL_TIME
 static om_time_t time_handle;
+#endif
 
 extern om_list_head_t topic_list;
 
 om_mutex_t om_mutex_handle;
 
 om_config_t OM_EMPTY_CONFIG = {.arg = NULL, .op = OM_CONFIG_END};
+
+static const char *color_tab[OM_LOG_COLOR_NUMBER][3] = {
+    {"\033[31m", "\033[0m", "Error"},
+    {"\033[32m", "\033[0m", "Pass"},
+    {"\033[34m", "\033[0m", "Notice"},
+    {"\033[33m", "\033[0m", "Waring"},
+    {"\0", "\0", "Default"}};
 
 #if OM_LOG_OUTPUT
 static om_topic_t *om_log;
@@ -103,7 +112,7 @@ om_status_t _om_publish(om_topic_t *topic, om_msg_t *msg) {
   OM_ASSENT(topic);
   OM_ASSENT(msg);
 
-  msg->time = om_time_get(&time_handle);
+  om_time_get(&msg->time);
 
   if (topic->user_fun.filter == NULL || topic->user_fun.filter(msg) == OM_OK) {
     if (topic->user_fun.decode) topic->user_fun.decode(msg);
@@ -240,11 +249,17 @@ om_status_t om_deinit() {
 #if OM_LOG_OUTPUT
 inline om_topic_t *om_get_log_handle() { return om_log; }
 
-om_status_t om_print_log(const char *format, ...) {
+om_status_t om_print_log(char *name, om_log_level_t level, const char *format,
+                         ...) {
   om_log_t log;
+  om_time_get(&log.time);
+  char fm_buf[OM_LOG_MAX_LEN];
+  snprintf(fm_buf, OM_LOG_MAX_LEN, "\033[0m%s[%s][%s]%s%s\n",
+           color_tab[level][0], color_tab[level][2], name, format,
+           color_tab[level][1]);
   va_list vArgList;
   va_start(vArgList, format);
-  vsnprintf(log.data, OM_LOG_MAX_LEN, format, vArgList);
+  vsnprintf(log.data, OM_LOG_MAX_LEN, fm_buf, vArgList);
   va_end(vArgList);
   return om_publish_with_handle(om_log, &log, sizeof(om_log_t), true);
 }

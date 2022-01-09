@@ -123,9 +123,10 @@ START_TEST(om_log) {
 
   ck_assert_msg(topic_log, "获取不到log话题。");
   om_topic_add_suber(topic_log, sub);
-  om_print_log("%s", str_log);
-  ck_assert_msg(!strncmp(str_log, sub->msg_buff.buff, OM_LOG_MAX_LEN),
-                "log发送失败。");
+  om_print_log("init", OM_LOG_DEFAULT, "%s", str_log);
+  ck_assert_msg(
+      !strcmp(sub->msg_buff.buff, "\033[0m[Default][init]Log test.\n"),
+      "LOG数据错误");
   om_deinit();
 }
 END_TEST
