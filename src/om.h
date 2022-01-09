@@ -24,11 +24,6 @@ typedef struct {
   void* arg;
 } om_config_t;
 
-typedef struct {
-  char data[OM_LOG_MAX_LEN];
-  om_time_t time;
-} om_log_t;
-
 typedef enum {
   OM_LOG_COLOR_RED,
   OM_LOG_COLOR_GREEN,
@@ -45,6 +40,12 @@ typedef enum {
   OM_LOG_PASS = OM_LOG_COLOR_GREEN,
   OM_LOG_NOTICE = OM_LOG_COLOR_BLUE
 } om_log_level_t;
+
+typedef struct {
+  char data[OM_LOG_MAX_LEN];
+  om_time_t time;
+  om_log_level_t level;
+} om_log_t;
 
 om_status_t om_init();
 

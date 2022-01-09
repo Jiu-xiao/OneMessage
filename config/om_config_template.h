@@ -30,8 +30,11 @@
 /* 开启"om_log"话题作为OneMessage的日志输出 */
 #define OM_LOG_OUTPUT (1)
 
+/* 按照日志等级以不同颜色输出 */
+#define OM_LOG_COLORFUL (1)
+
 /* 话题名称最大长度 */
 #define OM_TOPIC_MAX_NAME_LEN (10)
 
 /* 日志最大长度 */
-#define OM_LOG_MAX_LEN (50)
+#define OM_LOG_MAX_LEN (60)

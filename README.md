@@ -44,6 +44,7 @@ OneMessage
 | src/core | 核心api        |
 | src      | 用户接口       |
 | test     | 单元测试       |
+| example  | 例程           |
 ****
 ## 文档
 > [配置文件](doc/config.md)  

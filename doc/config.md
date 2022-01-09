@@ -50,6 +50,9 @@
 ## OM_LOG_OUTPUT
 >开启日志，输出到`om_log`话题。
 
+## OM_LOG_COLORFUL
+>按照日志等级以不同颜色输出。
+
 ## OM_TOPIC_MAX_NAME_LEN
 >话题名称最大长度
 

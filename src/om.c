@@ -252,11 +252,17 @@ inline om_topic_t *om_get_log_handle() { return om_log; }
 om_status_t om_print_log(char *name, om_log_level_t level, const char *format,
                          ...) {
   om_log_t log;
+  log.level = level;
   om_time_get(&log.time);
   char fm_buf[OM_LOG_MAX_LEN];
+#if OM_LOG_COLORFUL
   snprintf(fm_buf, OM_LOG_MAX_LEN, "\033[0m%s[%s][%s]%s%s\n",
            color_tab[level][0], color_tab[level][2], name, format,
            color_tab[level][1]);
+#else
+  snprintf(fm_buf, OM_LOG_MAX_LEN, "[%s][%s]%s\n", color_tab[level][2], name,
+           format);
+#endif
   va_list vArgList;
   va_start(vArgList, format);
   vsnprintf(log.data, OM_LOG_MAX_LEN, fm_buf, vArgList);
