@@ -21,6 +21,8 @@ static const char *color_tab[OM_LOG_COLOR_NUMBER][3] = {
 static om_topic_t *om_log;
 #endif
 
+static bool om_initd = false;
+
 om_status_t om_init() {
   om_mutex_init(&om_mutex_handle);
   om_mutex_unlock(&om_mutex_handle);
@@ -29,6 +31,8 @@ om_status_t om_init() {
   om_log = om_core_topic_create("om_log");
   om_core_add_topic(om_log);
 #endif
+
+  om_initd = true;
 
   return OM_OK;
 }
@@ -154,6 +158,8 @@ om_status_t om_publish_with_name(const char *name, void *buff, size_t size,
   OM_ASSENT(name);
   OM_ASSENT(buff);
 
+  if (!om_initd) return OM_ERROR_NOT_INIT;
+
   if (block)
     om_mutex_lock(&om_mutex_handle);
   else if (om_mutex_trylock(&om_mutex_handle) != OM_OK)
@@ -176,6 +182,8 @@ om_status_t om_publish_with_handle(om_topic_t *topic, void *buff, size_t size,
   OM_ASSENT(topic);
   OM_ASSENT(buff);
 
+  if (!om_initd) return OM_ERROR_NOT_INIT;
+
   if (block)
     om_mutex_lock(&om_mutex_handle);
   else if (om_mutex_trylock(&om_mutex_handle) != OM_OK)
@@ -194,6 +202,8 @@ om_status_t om_sync() {
 #if OM_VIRTUAL_TIME
   om_time_update(time_handle);
 #endif
+
+  if (!om_initd) return OM_ERROR_NOT_INIT;
 
   om_mutex_lock(&om_mutex_handle);
 
@@ -249,8 +259,11 @@ om_puber_t *om_create_puber(om_config_t *config) {
 }
 
 om_status_t om_deinit() {
+  om_initd = false;
+
   om_list_head_t *pos;
   om_del_all(pos, &topic_list, om_core_del_topic);
+
   return OM_OK;
 }
 

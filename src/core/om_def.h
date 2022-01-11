@@ -17,7 +17,8 @@ typedef enum {
   OM_ERROR = 1,
   OM_ERROR_NULL,
   OM_ERROR_BUSY,
-  OM_ERROR_TIMEOUT
+  OM_ERROR_TIMEOUT,
+  OM_ERROR_NOT_INIT
 } om_status_t;
 
 #ifdef OM_DEBUG
