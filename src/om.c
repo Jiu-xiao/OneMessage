@@ -57,6 +57,10 @@ om_status_t om_config_topic(om_topic_t *topic, om_config_t *config) {
         om_suber_t **sub = config->arg;
         om_core_add_suber(topic, *sub);
       } break;
+      case OM_TOPIC_VIRTUAL: {
+        topic->virtual = true;
+        break;
+      }
       default:
         return OM_ERROR;
     }
@@ -117,11 +121,15 @@ om_status_t _om_publish(om_topic_t *topic, om_msg_t *msg) {
   if (topic->user_fun.filter == NULL || topic->user_fun.filter(msg) == OM_OK) {
     if (topic->user_fun.decode) topic->user_fun.decode(msg);
 
-    if (topic->msg.buff) om_free(topic->msg.buff);
-    topic->msg.buff = om_malloc(msg->size);
-    memcpy(topic->msg.buff, msg->buff, msg->size);
-    topic->msg.size = msg->size;
-    topic->msg.time = msg->time;
+    if (topic->virtual)
+      memcpy(&topic->msg, msg, sizeof(*msg));
+    else {
+      if (topic->msg.buff) om_free(topic->msg.buff);
+      topic->msg.buff = om_malloc(msg->size);
+      memcpy(topic->msg.buff, msg->buff, msg->size);
+      topic->msg.size = msg->size;
+      topic->msg.time = msg->time;
+    }
 
     om_list_head_t *pos;
     om_list_for_each(pos, &topic->suber) {

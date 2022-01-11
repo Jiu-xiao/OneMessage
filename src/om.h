@@ -16,6 +16,7 @@ typedef enum {
   OM_ADD_SUBER,
   OM_ADD_PUBER,
   OM_PUB_FREQ,
+  OM_TOPIC_VIRTUAL,
   OM_CONFIG_END
 } om_config_op_t;
 
