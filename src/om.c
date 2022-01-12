@@ -139,17 +139,21 @@ om_status_t _om_publish(om_topic_t *topic, om_msg_t *msg) {
     om_list_head_t *pos;
     om_list_for_each(pos, &topic->suber) {
       om_suber_t *sub = om_list_entry(pos, om_suber_t, self);
+
       if (sub->isLink) {
         _om_publish(sub->target, &topic->msg);
-      } else {
-        if (sub->user_fun.filter == NULL ||
-            sub->user_fun.filter(&topic->msg) == OM_OK) {
-          if (sub->dump_target.enable &&
-              topic->msg.size <= sub->dump_target.max_size)
-            memcpy(sub->dump_target.address, topic->msg.buff, topic->msg.size);
-          if (sub->user_fun.deploy) sub->user_fun.deploy(&topic->msg);
-        }
+        continue;
       }
+
+      if (sub->user_fun.filter != NULL &&
+          sub->user_fun.filter(&topic->msg) != OM_OK)
+        continue;
+
+      if (sub->dump_target.enable &&
+          topic->msg.size <= sub->dump_target.max_size)
+        memcpy(sub->dump_target.address, topic->msg.buff, topic->msg.size);
+
+      if (sub->user_fun.deploy) sub->user_fun.deploy(&topic->msg);
     }
   }
 
@@ -217,14 +221,17 @@ om_status_t om_sync() {
       om_puber_t *pub = om_list_entry(pos2, om_puber_t, self);
       OM_ASSENT(pub->user_fun.get_message);
       OM_ASSENT(pub->user_fun.new_message);
+
       pub->freq.counter--;
-      if (pub->freq.counter <= 0) {
-        pub->freq.counter += pub->freq.reload;
-        if (pub->user_fun.new_message(&pub->msg_buff) == OM_OK &&
-            pub->user_fun.get_message(&pub->msg_buff) == OM_OK) {
-          _om_publish(topic, &pub->msg_buff);
-        }
-      }
+      if (pub->freq.counter > 0) continue;
+
+      pub->freq.counter += pub->freq.reload;
+
+      if (pub->user_fun.new_message(&pub->msg_buff) != OM_OK ||
+          pub->user_fun.get_message(&pub->msg_buff) != OM_OK)
+        continue;
+
+      _om_publish(topic, &pub->msg_buff);
     }
   }
 
