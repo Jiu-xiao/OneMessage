@@ -57,6 +57,10 @@ om_status_t om_config_suber(om_suber_t* sub, om_config_t* config);
 
 om_status_t om_config_puber(om_puber_t* pub, om_config_t* config);
 
+om_status_t _om_publish_to_suber(om_suber_t* sub, om_topic_t* topic);
+
+om_status_t _om_publish_to_topic(om_topic_t* topic, om_msg_t* msg);
+
 om_status_t _om_publish(om_topic_t* topic, om_msg_t* msg);
 
 om_status_t om_publish_with_name(const char* name, void* buff, size_t size,
@@ -64,6 +68,8 @@ om_status_t om_publish_with_name(const char* name, void* buff, size_t size,
 
 om_status_t om_publish_with_handle(om_topic_t* topic, void* buff, size_t size,
                                    bool block);
+
+om_status_t _om_refresh_puber(om_puber_t* pub, om_topic_t* topic);
 
 om_status_t om_sync();
 

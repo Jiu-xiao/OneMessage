@@ -117,44 +117,49 @@ om_status_t om_config_puber(om_puber_t *pub, om_config_t *config) {
   return OM_OK;
 }
 
-om_status_t _om_publish(om_topic_t *topic, om_msg_t *msg) {
-  OM_ASSENT(topic);
-  OM_ASSENT(msg);
+inline om_status_t _om_publish_to_suber(om_suber_t *sub, om_topic_t *topic) {
+  if (sub->isLink) {
+    _om_publish(sub->target, &topic->msg);
+    return OM_ERROR;
+  }
 
+  if (sub->user_fun.filter != NULL &&
+      sub->user_fun.filter(&topic->msg) != OM_OK)
+    return OM_ERROR;
+
+  if (sub->dump_target.enable && topic->msg.size <= sub->dump_target.max_size)
+    memcpy(sub->dump_target.address, topic->msg.buff, topic->msg.size);
+
+  if (sub->user_fun.deploy) sub->user_fun.deploy(&topic->msg);
+}
+
+inline om_status_t _om_publish_to_topic(om_topic_t *topic, om_msg_t *msg) {
   om_time_get(&msg->time);
 
-  if (topic->user_fun.filter == NULL || topic->user_fun.filter(msg) == OM_OK) {
-    if (topic->user_fun.decode) topic->user_fun.decode(msg);
+  if (topic->user_fun.filter != NULL && topic->user_fun.filter(msg) != OM_OK)
+    return OM_ERROR;
 
-    if (topic->virtual)
-      memcpy(&topic->msg, msg, sizeof(*msg));
-    else {
-      if (topic->msg.buff) om_free(topic->msg.buff);
-      topic->msg.buff = om_malloc(msg->size);
-      memcpy(topic->msg.buff, msg->buff, msg->size);
-      topic->msg.size = msg->size;
-      topic->msg.time = msg->time;
-    }
+  if (topic->user_fun.decode) topic->user_fun.decode(msg);
 
-    om_list_head_t *pos;
-    om_list_for_each(pos, &topic->suber) {
-      om_suber_t *sub = om_list_entry(pos, om_suber_t, self);
+  if (topic->virtual)
+    memcpy(&topic->msg, msg, sizeof(*msg));
+  else {
+    if (topic->msg.buff) om_free(topic->msg.buff);
+    topic->msg.buff = om_malloc(msg->size);
+    memcpy(topic->msg.buff, msg->buff, msg->size);
+    topic->msg.size = msg->size;
+    topic->msg.time = msg->time;
+  }
+}
 
-      if (sub->isLink) {
-        _om_publish(sub->target, &topic->msg);
-        continue;
-      }
+om_status_t _om_publish(om_topic_t *topic, om_msg_t *msg) {
+  _om_publish_to_topic(topic, msg);
 
-      if (sub->user_fun.filter != NULL &&
-          sub->user_fun.filter(&topic->msg) != OM_OK)
-        continue;
+  om_list_head_t *pos;
+  om_list_for_each(pos, &topic->suber) {
+    om_suber_t *sub = om_list_entry(pos, om_suber_t, self);
 
-      if (sub->dump_target.enable &&
-          topic->msg.size <= sub->dump_target.max_size)
-        memcpy(sub->dump_target.address, topic->msg.buff, topic->msg.size);
-
-      if (sub->user_fun.deploy) sub->user_fun.deploy(&topic->msg);
-    }
+    _om_publish_to_suber(sub, topic);
   }
 
   return OM_OK;
@@ -205,6 +210,22 @@ om_status_t om_publish_with_handle(om_topic_t *topic, void *buff, size_t size,
   return res;
 }
 
+inline om_status_t _om_refresh_puber(om_puber_t *pub, om_topic_t *topic) {
+  OM_ASSENT(pub->user_fun.get_message);
+  OM_ASSENT(pub->user_fun.new_message);
+
+  pub->freq.counter--;
+  if (pub->freq.counter > 0) return OM_ERROR;
+
+  pub->freq.counter += pub->freq.reload;
+
+  if (pub->user_fun.new_message(&pub->msg_buff) != OM_OK ||
+      pub->user_fun.get_message(&pub->msg_buff) != OM_OK)
+    return OM_ERROR;
+
+  _om_publish(topic, &pub->msg_buff);
+}
+
 om_status_t om_sync() {
 #if OM_VIRTUAL_TIME
   om_time_update(time_handle);
@@ -219,19 +240,7 @@ om_status_t om_sync() {
     om_topic_t *topic = om_list_entry(pos1, om_topic_t, self);
     om_list_for_each(pos2, &topic->puber) {
       om_puber_t *pub = om_list_entry(pos2, om_puber_t, self);
-      OM_ASSENT(pub->user_fun.get_message);
-      OM_ASSENT(pub->user_fun.new_message);
-
-      pub->freq.counter--;
-      if (pub->freq.counter > 0) continue;
-
-      pub->freq.counter += pub->freq.reload;
-
-      if (pub->user_fun.new_message(&pub->msg_buff) != OM_OK ||
-          pub->user_fun.get_message(&pub->msg_buff) != OM_OK)
-        continue;
-
-      _om_publish(topic, &pub->msg_buff);
+      _om_refresh_puber(pub, topic);
     }
   }
 
