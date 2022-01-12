@@ -137,7 +137,7 @@ om_status_t om_core_del_topic(om_list_head_t* head) {
   om_del_all(pos, &topic->link, om_core_delink);
   om_del_all(pos, &topic->puber, om_core_del_puber);
   om_del_all(pos, &topic->suber, om_core_del_suber);
-  if (topic->msg.buff) om_free(topic->msg.buff);
+  if (!topic->virtual && topic->msg.buff) om_free(topic->msg.buff);
   om_free(topic);
 
   return OM_OK;
@@ -150,6 +150,18 @@ om_topic_t* om_core_find_topic(const char* name) {
     if (!strncmp(name, topic->name, OM_TOPIC_MAX_NAME_LEN)) return topic;
   }
   return NULL;
+}
+
+om_status_t om_core_set_dump_target(om_suber_t* suber, void* target,
+                                    size_t max_size) {
+  OM_ASSENT(topic);
+  OM_ASSENT(suber);
+
+  suber->dump_target.max_size = max_size;
+  suber->dump_target.address = target;
+  suber->dump_target.enable = true;
+
+  return OM_OK;
 }
 
 void om_error(const char* file, uint32_t line) {

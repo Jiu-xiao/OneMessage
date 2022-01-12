@@ -28,8 +28,8 @@ typedef struct {
 typedef struct {
   om_list_head_t self;
   struct {
-    om_user_fun_t new;
-    om_user_fun_t get;
+    om_user_fun_t new_message;
+    om_user_fun_t get_message;
   } user_fun;
   om_msg_t msg_buff;
   struct {
@@ -42,11 +42,15 @@ typedef struct {
   om_list_head_t self;
   struct {
     om_user_fun_t filter;
-    om_user_fun_t apply;
+    om_user_fun_t deploy;
   } user_fun;
   bool isLink;
   om_topic_t* target;
-  om_msg_t msg_buff;
+  struct {
+    bool enable;
+    size_t max_size;
+    void* address;
+  } dump_target;
 } om_suber_t;
 
 typedef struct {
@@ -79,6 +83,9 @@ om_status_t om_core_del_suber(om_list_head_t* head);
 om_status_t om_core_del_puber(om_list_head_t* head);
 
 om_status_t om_core_del_topic(om_list_head_t* head);
+
+om_status_t om_core_set_dump_target(om_suber_t* suber, void* target,
+                                    size_t max_size);
 
 om_topic_t* om_core_find_topic(const char* name);
 

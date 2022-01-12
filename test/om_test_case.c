@@ -5,7 +5,7 @@ static char str1[] = "This is str1";
 static char str2[] = "This is str2";
 static char str3[] = "This is str3";
 
-static bool msg_new = false, filter = false, decode = false, apply = false,
+static bool msg_new = false, filter = false, decode = false, deploy = false,
             get = false;
 
 static int call_counter = 0;
@@ -28,7 +28,7 @@ static om_status_t get_fun(om_msg_t *msg) {
 static char str_tmp[20];
 
 static om_status_t apply_fun(om_msg_t *msg) {
-  apply = true;
+  deploy = true;
   strncpy(str_tmp, msg->buff, 20);
   return OM_OK;
 }
@@ -58,7 +58,7 @@ static om_config_t pub_config[] = {{OM_USER_FUN_NEW, new_fun},
                                    {OM_PUB_FREQ, &pub_freq},
                                    {OM_CONFIG_END, NULL}};
 
-static om_config_t sub_config[] = {{OM_USER_FUN_APPLY, apply_fun},
+static om_config_t sub_config[] = {{OM_USER_FUN_DEPLOY, apply_fun},
                                    {OM_CONFIG_END, NULL}};
 
 static om_config_t topic_config1[] = {{OM_USER_FUN_FILTER, filter_fun},
@@ -67,12 +67,13 @@ static om_config_t topic_config1[] = {{OM_USER_FUN_FILTER, filter_fun},
                                       {OM_ADD_SUBER, &sub},
                                       {OM_CONFIG_END, NULL}};
 
-static om_config_t topic_config2[] = {{OM_LINK, &topic}, {OM_CONFIG_END, NULL}};
+static om_config_t topic_config2[] = {
+    {OM_LINK, &topic}, {OM_TOPIC_VIRTUAL, NULL}, {OM_CONFIG_END, NULL}};
 
 START_TEST(publish) {
   om_init();
   om_status_t res = OM_OK;
-  sub = om_create_suber(sub_config);
+  sub = om_create_suber(sub_config, NULL, 0);
   pub = om_create_puber(pub_config);
   ck_assert_msg(sub, "sub 指针为 NULL.");
   ck_assert_msg(sub, "pub 指针为 NULL.");
@@ -118,15 +119,15 @@ char str_log[] = {"Log test."};
 
 START_TEST(om_log) {
   om_init();
-  om_suber_t *sub = om_create_suber(&OM_EMPTY_CONFIG);
+  char buff[100];
+  om_suber_t *sub = om_create_suber(&OM_EMPTY_CONFIG, buff, sizeof(buff));
   om_topic_t *topic_log = om_find_topic("om_log");
 
   ck_assert_msg(topic_log, "获取不到log话题。");
   om_topic_add_suber(topic_log, sub);
   om_print_log("init", OM_LOG_DEFAULT, "%s", str_log);
-  ck_assert_msg(
-      !strcmp(sub->msg_buff.buff, "\033[0m[Default][init]Log test.\n"),
-      "LOG数据错误");
+  ck_assert_msg(!strcmp(buff, "\033[0m[Default][init]Log test.\n"),
+                "LOG数据错误:%s", buff);
   om_deinit();
 }
 END_TEST

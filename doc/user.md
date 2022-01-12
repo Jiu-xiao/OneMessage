@@ -16,9 +16,9 @@
 `om_puber_t* pub = om_create_puber(pub_config);`
 ## 创建订阅者
 使用空配置创建  
-`om_suber_t* sub = om_create_suber(&OM_EMPTY_CONFIG);`  
+`om_suber_t* sub = om_create_suber(&OM_EMPTY_CONFIG, NULL, 0);`  
 使用自定义配置创建  
-`om_suber_t* sub = om_create_suber(&your_config);`
+`om_suber_t* sub = om_create_suber(&your_config, NULL, 0);`
 ## 创建话题配置
 | 操作               | 参数               | 功能                         | 状态 |
 | ------------------ | ------------------ | ---------------------------- | ---- |
@@ -26,7 +26,7 @@
 | OM_USER_FUN_GET    | 函数入口           | 发布者获取数据函数           | 必须 |
 | OM_USER_FUN_DECODE | 函数入口           | 话题数据解码函数             | 可选 |
 | OM_USER_FUN_NEW    | 函数入口           | 发布者检测新数据函数         | 必须 |
-| OM_USER_FUN_APPLY  | 函数入口           | 订阅者应用数据函数           | 可选 |
+| OM_USER_FUN_DEPLOY | 函数入口           | 订阅者应用数据函数           | 可选 |
 | OM_LINK            | 链接的目标话题     | 将话题作为目标话题的发布者   | 可选 |
 | OM_ADD_SUBER       | 订阅者             | 添加订阅者                   | 可选 |
 | OM_ADD_PUBER       | 发布者             | 添加发布者                   | 可选 |
@@ -44,18 +44,21 @@
 订阅者配置
 设置APPLY函数
 
-    om_config_t sub_config[] = {{OM_USER_FUN_APPLY, apply_fun},
+    om_config_t sub_config[] = {{OM_USER_FUN_DEPLOY, apply_fun},
                                 {OM_CONFIG_END, NULL}};
 
 创建订阅者
+om_suber_t*
 
-    om_suber_t* sub = om_create_suber(sub_config);
+    om_suber_t* sub = om_create_suber(sub_config, buff, buff_size);
+buff!=NULL会导出订阅数据到buff
 
 创建发布者
-    
+
     om_puber_t* pub = om_create_puber(pub_config);
 
 话题一配置
+
 设置FILTER和DECODE函数
 添加发布者和订阅者
 

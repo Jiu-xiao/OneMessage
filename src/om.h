@@ -5,13 +5,14 @@
 #define om_add_topic om_core_add_topic
 #define om_topic_link om_core_link
 #define om_find_topic om_core_find_topic
+#define om_set_dump_target om_core_set_dump_target
 
 typedef enum {
   OM_USER_FUN_FILTER,
   OM_USER_FUN_GET,
   OM_USER_FUN_DECODE,
   OM_USER_FUN_NEW,
-  OM_USER_FUN_APPLY,
+  OM_USER_FUN_DEPLOY,
   OM_LINK,
   OM_ADD_SUBER,
   OM_ADD_PUBER,
@@ -68,7 +69,7 @@ om_status_t om_sync();
 
 om_topic_t* om_create_topic(const char* name, om_config_t* config);
 
-om_suber_t* om_create_suber(om_config_t* config);
+om_suber_t* om_create_suber(om_config_t* config, void* buff, size_t max_size);
 
 om_puber_t* om_create_puber(om_config_t* config);
 

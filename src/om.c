@@ -82,8 +82,9 @@ om_status_t om_config_suber(om_suber_t *sub, om_config_t *config) {
       case OM_USER_FUN_FILTER:
         sub->user_fun.filter = config->arg;
         break;
-      case OM_USER_FUN_APPLY:
-        sub->user_fun.apply = config->arg;
+      case OM_USER_FUN_DEPLOY:
+        sub->user_fun.deploy = config->arg;
+        break;
       default:
         return OM_ERROR;
     }
@@ -99,10 +100,10 @@ om_status_t om_config_puber(om_puber_t *pub, om_config_t *config) {
   for (; config->op != OM_CONFIG_END; config++) {
     switch (config->op) {
       case OM_USER_FUN_NEW:
-        pub->user_fun.new = config->arg;
+        pub->user_fun.new_message = config->arg;
         break;
       case OM_USER_FUN_GET:
-        pub->user_fun.get = config->arg;
+        pub->user_fun.get_message = config->arg;
         break;
       case OM_PUB_FREQ:
         pub->freq.reload = OM_CALL_FREQ / *((float *)config->arg);
@@ -143,8 +144,10 @@ om_status_t _om_publish(om_topic_t *topic, om_msg_t *msg) {
       } else {
         if (sub->user_fun.filter == NULL ||
             sub->user_fun.filter(&topic->msg) == OM_OK) {
-          memcpy(&sub->msg_buff, &topic->msg, sizeof(topic->msg));
-          if (sub->user_fun.apply) sub->user_fun.apply(&topic->msg);
+          if (sub->dump_target.enable &&
+              topic->msg.size <= sub->dump_target.max_size)
+            memcpy(sub->dump_target.address, topic->msg.buff, topic->msg.size);
+          if (sub->user_fun.deploy) sub->user_fun.deploy(&topic->msg);
         }
       }
     }
@@ -212,13 +215,13 @@ om_status_t om_sync() {
     om_topic_t *topic = om_list_entry(pos1, om_topic_t, self);
     om_list_for_each(pos2, &topic->puber) {
       om_puber_t *pub = om_list_entry(pos2, om_puber_t, self);
-      OM_ASSENT(pub->user_fun.get);
-      OM_ASSENT(pub->user_fun.new);
+      OM_ASSENT(pub->user_fun.get_message);
+      OM_ASSENT(pub->user_fun.new_message);
       pub->freq.counter--;
       if (pub->freq.counter <= 0) {
         pub->freq.counter += pub->freq.reload;
-        if (pub->user_fun.new(&pub->msg_buff) == OM_OK &&
-            pub->user_fun.get(&pub->msg_buff) == OM_OK) {
+        if (pub->user_fun.new_message(&pub->msg_buff) == OM_OK &&
+            pub->user_fun.get_message(&pub->msg_buff) == OM_OK) {
           _om_publish(topic, &pub->msg_buff);
         }
       }
@@ -240,11 +243,12 @@ om_topic_t *om_create_topic(const char *name, om_config_t *config) {
   return topic;
 }
 
-om_suber_t *om_create_suber(om_config_t *config) {
+om_suber_t *om_create_suber(om_config_t *config, void *buff, size_t max_size) {
   OM_ASSENT(config);
 
   om_suber_t *sub = om_core_suber_create(NULL);
   om_config_suber(sub, config);
+  if (buff != NULL) om_core_set_dump_target(sub, buff, max_size);
 
   return sub;
 }
