@@ -31,20 +31,22 @@ git submodule add https://gitee.com/jiu-xiao/one-message.git <path>
 OneMessage
 ├─config
 ├─src
+│  ├─app
 │  ├─comp
 │  └─core
 └─test
 ```
 ****
-| 文件夹   | 功能           |
-| -------- | -------------- |
-| config   | 配置文件模板   |
-| doc      | 文档           |
-| src/comp | OneMessage组件 |
-| src/core | 核心api        |
-| src      | 用户接口       |
-| test     | 单元测试       |
-| example  | 例程           |
+| 文件夹   | 功能         |
+| -------- | ------------ |
+| config   | 配置文件模板 |
+| doc      | 文档         |
+| src/app  | 应用         |
+| src/comp | 组件         |
+| src/core | 核心api      |
+| src      | 用户接口     |
+| test     | 单元测试     |
+| example  | 例程         |
 ****
 ## 文档
 > [配置文件](doc/config.md)  

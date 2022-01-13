@@ -43,7 +43,7 @@ om_status_t om_print_log(char *name, om_log_level_t level, const char *format,
   va_start(vArgList, format);
   vsnprintf(log.data, OM_LOG_MAX_LEN, fm_buf, vArgList);
   va_end(vArgList);
-  return om_publish_with_handle(om_log, &log, sizeof(om_log_t), true);
+  return om_publish(om_log, &log, sizeof(om_log_t), true);
 }
 
 om_status_t om_log_deinit() {

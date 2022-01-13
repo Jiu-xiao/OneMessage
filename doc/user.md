@@ -8,23 +8,19 @@
 ## 初始化
 调用`om_init()`。
 ## 创建话题
-使用空配置创建  
-`om_topic_t* test = om_create_topic("test", &OM_EMPTY_CONFIG);`  
-使用自定义配置创建  
-`om_topic_t* test = om_create_topic("test", &your_config);`
+`om_topic_t *om_create_topic(const char *name, om_config_t *config);`
+config==NULL时不载入配置
 ## 创建发布者
-`om_puber_t* pub = om_create_puber(pub_config);`
+`om_puber_t *om_create_puber(om_config_t *config);`
+config==NULL时不载入配置
 ## 创建订阅者
-使用空配置创建  
-`om_suber_t* sub = om_create_suber(&OM_EMPTY_CONFIG, NULL, 0);`  
-使用自定义配置创建  
-`om_suber_t* sub = om_create_suber(&your_config, NULL, 0);`
+om_status_t om_subscript(om_topic_t *topic, void *buff, size_t max_size, om_user_fun_t filter);
+config==NULL时不载入配置,buff==NULL时不导出数据
 ## 创建话题配置
 | 操作               | 参数               | 功能                         | 状态 |
 | ------------------ | ------------------ | ---------------------------- | ---- |
 | OM_USER_FUN_FILTER | 函数入口           | 设置话题过滤函数             | 可选 |
 | OM_USER_FUN_GET    | 函数入口           | 发布者获取数据函数           | 必须 |
-| OM_USER_FUN_DECODE | 函数入口           | 话题数据解码函数             | 可选 |
 | OM_USER_FUN_NEW    | 函数入口           | 发布者检测新数据函数         | 必须 |
 | OM_USER_FUN_DEPLOY | 函数入口           | 订阅者应用数据函数           | 可选 |
 | OM_LINK            | 链接的目标话题     | 将话题作为目标话题的发布者   | 可选 |
@@ -95,10 +91,12 @@ buff!=NULL会导出订阅数据到buff
     om_status_t om_config_puber(om_puber_t* pub, om_config_t* config);
 
 ## 主动发布
-    om_status_t om_publish_with_name(const char* name, void* buff, size_t size, bool block);
-
-    om_status_t om_publish_with_handle(om_topic_t* topic, void* buff, size_t size, bool block);
+    om_status_t om_publish(om_topic_t* topic, void* buff, size_t size, bool block);
 block参数决定当其他线程发布时是否阻塞
+## 订阅缓存区
+    om_status_t om_subscript(om_topic_t *topic, void *buff, size_t max_size, om_user_fun_t filter);
+
+filter==NULL时不添加过滤器函数
 ## log
     om_topic_t* om_get_log_handle();
     om_status_t om_print_log(char* name, om_log_level_t level, const char* format,...);

@@ -38,3 +38,6 @@
 
 /* 日志最大长度 */
 #define OM_LOG_MAX_LEN (60)
+
+/* Debug */
+#define OM_DEBUG (1)

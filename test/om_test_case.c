@@ -5,8 +5,7 @@ static char str1[] = "This is str1";
 static char str2[] = "This is str2";
 static char str3[] = "This is str3";
 
-static bool msg_new = false, filter = false, decode = false, deploy = false,
-            get = false;
+static bool msg_new = false, filter = false, deploy = false, get = false;
 
 static int call_counter = 0;
 
@@ -41,11 +40,6 @@ static om_status_t filter_fun(om_msg_t *msg) {
     return OM_ERROR;
 }
 
-static om_status_t decode_fun(om_msg_t *msg) {
-  decode = true;
-  return OM_OK;
-}
-
 static om_suber_t *sub;
 static om_puber_t *pub;
 static om_topic_t *topic;
@@ -62,7 +56,6 @@ static om_config_t sub_config[] = {{OM_USER_FUN_DEPLOY, apply_fun},
                                    {OM_CONFIG_END, NULL}};
 
 static om_config_t topic_config1[] = {{OM_USER_FUN_FILTER, filter_fun},
-                                      {OM_USER_FUN_DECODE, decode_fun},
                                       {OM_ADD_PUBER, &pub},
                                       {OM_ADD_SUBER, &sub},
                                       {OM_CONFIG_END, NULL}};
@@ -91,22 +84,20 @@ START_TEST(publish) {
 
   ck_assert_msg(!get, "意外调用了apply函数。");
   ck_assert_msg(!filter, "意外调用了filter函数。");
-  ck_assert_msg(!decode, "意外调用了decode函数。");
   msg_new = true;
 
   for (int i = 0; i < 1000; i++) om_sync();
   ck_assert_msg(get, "未调用apply函数。");
   ck_assert_msg(filter, "未调用filter函数。");
-  ck_assert_msg(decode, "未调用decode函数。");
   ck_assert_msg(!strncmp(str_tmp, str1, 20), "sync数据损坏。");
   msg_new = false;
 
   ck_assert_msg(om_find_topic("topic") == topic, "无法根据名称寻找话题。");
 
-  om_publish_with_name("topic2", str2, sizeof(str2), true);
+  om_publish(om_find_topic("topic2"), str2, sizeof(str2), true);
   ck_assert_msg(!strncmp(str_tmp, str2, 20), "publish数据损坏。");
 
-  om_publish_with_name("topic2", str3, sizeof(str3), true);
+  om_publish(om_find_topic("topic2"), str3, sizeof(str3), true);
   ck_assert_msg(strncmp(str_tmp, str3, 20), "filter函数未生效。");
 
   res = om_deinit();
@@ -120,7 +111,7 @@ char str_log[] = {"Log test."};
 START_TEST(om_log) {
   om_init();
   char buff[100];
-  om_suber_t *sub = om_create_suber(&OM_EMPTY_CONFIG, buff, sizeof(buff));
+  om_suber_t *sub = om_create_suber(NULL, buff, sizeof(buff));
   om_topic_t *topic_log = om_find_topic("om_log");
 
   ck_assert_msg(topic_log, "获取不到log话题。");

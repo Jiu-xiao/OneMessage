@@ -21,7 +21,7 @@ typedef enum {
   OM_ERROR_NOT_INIT
 } om_status_t;
 
-#ifdef OM_DEBUG
+#if OM_DEBUG
 #define OM_ASSENT(arg) \
   if (!(arg)) om_error(__FILE__, __LINE__);
 #define OM_CHECK(arg) \
