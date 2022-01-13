@@ -1,5 +1,5 @@
-#ifndef __OM_CONFIG_H_
-#define __OM_CONFIG_H_
+#ifndef __OM_DEF_H_
+#define __OM_DEF_H_
 
 #ifdef OM_TEST
 #include "om_config_template.h"

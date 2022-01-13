@@ -1,3 +1,6 @@
+#ifndef __OM_CORE_H__
+#define __OM_CORE_H__
+
 #include "om_def.h"
 #include "om_lib.h"
 #include "om_list.h"
@@ -90,3 +93,4 @@ om_status_t om_core_set_dump_target(om_suber_t* suber, void* target,
 om_topic_t* om_core_find_topic(const char* name);
 
 void om_error(const char* file, uint32_t line);
+#endif

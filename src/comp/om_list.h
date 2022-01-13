@@ -1,3 +1,6 @@
+#ifndef __OM_LIST_H__
+#define __OM_LIST_H__
+
 #include "om_def.h"
 #include "om_lib.h"
 
@@ -56,3 +59,4 @@ void __list_add(om_list_head_t *new, om_list_head_t *prev,
                 om_list_head_t *next);
 
 void __list_del_entry(om_list_head_t *entry);
+#endif
