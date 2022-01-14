@@ -15,6 +15,8 @@
     om_puber_t* om_config_puber(om_puber_t* puber, const char* format, ...)
 
 topic/suber/puber==NULL时，会新创建对应类型的变量并返回，且om_config_topic的第一个可选参数为话题名。
+
+format参数支持大小写。
 ### 发布者配置
 | 选项 | 参数                              | 功能              |
 | ---- | --------------------------------- | ----------------- |
@@ -39,6 +41,7 @@ topic/suber/puber==NULL时，会新创建对应类型的变量并返回，且om_
 | p    | om_puber_t *                      | 将发布者指向话题                         |
 | t    | om_topic_t *                      | 将参数中的话题指向自身                   |
 | v    | 无                                | 设置为虚话题(不拷贝消息内容，只传递指针) |
+
 例：
 * om_config_suber(NULL,"fdt",fun1,fun2,your_topic)会返回一个新创建的指向your_topic的订阅者，且其filter函数为fun1,deploy函数为fun2。
 * om_config_topic(your_topic,"sp",suber,puber)会将订阅者suber和发布者puber指向your_topic。
