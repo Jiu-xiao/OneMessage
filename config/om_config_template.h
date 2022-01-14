@@ -1,3 +1,6 @@
+/* Debug */
+#define OM_DEBUG (1)
+
 /* OneMessage主线程调用的频率 */
 #define OM_CALL_FREQ (1000)
 
@@ -38,6 +41,3 @@
 
 /* 日志最大长度 */
 #define OM_LOG_MAX_LEN (60)
-
-/* Debug */
-#define OM_DEBUG (1)

@@ -26,7 +26,7 @@ static om_status_t get_fun(om_msg_t *msg) {
 
 static char str_tmp[20];
 
-static om_status_t apply_fun(om_msg_t *msg) {
+static om_status_t deploy_fun(om_msg_t *msg) {
   deploy = true;
   strncpy(str_tmp, msg->buff, 20);
   return OM_OK;
@@ -40,38 +40,18 @@ static om_status_t filter_fun(om_msg_t *msg) {
     return OM_ERROR;
 }
 
-static om_suber_t *sub;
-static om_puber_t *pub;
-static om_topic_t *topic;
-static om_topic_t *topic2;
-
-float pub_freq = 12.5;
-
-static om_config_t pub_config[] = {{OM_USER_FUN_NEW, new_fun},
-                                   {OM_USER_FUN_GET, get_fun},
-                                   {OM_PUB_FREQ, &pub_freq},
-                                   {OM_CONFIG_END, NULL}};
-
-static om_config_t sub_config[] = {{OM_USER_FUN_DEPLOY, apply_fun},
-                                   {OM_CONFIG_END, NULL}};
-
-static om_config_t topic_config1[] = {{OM_USER_FUN_FILTER, filter_fun},
-                                      {OM_ADD_PUBER, &pub},
-                                      {OM_ADD_SUBER, &sub},
-                                      {OM_CONFIG_END, NULL}};
-
-static om_config_t topic_config2[] = {
-    {OM_LINK, &topic}, {OM_TOPIC_VIRTUAL, NULL}, {OM_CONFIG_END, NULL}};
+static float pub_freq = 12.5;
 
 START_TEST(publish) {
   om_init();
   om_status_t res = OM_OK;
-  sub = om_create_suber(sub_config, NULL, 0);
-  pub = om_create_puber(pub_config);
+  om_suber_t *sub = om_config_suber(NULL, "d", deploy_fun);
+  om_puber_t *pub = om_config_puber(NULL, "ngq", new_fun, get_fun, pub_freq);
   ck_assert_msg(sub, "sub 指针为 NULL.");
   ck_assert_msg(sub, "pub 指针为 NULL.");
-  topic = om_create_topic("topic", topic_config1);
-  topic2 = om_create_topic("topic2", topic_config2);
+  om_topic_t *topic =
+      om_config_topic(NULL, "fps", "topic", filter_fun, pub, sub);
+  om_topic_t *topic2 = om_config_topic(NULL, "l", "topic2", topic);
   ck_assert_msg(topic, "topic 指针为 NULL.");
   ck_assert_msg(topic2, "topic2 指针为 NULL.");
   res += om_add_topic(topic);
@@ -110,12 +90,12 @@ char str_log[] = {"Log test."};
 
 START_TEST(om_log) {
   om_init();
-  char buff[100];
-  om_suber_t *sub = om_create_suber(NULL, buff, sizeof(buff));
-  om_topic_t *topic_log = om_find_topic("om_log");
+  char buff[100] = {0};
+  om_topic_t *topic_log = om_get_log_handle();
+
+  om_subscript(topic_log, buff, sizeof(buff), NULL);
 
   ck_assert_msg(topic_log, "获取不到log话题。");
-  om_topic_add_suber(topic_log, sub);
   om_print_log("init", OM_LOG_DEFAULT, "%s", str_log);
   ck_assert_msg(!strcmp(buff, "\033[0m[Default][init]Log test.\n"),
                 "LOG数据错误:%s", buff);

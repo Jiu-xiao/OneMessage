@@ -1,4 +1,5 @@
 #include "om_msg.h"
+
 #include "om_core.h"
 #include "om_def.h"
 
@@ -21,83 +22,6 @@ om_status_t om_msg_init() {
   return OM_OK;
 }
 
-om_status_t om_config_topic(om_topic_t *topic, om_config_t *config) {
-  OM_ASSENT(config);
-  OM_ASSENT(topic);
-
-  for (; config->op != OM_CONFIG_END; config++) {
-    switch (config->op) {
-    case OM_USER_FUN_FILTER:
-      topic->user_fun.filter = config->arg;
-      break;
-    case OM_LINK: {
-      om_topic_t **target = config->arg;
-      om_core_link(topic, *target);
-    } break;
-    case OM_ADD_PUBER: {
-      om_puber_t **pub = config->arg;
-      om_core_add_puber(topic, *pub);
-    } break;
-    case OM_ADD_SUBER: {
-      om_suber_t **sub = config->arg;
-      om_core_add_suber(topic, *sub);
-    } break;
-    case OM_TOPIC_VIRTUAL: {
-      topic->virtual = true;
-      break;
-    }
-    default:
-      return OM_ERROR;
-    }
-  }
-
-  return OM_OK;
-}
-
-om_status_t om_config_suber(om_suber_t *sub, om_config_t *config) {
-  OM_ASSENT(config);
-  OM_ASSENT(sub);
-
-  for (; config->op != OM_CONFIG_END; config++) {
-    switch (config->op) {
-    case OM_USER_FUN_FILTER:
-      sub->user_fun.filter = config->arg;
-      break;
-    case OM_USER_FUN_DEPLOY:
-      sub->user_fun.deploy = config->arg;
-      break;
-    default:
-      return OM_ERROR;
-    }
-  }
-
-  return OM_OK;
-}
-
-om_status_t om_config_puber(om_puber_t *pub, om_config_t *config) {
-  OM_ASSENT(config);
-  OM_ASSENT(pub);
-
-  for (; config->op != OM_CONFIG_END; config++) {
-    switch (config->op) {
-    case OM_USER_FUN_NEW:
-      pub->user_fun.new_message = config->arg;
-      break;
-    case OM_USER_FUN_GET:
-      pub->user_fun.get_message = config->arg;
-      break;
-    case OM_PUB_FREQ:
-      pub->freq.reload = OM_CALL_FREQ / *((float *)config->arg);
-      pub->freq.counter = pub->freq.reload;
-      break;
-    default:
-      return OM_ERROR;
-    }
-  }
-
-  return OM_OK;
-}
-
 inline om_status_t _om_publish_to_suber(om_suber_t *sub, om_topic_t *topic) {
   if (sub->isLink) {
     _om_publish(sub->target, &topic->msg);
@@ -111,8 +35,7 @@ inline om_status_t _om_publish_to_suber(om_suber_t *sub, om_topic_t *topic) {
   if (sub->dump_target.enable && topic->msg.size <= sub->dump_target.max_size)
     memcpy(sub->dump_target.address, topic->msg.buff, topic->msg.size);
 
-  if (sub->user_fun.deploy)
-    sub->user_fun.deploy(&topic->msg);
+  if (sub->user_fun.deploy) sub->user_fun.deploy(&topic->msg);
 
   return OM_OK;
 }
@@ -126,8 +49,7 @@ inline om_status_t _om_publish_to_topic(om_topic_t *topic, om_msg_t *msg) {
   if (topic->virtual)
     memcpy(&topic->msg, msg, sizeof(*msg));
   else {
-    if (topic->msg.buff)
-      om_free(topic->msg.buff);
+    if (topic->msg.buff) om_free(topic->msg.buff);
     topic->msg.buff = om_malloc(msg->size);
     memcpy(topic->msg.buff, msg->buff, msg->size);
     topic->msg.size = msg->size;
@@ -154,8 +76,7 @@ om_status_t om_publish(om_topic_t *topic, void *buff, size_t size, bool block) {
   OM_ASSENT(topic);
   OM_ASSENT(buff);
 
-  if (!om_msg_initd)
-    return OM_ERROR_NOT_INIT;
+  if (!om_msg_initd) return OM_ERROR_NOT_INIT;
 
   if (block)
     om_mutex_lock(&om_mutex_handle);
@@ -176,8 +97,7 @@ inline om_status_t _om_refresh_puber(om_puber_t *pub, om_topic_t *topic) {
   OM_ASSENT(pub->user_fun.new_message);
 
   pub->freq.counter--;
-  if (pub->freq.counter > 0)
-    return OM_ERROR;
+  if (pub->freq.counter > 0) return OM_ERROR;
 
   pub->freq.counter += pub->freq.reload;
 
@@ -195,8 +115,7 @@ om_status_t om_sync() {
   om_time_update(time_handle);
 #endif
 
-  if (!om_msg_initd)
-    return OM_ERROR_NOT_INIT;
+  if (!om_msg_initd) return OM_ERROR_NOT_INIT;
 
   om_mutex_lock(&om_mutex_handle);
 
@@ -214,41 +133,14 @@ om_status_t om_sync() {
   return OM_OK;
 }
 
-om_topic_t *om_create_topic(const char *name, om_config_t *config) {
-  OM_ASSENT(name);
-
-  om_topic_t *topic = om_core_topic_create(name);
-  if (config)
-    om_config_topic(topic, config);
-
-  return topic;
-}
-
-om_suber_t *om_create_suber(om_config_t *config, void *buff, size_t max_size) {
-  om_suber_t *sub = om_core_suber_create(NULL);
-  if (config)
-    om_config_suber(sub, config);
-  if (buff != NULL)
-    om_core_set_dump_target(sub, buff, max_size);
-
-  return sub;
-}
-
-om_puber_t *om_create_puber(om_config_t *config) {
-  om_puber_t *pub = om_core_puber_create(OM_CALL_FREQ);
-  if (config)
-    om_config_puber(pub, config);
-
-  return pub;
-}
-
 om_status_t om_subscript(om_topic_t *topic, void *buff, size_t max_size,
                          om_user_fun_t filter) {
   OM_ASSENT(topic);
   OM_ASSENT(buff);
 
-  om_suber_t *sub = om_core_suber_create(topic);
+  om_suber_t *sub = om_core_suber_create(NULL);
   om_core_set_dump_target(sub, buff, max_size);
+  om_core_add_suber(topic, sub);
   sub->user_fun.filter = filter;
 
   return OM_OK;

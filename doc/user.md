@@ -6,114 +6,92 @@
 ## 添加同步函数
 将`om_sync()`在中断或者线程按照OM_CALL_FREQ频率调用。
 ## 初始化
-调用`om_init()`。
-## 创建话题
-`om_topic_t *om_create_topic(const char *name, om_config_t *config);`
-config==NULL时不载入配置
-## 创建发布者
-`om_puber_t *om_create_puber(om_config_t *config);`
-config==NULL时不载入配置
-## 创建订阅者
-om_status_t om_subscript(om_topic_t *topic, void *buff, size_t max_size, om_user_fun_t filter);
-config==NULL时不载入配置,buff==NULL时不导出数据
-## 创建话题配置
-| 操作               | 参数               | 功能                         | 状态 |
-| ------------------ | ------------------ | ---------------------------- | ---- |
-| OM_USER_FUN_FILTER | 函数入口           | 设置话题过滤函数             | 可选 |
-| OM_USER_FUN_GET    | 函数入口           | 发布者获取数据函数           | 必须 |
-| OM_USER_FUN_NEW    | 函数入口           | 发布者检测新数据函数         | 必须 |
-| OM_USER_FUN_DEPLOY | 函数入口           | 订阅者应用数据函数           | 可选 |
-| OM_LINK            | 链接的目标话题     | 将话题作为目标话题的发布者   | 可选 |
-| OM_ADD_SUBER       | 订阅者             | 添加订阅者                   | 可选 |
-| OM_ADD_PUBER       | 发布者             | 添加发布者                   | 可选 |
-| OM_PUB_FREQ        | 刷新频率（float*） | 添加发布者                   | 可选 |
-| OM_TOPIC_VIRTUAL   | NULL               | 不拷贝数据，只保留长度和地址 | 可选 |
-| OM_CONFIG_END      | NULL               | config结束标志               | 必须 |
-----
-发布者配置
-设置NEW和GET函数
+    om_status_t om_init();
+## 配置
+    om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...)
 
-    om_config_t pub_config[] = {{OM_USER_FUN_NEW, new_fun},
-                                {OM_USER_FUN_GET, get_fun},
-                                {OM_CONFIG_END, NULL}};
+    om_suber_t* om_config_suber(om_suber_t* suber, const char* format, ...)
 
-订阅者配置
-设置APPLY函数
+    om_puber_t* om_config_puber(om_puber_t* puber, const char* format, ...)
 
-    om_config_t sub_config[] = {{OM_USER_FUN_DEPLOY, apply_fun},
-                                {OM_CONFIG_END, NULL}};
+topic/suber/puber==NULL时，会新创建对应类型的变量并返回，且om_config_topic的第一个可选参数为话题名。
+### 发布者配置
+| 选项 | 参数                              | 功能              |
+| ---- | --------------------------------- | ----------------- |
+| n    | om_status_t (*fun)(om_msg_t *msg) | 注册new函数       |
+| g    | om_status_t (*fun)(om_msg_t *msg) | 注册get函数       |
+| t    | om_topic_t *                      | 将发布者指向话题  |
+| q    | float                             | 设置new的调用频率 |
 
-创建订阅者
-om_suber_t*
+### 订阅者配置
+| 选项 | 参数                              | 功能               |
+| ---- | --------------------------------- | ------------------ |
+| f    | om_status_t (*fun)(om_msg_t *msg) | 注册filter函数     |
+| d    | om_status_t (*fun)(om_msg_t *msg) | 注册deploy函数     |
+| t    | om_topic_t *                      | 将订阅者者指向话题 |
 
-    om_suber_t* sub = om_create_suber(sub_config, buff, buff_size);
-buff!=NULL会导出订阅数据到buff
+### 话题配置
+| 选项 | 参数                              | 功能                                     |
+| ---- | --------------------------------- | ---------------------------------------- |
+| f    | om_status_t (*fun)(om_msg_t *msg) | 注册filter函数                           |
+| l    | om_topic_t *                      | 指向参数中的话题                         |
+| s    | om_suber_t *                      | 将订阅者指向话题                         |
+| p    | om_puber_t *                      | 将发布者指向话题                         |
+| t    | om_topic_t *                      | 将参数中的话题指向自身                   |
+| v    | 无                                | 设置为虚话题(不拷贝消息内容，只传递指针) |
+例：
+* om_config_suber(NULL,"fdt",fun1,fun2,your_topic)会返回一个新创建的指向your_topic的订阅者，且其filter函数为fun1,deploy函数为fun2。
+* om_config_topic(your_topic,"sp",suber,puber)会将订阅者suber和发布者puber指向your_topic。
+* om_config_topic(NULL,"v","topic_name")会新创建一个名为topic_name虚话题并返回
+## 返回值
+  * OM_OK = 0,
+  * OM_ERROR = 1
+  * OM_ERROR_NULL
+  * OM_ERROR_BUSY
+  * OM_ERROR_TIMEOUT
+  * OM_ERROR_NOT_INIT
 
-创建发布者
+## 用户函数
+| 函数名 | 功能                                                                                          |
+| ------ | --------------------------------------------------------------------------------------------- |
+| filter | 如果注册了filter函数，话题和订阅者收到的消息只有返回值为OM_OK时才会保存                       |
+| new    | 发布者必须注册，om_sync会定期调用new函数            ，如果返回值为OM_OK,则会进一步调用get函数 |
+| get    | 发布者必须注册，将接收到的消息保存在msg中，如果返回OM_OK,则会将msg发布到绑定的话题            |
+| deploy | 如果注册了deploy函数，订阅者收到订阅的时候会将调用此函数，并将收到的消息传入                  |
 
-    om_puber_t* pub = om_create_puber(pub_config);
+## 将话题加入队列
 
-话题一配置
+    om_status_t om_add_topic(om_topic_t *topic)
 
-设置FILTER和DECODE函数
-添加发布者和订阅者
-
-    om_config_t topic_config1[] = {{OM_USER_FUN_FILTER, filter_fun},
-                                   {OM_USER_FUN_DECODE, decode_fun},
-                                   {OM_ADD_PUBER, &pub},
-                                   {OM_ADD_SUBER, &sub},
-                                   {OM_CONFIG_END, NULL}};
-创建话题一
-
-    om_topic_t* topic = om_create_topic("topic", topic_config1);
-
-话题二配置
-链接到话题一
-
-    om_config_t topic_config2[] = {{OM_LINK, &topic},
-                                   {OM_CONFIG_END, NULL}};
-
-创建话题二
-
-    om_topic_t* topic2 = om_create_topic("topic2", topic_config2);
-
-将两个话题加入队列
-
-    om_add_topic(topic);
-    om_add_topic(topic2);
-
-## 主动加载配置
-
-    om_status_t om_config_topic(om_topic_t* topic, om_config_t* config);
-
-    om_status_t om_config_suber(om_suber_t* sub, om_config_t* config);
-
-    om_status_t om_config_puber(om_puber_t* pub, om_config_t* config);
-
+加入队列后，会立刻开始收发消息，所以需要在调用前完成话题的所有配置。
 ## 主动发布
-    om_status_t om_publish(om_topic_t* topic, void* buff, size_t size, bool block);
+    om_status_t om_publish(om_topic_t* topic, void* buff, size_t size, bool block)
 block参数决定当其他线程发布时是否阻塞
-## 订阅缓存区
-    om_status_t om_subscript(om_topic_t *topic, void *buff, size_t max_size, om_user_fun_t filter);
+## 订阅话题
+    om_status_t om_subscript(om_topic_t *topic, void *buff, size_t max_size, om_user_fun_t filter)
 
 filter==NULL时不添加过滤器函数
 ## log
-    om_topic_t* om_get_log_handle();
-    om_status_t om_print_log(char* name, om_log_level_t level, const char* format,...);
+    om_topic_t* om_get_log_handle()    //返回log所在话题
+    om_status_t om_print_log(char* name, om_log_level_t level, const char* format,...)
 
-| Level          | Color                |
-| -------------- | -------------------- |
-| OM_LOG_DEFAULT | OM_LOG_COLOR_DEFAULT |
-| OM_LOG_WARNING | OM_LOG_COLOR_YELLOW  |
-| OM_LOG_ERROR   | OM_LOG_COLOR_RED     |
-| OM_LOG_PASS    | OM_LOG_COLOR_GREEN   |
-| OM_LOG_NOTICE  | OM_LOG_COLOR_BLUE    |
+| Level          | Color   |
+| -------------- | ------- |
+| OM_LOG_DEFAULT | DEFAULT |
+| OM_LOG_WARNING | YELLOW  |
+| OM_LOG_ERROR   | RED     |
+| OM_LOG_PASS    | GREEN   |
+| OM_LOG_NOTICE  | BLUE    |
+## 查找话题
+    om_topic_t *om_core_find_topic(const char *name)
+如果能找到对应名字的话题，返回此话题，否则返回NULL
+
+## 注销
+    om_status_t om_deinit();
+释放OneMessage申请的所有内存空间
 ## 其他API
-| 函数名             | 功能               |
-| ------------------ | ------------------ |
-| om_topic_add_puber | 添加发布者         |
-| om_topic_add_suber | 添加订阅者         |
-| om_add_topic       | 将话题加入队列     |
-| om_topic_link      | 链接话题           |
-| om_find_topic      | 根据话题名寻找话题 |
-| om_deinit          | 注销OneMessage     |
+| 函数名             | 功能       |
+| ------------------ | ---------- |
+| om_topic_add_puber | 添加发布者 |
+| om_topic_add_suber | 添加订阅者 |
+| om_topic_link      | 链接话题   |
