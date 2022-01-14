@@ -50,13 +50,10 @@ START_TEST(publish) {
   ck_assert_msg(sub, "sub 指针为 NULL.");
   ck_assert_msg(sub, "pub 指针为 NULL.");
   om_topic_t *topic =
-      om_config_topic(NULL, "fps", "topic", filter_fun, pub, sub);
-  om_topic_t *topic2 = om_config_topic(NULL, "l", "topic2", topic);
+      om_config_topic(NULL, "fpsa", "topic", filter_fun, pub, sub);
+  om_topic_t *topic2 = om_config_topic(NULL, "la", "topic2", topic);
   ck_assert_msg(topic, "topic 指针为 NULL.");
   ck_assert_msg(topic2, "topic2 指针为 NULL.");
-  res += om_add_topic(topic);
-  res += om_add_topic(topic2);
-  ck_assert_msg(!res, "话题加入队列失败。");
 
   for (int i = 0; i < 10000; i++) om_sync();
   ck_assert_msg(call_counter == 125, "new_fun调用了%d次，应为125次",

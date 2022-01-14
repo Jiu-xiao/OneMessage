@@ -1,9 +1,10 @@
 #include "om_fmt.h"
 
-#include "om_core.h"
+#include "om_msg.h"
 
-#define GET_CAPITAL(_c) (_c > 'Z' ? _c + 'A' - 'a' : _c)
+#define GET_CAPITAL(_c) (isupper(_c) ? _c : toupper(_c))
 
+#define ADD2LIST ('A')
 #define FILTER_FLAG ('F')
 #define NEW_FLAG ('N')
 #define GET_FLAG ('G')
@@ -23,6 +24,8 @@ om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
   if (format == NULL) return topic;
 
   for (const char* index = format; *index != '\0'; index++) {
+    OM_ASSENT(isalpha(*index));
+
     switch (GET_CAPITAL(*index)) {
       case FILTER_FLAG:
         topic->user_fun.filter = va_arg(valist, om_user_fun_t);
@@ -42,7 +45,11 @@ om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
       case VIRTUAL_FLAG:
         topic->virtual = true;
         break;
+      case ADD2LIST:
+        om_add_topic(topic);
+        break;
       default:
+        OM_ASSENT(false);
         va_end(valist);
         return NULL;
     }
@@ -60,6 +67,7 @@ om_suber_t* om_config_suber(om_suber_t* suber, const char* format, ...) {
   if (format == NULL) return suber;
 
   for (const char* index = format; *index != '\0'; index++) {
+    OM_ASSENT(isalpha(*index));
     switch (GET_CAPITAL(*index)) {
       case FILTER_FLAG:
         suber->user_fun.filter = va_arg(valist, om_user_fun_t);
@@ -71,6 +79,7 @@ om_suber_t* om_config_suber(om_suber_t* suber, const char* format, ...) {
         om_core_add_suber(va_arg(valist, om_topic_t*), suber);
         break;
       default:
+        OM_ASSENT(false);
         va_end(valist);
         return NULL;
     }
@@ -88,6 +97,7 @@ om_puber_t* om_config_puber(om_puber_t* puber, const char* format, ...) {
   if (format == NULL) return puber;
 
   for (const char* index = format; *index != '\0'; index++) {
+    OM_ASSENT(isalpha(*index));
     switch (GET_CAPITAL(*index)) {
       case NEW_FLAG:
         puber->user_fun.new_message = va_arg(valist, om_user_fun_t);
@@ -103,6 +113,7 @@ om_puber_t* om_config_puber(om_puber_t* puber, const char* format, ...) {
         puber->freq.counter = puber->freq.reload;
         break;
       default:
+        OM_ASSENT(false);
         va_end(valist);
         return NULL;
     }

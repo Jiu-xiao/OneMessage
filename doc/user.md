@@ -41,6 +41,7 @@ format参数支持大小写。
 | p    | om_puber_t *                      | 将发布者指向话题                         |
 | t    | om_topic_t *                      | 将参数中的话题指向自身                   |
 | v    | 无                                | 设置为虚话题(不拷贝消息内容，只传递指针) |
+| a    | 无                                | 将话题添加到队列                         |
 
 例：
 * om_config_suber(NULL,"fdt",fun1,fun2,your_topic)会返回一个新创建的指向your_topic的订阅者，且其filter函数为fun1,deploy函数为fun2。
