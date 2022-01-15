@@ -2,6 +2,13 @@
 一个基于`发布-订阅`模型的消息框架，为嵌入式设备设计，使用C语言编写。
 ---
 ---
+## 硬件支持
+已在linux和STM32F103上成功运行，欢迎适配到其他平台。
+
+[example for linux(use cmake)](https://gitee.com/jiu-xiao/msg-example.git)
+
+[example for f103(use makefile)](https://gitee.com/jiu-xiao/om-example-mcu.git)
+
 ## 特性
 * 发布-订阅
     * 话题为操作的主体，支持多发布者和多订阅者
