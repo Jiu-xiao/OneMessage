@@ -4,6 +4,9 @@
 /* OneMessage主线程调用的频率 */
 #define OM_CALL_FREQ (1000)
 
+/* 使能这个宏可能会提高刷新频率的精度，但会消耗更多性能 */
+#define OM_FREQ_USE_FLOAT (1)
+
 /* 使用用户自定义的内存分配 */
 #define OM_USE_USER_MALLOC (0)
 

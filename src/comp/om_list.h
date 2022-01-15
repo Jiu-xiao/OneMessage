@@ -5,7 +5,7 @@
 #include "om_lib.h"
 
 typedef struct _om_list_head {
-  struct _om_list_head *next, *prev;
+  struct _om_list_head* next, * prev;
 } om_list_head_t;
 
 #define LIST_HEAD_INIT(name) \
@@ -29,7 +29,7 @@ typedef struct _om_list_head {
 
 #define om_list_entry(ptr, type, member) om_container_of(ptr, type, member)
 
-void _INIT_LIST_HEAD(om_list_head_t *list);
+void _INIT_LIST_HEAD(om_list_head_t* list);
 
 #define INIT_LIST_HEAD(arg) _INIT_LIST_HEAD(arg)
 
@@ -41,22 +41,22 @@ void _INIT_LIST_HEAD(om_list_head_t *list);
       del_fun(_pos);                      \
   }
 
-void om_list_add(om_list_head_t *new, om_list_head_t *head);
+void om_list_add(om_list_head_t* new, om_list_head_t* head);
 
-void om_list_add_tail(om_list_head_t *new, om_list_head_t *head);
+void om_list_add_tail(om_list_head_t* new, om_list_head_t* head);
 
-void om_list_del(om_list_head_t *entry);
+void om_list_del(om_list_head_t* entry);
 
-void om_list_del_init(om_list_head_t *entry);
+void om_list_del_init(om_list_head_t* entry);
 
-void om_list_replace(om_list_head_t *old, om_list_head_t *new);
+void om_list_replace(om_list_head_t* old, om_list_head_t* new);
 
-int om_list_empty(const om_list_head_t *head);
+int om_list_empty(const om_list_head_t* head);
 
-void __list_del(om_list_head_t *prev, om_list_head_t *next);
+void __list_del(om_list_head_t* prev, om_list_head_t* next);
 
-void __list_add(om_list_head_t *new, om_list_head_t *prev,
-                om_list_head_t *next);
+void __list_add(om_list_head_t* new, om_list_head_t* prev,
+  om_list_head_t* next);
 
-void __list_del_entry(om_list_head_t *entry);
+void __list_del_entry(om_list_head_t* entry);
 #endif
