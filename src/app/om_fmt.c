@@ -21,7 +21,10 @@ om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
   va_start(valist, format);
 
   if (!topic) topic = om_core_topic_create(va_arg(valist, const char*));
-  if (format == NULL) return topic;
+  if (format == NULL) {
+    va_end(valist);
+    return topic;
+  }
 
   for (const uint8_t* index = (const uint8_t*)format; *index != '\0'; index++) {
     OM_ASSENT(isalpha(*index));
@@ -67,11 +70,11 @@ om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
 }
 
 om_suber_t* om_config_suber(om_suber_t* suber, const char* format, ...) {
-  va_list valist;
-  va_start(valist, format);
-
   if (!suber) suber = om_core_suber_create(NULL);
   if (format == NULL) return suber;
+
+  va_list valist;
+  va_start(valist, format);
 
   for (const uint8_t* index = (const uint8_t*)format; *index != '\0'; index++) {
     OM_ASSENT(isalpha(*index));
@@ -97,11 +100,11 @@ om_suber_t* om_config_suber(om_suber_t* suber, const char* format, ...) {
 }
 
 om_puber_t* om_config_puber(om_puber_t* puber, const char* format, ...) {
-  va_list valist;
-  va_start(valist, format);
-
   if (!puber) puber = om_core_puber_create(OM_CALL_FREQ);
   if (format == NULL) return puber;
+
+  va_list valist;
+  va_start(valist, format);
 
   for (const uint8_t* index = (const uint8_t*)format; *index != '\0'; index++) {
     OM_ASSENT(isalpha(*index));
