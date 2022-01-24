@@ -1,3 +1,4 @@
+#include "om_afl.h"
 #include "om_fmt.h"
 #include "om_log.h"
 #include "om_msg.h"

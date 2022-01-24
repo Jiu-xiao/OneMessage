@@ -11,10 +11,11 @@ typedef struct {
   om_time_t time;
 } om_msg_t;
 
-typedef om_status_t(*om_user_fun_t)(om_msg_t* msg);
+typedef om_status_t (*om_user_fun_t)(om_msg_t* msg);
 
 typedef struct {
   bool virtual;
+  om_mutex_t mutex;
   om_msg_t msg;
   char name[OM_TOPIC_MAX_NAME_LEN];
   bool enable;
@@ -25,6 +26,7 @@ typedef struct {
   struct {
     om_user_fun_t filter;
   } user_fun;
+  void* afl;
 } om_topic_t;
 
 typedef struct {
@@ -92,7 +94,7 @@ om_status_t om_core_del_puber(om_list_head_t* head);
 om_status_t om_core_del_topic(om_list_head_t* head);
 
 om_status_t om_core_set_dump_target(om_suber_t* suber, void* target,
-  size_t max_size);
+                                    size_t max_size);
 
 om_topic_t* om_core_find_topic(const char* name);
 

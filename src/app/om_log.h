@@ -1,3 +1,6 @@
+#ifndef __OM_LOG_H__
+#define __OM_LOG_H__
+
 #include "om_core.h"
 
 #if OM_LOG_OUTPUT
@@ -24,13 +27,14 @@ typedef struct {
   om_log_level_t level;
 } om_log_t;
 
-
 om_status_t om_log_init();
 
 om_topic_t* om_get_log_handle();
 
 om_status_t om_print_log(char* name, om_log_level_t level, const char* format,
-  ...);
+                         ...);
 
 om_status_t om_log_deinit();
+#endif
+
 #endif

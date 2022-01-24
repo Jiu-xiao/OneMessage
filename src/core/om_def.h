@@ -22,13 +22,13 @@ typedef enum {
 } om_status_t;
 
 #if OM_DEBUG
-#define OM_ASSENT(arg) \
+#define OM_ASSERT(arg) \
   if (!(arg)) om_error(__FILE__, __LINE__);
 #define OM_CHECK(arg) \
   if (!(arg)) om_error(__FILE__, __LINE__);
 
 #else
-#define OM_ASSENT(arg) (void)0;
+#define OM_ASSERT(arg) (void)0;
 #define OM_CHECK(arg) (void)0;
 #endif
 

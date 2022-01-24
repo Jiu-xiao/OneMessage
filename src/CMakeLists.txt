@@ -8,6 +8,7 @@ file(
   "${CMAKE_CURRENT_SOURCE_DIR}/app/om_msg.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/app/om_log.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/app/om_fmt.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/app/om_afl.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/core/om_core.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/comp/om_list.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/comp/om_mutex.c")
