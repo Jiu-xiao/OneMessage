@@ -101,3 +101,42 @@ filter==NULL时不添加过滤器函数
 | om_topic_add_puber | 添加发布者 |
 | om_topic_add_suber | 添加订阅者 |
 | om_topic_link      | 链接话题   |
+
+## 高级过滤器
+
+    om_status_t om_config_filter(om_topic_t* topic, const char* format, ...)
+
+过滤器配置
+| 选项 | 参数                                                                                  | 功能               |
+| ---- | ------------------------------------------------------------------------------------- | ------------------ |
+| l    | om_topic_t* target,size_t length,size_t offset,size_t scope,void* template            | 设置过滤器列表模式 |
+| r    | om_topic_t* target,size_t length,size_t offset,size_t scope,size_t start,size_t range | 设置过滤器范围模式 |
+| d    | om_topic_t* target,size_t length,size_t offset,size_t scope                           | 设置过滤器分解模式 |
+
+在列表模式下，会从offset开始检测收到的消息是否与template相同，直到offset+scope为止，然后把整包发布到target话题。
+
+在范围模式下，会从offset到offset+scope视为一个整形数，然后判断其>=start且<=start+range,`暂时只支持uint32_t类型`，再将整包发布到target。
+
+在分解模式下，会将offset到offset+scope这一段数据发布到target。
+
+为了避免计算偏移量以及长度，OneMessage提供了OM_PRASE_STRUCT宏，可得到结构体对应成员的length，offset，scope三个参数。例：
+
+数据结构体：
+
+    typedef struct{
+        char list[10];
+        uint32_t range;
+        float decomp;
+    }om_example_t;
+
+配置列表模式
+
+    om_config_filter(source,"l",target_topic,OM_PRASE_STRUCT(om_example_t,list),your_template)
+
+配置范围模式
+
+    om_config_filter(source,"r",target_topic,OM_PRASE_STRUCT(om_example_t,range),start,range)
+
+配置分解模式
+
+    om_config_filter(source,"d",target_topic,OM_PRASE_STRUCT(om_example_t,decomp))

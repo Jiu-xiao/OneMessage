@@ -151,7 +151,8 @@ om_status_t om_config_filter(om_topic_t* topic, const char* format, ...) {
   }
 
   for (const uint8_t* index = (const uint8_t*)format; *index != '\0'; index++) {
-    switch (*index) {
+    OM_ASSERT(isalpha(*index));
+    switch (GET_CAPITAL(*index)) {
       case LIST_FLAG: {
         om_filter_t* filter = om_afl_filter_create(va_arg(valist, om_topic_t*));
         size_t length = va_arg(valist, size_t);

@@ -3,7 +3,7 @@
 
 #include "om_core.h"
 
-#define PRASE_STRUCT(container, member)               \
+#define OM_PRASE_STRUCT(container, member)            \
   sizeof(container), om_offset_of(container, member), \
       om_member_size_of(container, member)
 

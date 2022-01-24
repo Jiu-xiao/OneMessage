@@ -118,9 +118,10 @@ START_TEST(om_afl) {
   om_subscript(range, &(ans2), sizeof(ans2), NULL);
   om_subscript(decompose, &(ans3.decompose), sizeof(ans3.decompose), NULL);
 
-  om_config_filter(source, "LDR", list, PRASE_STRUCT(om_afl_test_t, list),
-                   template, decompose, PRASE_STRUCT(om_afl_test_t, decompose),
-                   range, PRASE_STRUCT(om_afl_test_t, range), 213, 100);
+  om_config_filter(source, "LDR", list, OM_PRASE_STRUCT(om_afl_test_t, list),
+                   template, decompose,
+                   OM_PRASE_STRUCT(om_afl_test_t, decompose), range,
+                   OM_PRASE_STRUCT(om_afl_test_t, range), 213, 100);
 
   memcpy(&test.list, template, sizeof(template));
   om_publish(source, &test, sizeof(test), true);
