@@ -1,9 +1,9 @@
+#include "om_afl.h"
 #include "om_fmt.h"
-
 #include "om_msg.h"
 
 #define GET_CAPITAL(_c) (isupper(_c) ? _c : toupper(_c))
-
+/* MSG */
 #define ADD2LIST ('A')
 #define FILTER_FLAG ('F')
 #define NEW_FLAG ('N')
@@ -16,6 +16,11 @@
 #define FREQ_FLAG ('Q')
 #define VIRTUAL_FLAG ('V')
 
+/* AFL */
+#define DECOMPOSE_FLAG ('D')
+#define LIST_FLAG ('L')
+#define RANGE_FLAG ('R')
+
 om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
   va_list valist;
   va_start(valist, format);
@@ -27,41 +32,42 @@ om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
   }
 
   for (const uint8_t* index = (const uint8_t*)format; *index != '\0'; index++) {
-    OM_ASSENT(isalpha(*index));
+    OM_ASSERT(isalpha(*index));
 
     switch (GET_CAPITAL(*index)) {
-    case FILTER_FLAG:
-      topic->user_fun.filter = va_arg(valist, om_user_fun_t);
-      break;
-    case LINK_FLAG:
-      om_core_link(topic, va_arg(valist, om_topic_t*));
-      break;
-    case SUBER_FLAG:
-      om_core_add_suber(topic, va_arg(valist, om_suber_t*));
-      break;
-    case PUBER_FLAG:
-      om_core_add_puber(topic, va_arg(valist, om_puber_t*));
-      break;
-    case TOPIC_FLAG:
-      om_core_link(va_arg(valist, om_topic_t*), topic);
-      break;
-    case VIRTUAL_FLAG:
-      topic->virtual = true;
-      break;
-    case ADD2LIST:
-      om_add_topic(topic);
-      break;
-    case DEPLOY_FLAG:
-      om_config_suber(NULL, "DT", va_arg(valist, om_user_fun_t), topic);
-      break;
-    case NEW_FLAG:
-    case GET_FLAG:
-      om_config_puber(NULL, "NGT", va_arg(valist, om_user_fun_t), va_arg(valist, om_user_fun_t), topic);
-      break;
-    default:
-      OM_ASSENT(false);
-      va_end(valist);
-      return NULL;
+      case FILTER_FLAG:
+        topic->user_fun.filter = va_arg(valist, om_user_fun_t);
+        break;
+      case LINK_FLAG:
+        om_core_link(topic, va_arg(valist, om_topic_t*));
+        break;
+      case SUBER_FLAG:
+        om_core_add_suber(topic, va_arg(valist, om_suber_t*));
+        break;
+      case PUBER_FLAG:
+        om_core_add_puber(topic, va_arg(valist, om_puber_t*));
+        break;
+      case TOPIC_FLAG:
+        om_core_link(va_arg(valist, om_topic_t*), topic);
+        break;
+      case VIRTUAL_FLAG:
+        topic->virtual = true;
+        break;
+      case ADD2LIST:
+        om_add_topic(topic);
+        break;
+      case DEPLOY_FLAG:
+        om_config_suber(NULL, "DT", va_arg(valist, om_user_fun_t), topic);
+        break;
+      case NEW_FLAG:
+      case GET_FLAG:
+        om_config_puber(NULL, "NGT", va_arg(valist, om_user_fun_t),
+                        va_arg(valist, om_user_fun_t), topic);
+        break;
+      default:
+        OM_ASSERT(false);
+        va_end(valist);
+        return NULL;
     }
   }
   va_end(valist);
@@ -77,21 +83,21 @@ om_suber_t* om_config_suber(om_suber_t* suber, const char* format, ...) {
   va_start(valist, format);
 
   for (const uint8_t* index = (const uint8_t*)format; *index != '\0'; index++) {
-    OM_ASSENT(isalpha(*index));
+    OM_ASSERT(isalpha(*index));
     switch (GET_CAPITAL(*index)) {
-    case FILTER_FLAG:
-      suber->user_fun.filter = va_arg(valist, om_user_fun_t);
-      break;
-    case DEPLOY_FLAG:
-      suber->user_fun.deploy = va_arg(valist, om_user_fun_t);
-      break;
-    case TOPIC_FLAG:
-      om_core_add_suber(va_arg(valist, om_topic_t*), suber);
-      break;
-    default:
-      OM_ASSENT(false);
-      va_end(valist);
-      return NULL;
+      case FILTER_FLAG:
+        suber->user_fun.filter = va_arg(valist, om_user_fun_t);
+        break;
+      case DEPLOY_FLAG:
+        suber->user_fun.deploy = va_arg(valist, om_user_fun_t);
+        break;
+      case TOPIC_FLAG:
+        om_core_add_suber(va_arg(valist, om_topic_t*), suber);
+        break;
+      default:
+        OM_ASSERT(false);
+        va_end(valist);
+        return NULL;
     }
   }
   va_end(valist);
@@ -107,28 +113,86 @@ om_puber_t* om_config_puber(om_puber_t* puber, const char* format, ...) {
   va_start(valist, format);
 
   for (const uint8_t* index = (const uint8_t*)format; *index != '\0'; index++) {
-    OM_ASSENT(isalpha(*index));
+    OM_ASSERT(isalpha(*index));
     switch (GET_CAPITAL(*index)) {
-    case NEW_FLAG:
-      puber->user_fun.new_message = va_arg(valist, om_user_fun_t);
-      break;
-    case GET_FLAG:
-      puber->user_fun.get_message = va_arg(valist, om_user_fun_t);
-      break;
-    case TOPIC_FLAG:
-      om_core_add_puber(va_arg(valist, om_topic_t*), puber);
-      break;
-    case FREQ_FLAG:
-      puber->freq.reload = OM_CALL_FREQ / va_arg(valist, double);
-      puber->freq.counter = puber->freq.reload;
-      break;
-    default:
-      OM_ASSENT(false);
-      va_end(valist);
-      return NULL;
+      case NEW_FLAG:
+        puber->user_fun.new_message = va_arg(valist, om_user_fun_t);
+        break;
+      case GET_FLAG:
+        puber->user_fun.get_message = va_arg(valist, om_user_fun_t);
+        break;
+      case TOPIC_FLAG:
+        om_core_add_puber(va_arg(valist, om_topic_t*), puber);
+        break;
+      case FREQ_FLAG:
+        puber->freq.reload = OM_CALL_FREQ / va_arg(valist, double);
+        puber->freq.counter = puber->freq.reload;
+        break;
+      default:
+        OM_ASSERT(false);
+        va_end(valist);
+        return NULL;
     }
   }
   va_end(valist);
 
   return puber;
+}
+
+om_status_t om_config_filter(om_topic_t* topic, const char* format, ...) {
+  OM_ASSERT(topic);
+  OM_ASSERT(format);
+
+  va_list valist;
+  va_start(valist, format);
+
+  if (topic->afl == NULL) {
+    om_afl_create(topic);
+  }
+
+  for (const uint8_t* index = (const uint8_t*)format; *index != '\0'; index++) {
+    switch (*index) {
+      case LIST_FLAG: {
+        om_filter_t* filter = om_afl_filter_create(va_arg(valist, om_topic_t*));
+        size_t length = va_arg(valist, size_t);
+        size_t offset = va_arg(valist, size_t);
+        size_t scope = va_arg(valist, size_t);
+        void* template = va_arg(valist, void*);
+        om_afl_set_filter(filter, OM_AFL_MODE_LIST, offset, length, scope, 0,
+                          template);
+        om_afl_add_filter(topic->afl, filter);
+        break;
+      }
+      case DECOMPOSE_FLAG: {
+        om_filter_t* filter = om_afl_filter_create(va_arg(valist, om_topic_t*));
+        size_t length = va_arg(valist, size_t);
+        size_t offset = va_arg(valist, size_t);
+        size_t scope = va_arg(valist, size_t);
+        om_afl_set_filter(filter, OM_AFL_MODE_DECOMPOSE, offset, length, scope,
+                          0, NULL);
+        om_afl_add_filter(topic->afl, filter);
+        break;
+      }
+      case RANGE_FLAG: {
+        om_filter_t* filter = om_afl_filter_create(va_arg(valist, om_topic_t*));
+        size_t length = va_arg(valist, size_t);
+        size_t offset = va_arg(valist, size_t);
+        size_t scope = va_arg(valist, size_t);
+        uint32_t start = va_arg(valist, uint32_t);
+        uint32_t arg = va_arg(valist, uint32_t);
+        om_afl_set_filter(filter, OM_AFL_MODE_RANGE, offset, length, start, arg,
+                          NULL);
+        om_afl_add_filter(topic->afl, filter);
+        break;
+      }
+
+      default:
+        OM_ASSERT(false);
+        return OM_ERROR;
+    }
+  }
+
+  va_end(valist);
+
+  return OM_OK;
 }
