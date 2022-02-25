@@ -89,7 +89,7 @@ filter==NULL时不添加过滤器函数
 | OM_LOG_PASS    | GREEN   |
 | OM_LOG_NOTICE  | BLUE    |
 ## 查找话题
-    om_topic_t *om_core_find_topic(const char *name)
+    om_topic_t *om_core_find_topic(const char *name, uint32_t timeout)
 如果能找到对应名字的话题，返回此话题，否则返回NULL
 
 ## 注销

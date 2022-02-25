@@ -12,6 +12,10 @@
 >>
 >>om_free 内存释放
 
+## OM_DELAY
+>非阻塞延时函数
+>>om_delay_ms 等待一毫秒
+
 ## OM_MUTEX_*
 ### OS层提供的互斥锁API
 >Linux示例
