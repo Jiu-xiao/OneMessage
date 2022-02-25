@@ -65,12 +65,12 @@ START_TEST(publish) {
   ck_assert_msg(!strncmp(str_tmp, str1, 20), "sync数据损坏。");
   msg_new = false;
 
-  ck_assert_msg(om_find_topic("topic") == topic, "无法根据名称寻找话题。");
+  ck_assert_msg(om_find_topic("topic", 0) == topic, "无法根据名称寻找话题。");
 
-  om_publish(om_find_topic("topic2"), str2, sizeof(str2), true);
+  om_publish(om_find_topic("topic2", 0), str2, sizeof(str2), true);
   ck_assert_msg(!strncmp(str_tmp, str2, 20), "publish数据损坏。");
 
-  om_publish(om_find_topic("topic2"), str3, sizeof(str3), true);
+  om_publish(om_find_topic("topic2", 0), str3, sizeof(str3), true);
   ck_assert_msg(strncmp(str_tmp, str3, 20), "filter函数未生效。");
 
   res = om_deinit();
@@ -105,6 +105,8 @@ typedef struct {
 
 START_TEST(om_afl) {
   om_init();
+
+  om_delay_ms(1000);
 
   om_afl_test_t test = {0}, ans1 = {0}, ans2 = {0}, ans3 = {0};
   uint8_t template[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};

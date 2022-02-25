@@ -16,6 +16,20 @@
 #define om_free user_free
 #endif
 
+/* 非阻塞延时函数 */
+#include <errno.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <sys/select.h>
+#define om_delay_ms(arg)                    \
+  struct timeval tv;                        \
+  tv.tv_sec = arg / 1000;                   \
+  tv.tv_usec = (arg % 1000) * 1000;         \
+  int err;                                  \
+  do {                                      \
+    err = select(0, NULL, NULL, NULL, &tv); \
+  } while (err < 0 && errno == EINTR);
+
 /* OS层互斥锁api */
 #include <pthread.h>
 #define om_mutex_t pthread_mutex_t

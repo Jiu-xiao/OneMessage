@@ -157,12 +157,16 @@ om_status_t om_core_del_topic(om_list_head_t* head) {
   return OM_OK;
 }
 
-om_topic_t* om_core_find_topic(const char* name) {
+om_topic_t* om_core_find_topic(const char* name, uint32_t timeout) {
   om_list_head_t* pos;
-  om_list_for_each(pos, &topic_list) {
-    om_topic_t* topic = om_list_entry(pos, om_topic_t, self);
-    if (!strncmp(name, topic->name, OM_TOPIC_MAX_NAME_LEN)) return topic;
-  }
+  do {
+    om_list_for_each(pos, &topic_list) {
+      om_topic_t* topic = om_list_entry(pos, om_topic_t, self);
+      if (!strncmp(name, topic->name, OM_TOPIC_MAX_NAME_LEN)) return topic;
+    }
+    timeout--;
+    om_delay_ms(1);
+  } while (timeout);
   return NULL;
 }
 

@@ -96,7 +96,7 @@ om_status_t om_core_del_topic(om_list_head_t* head);
 om_status_t om_core_set_dump_target(om_suber_t* suber, void* target,
                                     size_t max_size);
 
-om_topic_t* om_core_find_topic(const char* name);
+om_topic_t* om_core_find_topic(const char* name, uint32_t timeout);
 
 void om_error(const char* file, uint32_t line);
 #endif
