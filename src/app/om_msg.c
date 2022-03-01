@@ -157,3 +157,21 @@ om_status_t om_msg_deinit() {
 
   return OM_OK;
 }
+
+om_status_t om_msg_del_topic(om_topic_t* topic) {
+  OM_ASSERT(topic);
+
+  return om_core_del_topic(&topic->self);
+}
+
+om_status_t om_msg_del_suber(om_suber_t* suber) {
+  OM_ASSERT(suber);
+
+  return om_core_del_suber(&suber->self);
+}
+
+om_status_t om_msg_del_puber(om_puber_t* puber) {
+  OM_ASSERT(puber);
+
+  return om_core_del_puber(&puber->self);
+}

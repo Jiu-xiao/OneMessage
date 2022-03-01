@@ -29,4 +29,10 @@ om_status_t om_subscript(om_topic_t* topic, void* buff, size_t max_size,
 
 om_status_t om_msg_deinit();
 
+om_status_t om_msg_del_topic(om_topic_t* topic);
+
+om_status_t om_msg_del_suber(om_suber_t* suber);
+
+om_status_t om_msg_del_puber(om_puber_t* puber);
+
 #endif

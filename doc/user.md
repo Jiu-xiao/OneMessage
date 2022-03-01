@@ -101,6 +101,9 @@ filter==NULL时不添加过滤器函数
 | om_topic_add_puber | 添加发布者 |
 | om_topic_add_suber | 添加订阅者 |
 | om_topic_link      | 链接话题   |
+| om_msg_del_topic   | 销毁话题   |
+| om_msg_del_suber   | 销毁订阅者 |
+| om_msg_del_puber   | 销毁发布者 |
 
 ## 高级过滤器
 
