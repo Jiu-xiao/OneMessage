@@ -136,7 +136,7 @@ om_status_t om_sync() {
   return OM_OK;
 }
 
-om_status_t om_subscript(om_topic_t* topic, void* buff, size_t max_size,
+om_suber_t* om_subscript(om_topic_t* topic, void* buff, size_t max_size,
                          om_user_fun_t filter) {
   OM_ASSERT(topic);
   OM_ASSERT(buff);
@@ -146,7 +146,7 @@ om_status_t om_subscript(om_topic_t* topic, void* buff, size_t max_size,
   om_core_add_suber(topic, sub);
   sub->user_fun.filter = filter;
 
-  return OM_OK;
+  return sub;
 }
 
 om_status_t om_msg_deinit() {

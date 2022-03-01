@@ -24,7 +24,7 @@ om_status_t _om_refresh_puber(om_puber_t* pub, om_topic_t* topic);
 
 om_status_t om_sync();
 
-om_status_t om_subscript(om_topic_t* topic, void* buff, size_t max_size,
+om_suber_t* om_subscript(om_topic_t* topic, void* buff, size_t max_size,
                          om_user_fun_t filter);
 
 om_status_t om_msg_deinit();
