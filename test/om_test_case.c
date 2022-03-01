@@ -163,7 +163,7 @@ Suite* make_om_suite(void) {
   Suite* om = suite_create("OneMessage单元测试");
   TCase* tc_publish = tcase_create("订阅发布测试");
   TCase* tc_log = tcase_create("日志测试");
-  TCase* tc_afl = tcase_create("滤波器测试");
+  TCase* tc_afl = tcase_create("过滤器测试");
   suite_add_tcase(om, tc_publish);
   suite_add_tcase(om, tc_log);
   suite_add_tcase(om, tc_afl);
