@@ -175,13 +175,13 @@ om_status_t om_msg_del_puber(om_puber_t* puber) {
   return om_core_del_puber(&puber->self);
 }
 
-size_t om_msg_get_topic_num() { return om_list_get_num(&topic_list); }
+uint16_t om_msg_get_topic_num() { return om_list_get_num(&topic_list); }
 
-size_t om_msg_get_suber_num(om_topic_t* topic) {
+uint16_t om_msg_get_suber_num(om_topic_t* topic) {
   return om_list_get_num(&topic->suber);
 }
 
-size_t om_msg_get_puber_num(om_topic_t* topic) {
+uint16_t om_msg_get_puber_num(om_topic_t* topic) {
   return om_list_get_num(&topic->puber);
 }
 
