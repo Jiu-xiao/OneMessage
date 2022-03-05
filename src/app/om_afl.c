@@ -139,9 +139,7 @@ om_status_t om_afl_filter_del(om_list_head_t* filter) {
 }
 
 om_status_t om_afl_del(om_afl_t* afl) {
-  om_list_head_t* pos;
-
-  om_del_all(pos, &afl->filter, om_afl_filter_del);
+  om_del_all(&afl->filter, om_afl_filter_del);
 
   om_free(afl);
 

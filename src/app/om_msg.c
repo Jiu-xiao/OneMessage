@@ -152,8 +152,7 @@ om_suber_t* om_subscript(om_topic_t* topic, void* buff, size_t max_size,
 om_status_t om_msg_deinit() {
   om_msg_initd = false;
 
-  om_list_head_t* pos;
-  om_del_all(pos, &topic_list, om_core_del_topic);
+  om_del_all(&topic_list, om_core_del_topic);
 
   return OM_OK;
 }

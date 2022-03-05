@@ -90,8 +90,8 @@ START_TEST(om_log) {
 
   ck_assert_msg(topic_log, "获取不到log话题。");
   om_print_log("init", OM_LOG_DEFAULT, "%s", str_log);
-  ck_assert_msg(!strcmp(buff, "\033[0m[Default][init]Log test.\n"),
-                "LOG数据错误:%s", buff);
+  ck_assert_msg(!strcmp(buff, "[Default][init]Log test.\r\n"), "LOG数据错误:%s",
+                buff);
   om_deinit();
 }
 END_TEST

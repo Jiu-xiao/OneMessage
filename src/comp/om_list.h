@@ -35,13 +35,15 @@ void _INIT_LIST_HEAD(om_list_head_t* list);
 
 #define INIT_LIST_HEAD(arg) _INIT_LIST_HEAD(arg)
 
-#define om_del_all(_pos, source, del_fun) \
-  om_list_for_each(_pos, source) {        \
-    if (om_list_empty(source))            \
-      break;                              \
-    else                                  \
-      del_fun(_pos);                      \
-  }
+#define om_del_all(source, del_fun)                \
+  do {                                             \
+    om_list_head_t *pos, *tmp;                     \
+    for (pos = (source)->next; pos != (source);) { \
+      tmp = pos;                                   \
+      pos = pos->next;                             \
+      del_fun(tmp);                                \
+    }                                              \
+  } while (0)
 
 void om_list_add(om_list_head_t* new, om_list_head_t* head);
 
