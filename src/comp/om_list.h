@@ -61,4 +61,6 @@ void __list_add(om_list_head_t* new, om_list_head_t* prev,
                 om_list_head_t* next);
 
 void __list_del_entry(om_list_head_t* entry);
+
+size_t om_list_get_num(const om_list_head_t* head);
 #endif

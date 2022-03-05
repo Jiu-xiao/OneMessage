@@ -6,7 +6,7 @@ inline void _INIT_LIST_HEAD(om_list_head_t* list) {
 }
 
 inline void __list_add(om_list_head_t* new, om_list_head_t* prev,
-  om_list_head_t* next) {
+                       om_list_head_t* next) {
   next->prev = new;
   new->next = next;
   new->prev = prev;
@@ -48,4 +48,13 @@ inline void om_list_replace(om_list_head_t* old, om_list_head_t* new) {
 
 inline int om_list_empty(const om_list_head_t* head) {
   return head->next == head;
+}
+
+size_t om_list_get_num(const om_list_head_t* head) {
+  size_t num = 0;
+
+  om_list_head_t* pos;
+  om_list_for_each(pos, head) { num++; }
+
+  return num;
 }

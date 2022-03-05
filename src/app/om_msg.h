@@ -35,4 +35,12 @@ om_status_t om_msg_del_suber(om_suber_t* suber);
 
 om_status_t om_msg_del_puber(om_puber_t* puber);
 
+size_t om_msg_get_topic_num();
+
+size_t om_msg_get_suber_num(om_topic_t* topic);
+
+size_t om_msg_get_puber_num(om_topic_t* topic);
+
+om_status_t om_msg_for_each(om_status_t (*fun)(om_topic_t*));
+
 #endif

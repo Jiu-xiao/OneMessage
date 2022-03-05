@@ -175,3 +175,26 @@ om_status_t om_msg_del_puber(om_puber_t* puber) {
 
   return om_core_del_puber(&puber->self);
 }
+
+size_t om_msg_get_topic_num() { return om_list_get_num(&topic_list); }
+
+size_t om_msg_get_suber_num(om_topic_t* topic) {
+  return om_list_get_num(&topic->suber);
+}
+
+size_t om_msg_get_puber_num(om_topic_t* topic) {
+  return om_list_get_num(&topic->puber);
+}
+
+om_status_t om_msg_for_each(om_status_t (*fun)(om_topic_t*)) {
+  OM_ASSERT(fun);
+
+  om_list_head_t* pos;
+
+  om_list_for_each(pos, &topic_list) {
+    om_topic_t* topic = om_list_entry(pos, om_topic_t, self);
+    if (fun(topic) != OM_OK) return OM_ERROR;
+  }
+
+  return OM_OK;
+}

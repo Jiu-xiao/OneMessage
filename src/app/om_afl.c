@@ -89,7 +89,12 @@ om_status_t _om_afl_filter_check(om_filter_t* filter, om_msg_t* msg) {
       if (msg->size < filter->data.decomp.offset + filter->data.decomp.size)
         return OM_ERROR;
       return OM_OK;
+
+    default:
+      return OM_ERROR;
   }
+
+  return OM_ERROR;
 }
 
 om_status_t _om_afl_filter_apply(om_filter_t* filter, om_msg_t* msg) {
@@ -119,6 +124,8 @@ om_status_t om_afl_apply(om_msg_t* msg, om_afl_t* afl) {
     if (_om_afl_filter_check(filter, msg) == OM_OK)
       _om_afl_filter_apply(filter, msg);
   }
+
+  return OM_OK;
 }
 
 om_status_t om_afl_filter_del(om_list_head_t* filter) {
@@ -137,4 +144,6 @@ om_status_t om_afl_del(om_afl_t* afl) {
   om_del_all(pos, &afl->filter, om_afl_filter_del);
 
   om_free(afl);
+
+  return OM_OK;
 }
