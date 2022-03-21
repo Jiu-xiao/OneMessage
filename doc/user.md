@@ -91,14 +91,18 @@ format参数支持大小写。
 
 ## 主动发布
 
-    om_status_t om_publish(om_topic_t* topic, void* buff, size_t size, bool block)
+    om_status_t om_publish(om_topic_t* topic, void* buff, uint32_t size, bool block)
 block参数决定当其他线程发布时是否阻塞
 
 ## 订阅话题
 
-    om_status_t om_subscript(om_topic_t *topic, void *buff, size_t max_size, om_user_fun_t filter)
+    om_suber_t om_subscript(om_topic_t *topic, void *buff, uint32_t max_size, om_user_fun_t filter)
 
-filter==NULL时不添加过滤器函数
+    om_status_t om_suber_dump(om_suber_t* suber)
+
+* filter==NULL时不添加过滤器函数.
+* om_subscript会返回一个可导出话题数据的订阅者
+* 当订阅者接收到新数据时，调用om_suber_dump会将数据写入buff,并返回OM_OK.
 
 ## log
 
@@ -151,11 +155,11 @@ filter==NULL时不添加过滤器函数
     om_status_t om_config_filter(om_topic_t* topic, const char* format, ...)
 
 过滤器配置
-| 选项 | 参数                                                                                    | 功能               |
-| ---- | --------------------------------------------------------------------------------------- | ------------------ |
-| l    | `om_topic_t* target,size_t length,size_t offset,size_t scope,void* template`            | 设置过滤器列表模式 |
-| r    | `om_topic_t* target,size_t length,size_t offset,size_t scope,size_t start,size_t range` | 设置过滤器范围模式 |
-| d    | `om_topic_t* target,size_t length,size_t offset,size_t scope`                           | 设置过滤器分解模式 |
+| 选项 | 参数                                                                                              | 功能               |
+| ---- | ------------------------------------------------------------------------------------------------- | ------------------ |
+| l    | `om_topic_t* target,uint32_t length,uint32_t offset,uint32_t scope,void* template`                | 设置过滤器列表模式 |
+| r    | `om_topic_t* target,uint32_t length,uint32_t offset,uint32_t scope,uint32_t start,uint32_t range` | 设置过滤器范围模式 |
+| d    | `om_topic_t* target,uint32_t length,uint32_t offset,uint32_t scope`                               | 设置过滤器分解模式 |
 
 在列表模式下，会从offset开始检测收到的消息是否与template相同，直到offset+scope为止，然后把整包发布到target话题。
 

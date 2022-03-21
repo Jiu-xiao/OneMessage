@@ -18,17 +18,21 @@ om_status_t om_msg_init() {
 }
 
 inline om_status_t _om_publish_to_suber(om_suber_t* sub, om_topic_t* topic) {
+  OM_ASSERT(sub);
+  OM_ASSERT(topic);
+
   if (sub->isLink) {
+    om_mutex_lock(&sub->target->mutex);
     _om_publish(sub->target, &topic->msg);
-    return OM_ERROR;
+    om_mutex_unlock(&sub->target->mutex);
+    return OM_OK;
   }
 
   if (sub->user_fun.filter != NULL &&
       sub->user_fun.filter(&topic->msg) != OM_OK)
     return OM_ERROR;
 
-  if (sub->dump_target.enable && topic->msg.size <= sub->dump_target.max_size)
-    memcpy(sub->dump_target.address, topic->msg.buff, topic->msg.size);
+  if (sub->dump_target.enable) sub->dump_target.new = true;
   OM_ASSERT(topic->msg.buff);
 
   if (sub->user_fun.deploy) sub->user_fun.deploy(&topic->msg);
@@ -37,6 +41,9 @@ inline om_status_t _om_publish_to_suber(om_suber_t* sub, om_topic_t* topic) {
 }
 
 inline om_status_t _om_publish_to_topic(om_topic_t* topic, om_msg_t* msg) {
+  OM_ASSERT(topic);
+  OM_ASSERT(msg);
+
   om_time_get(&msg->time);
 
   if (topic->user_fun.filter != NULL && topic->user_fun.filter(msg) != OM_OK)
@@ -45,6 +52,7 @@ inline om_status_t _om_publish_to_topic(om_topic_t* topic, om_msg_t* msg) {
   if (topic->virtual)
     memcpy(&topic->msg, msg, sizeof(*msg));
   else {
+    if (topic->msg.buff != NULL) om_free(topic->msg.buff);
     topic->msg.buff = om_malloc(msg->size);
     OM_ASSERT(topic->msg.buff);
     memcpy(topic->msg.buff, msg->buff, msg->size);
@@ -56,6 +64,9 @@ inline om_status_t _om_publish_to_topic(om_topic_t* topic, om_msg_t* msg) {
 }
 
 om_status_t _om_publish(om_topic_t* topic, om_msg_t* msg) {
+  OM_ASSERT(topic);
+  OM_ASSERT(msg);
+
   if (_om_publish_to_topic(topic, msg) != OM_OK) return OM_ERROR;
 
   if (topic->afl) om_afl_apply(&(topic->msg), topic->afl);
@@ -67,15 +78,11 @@ om_status_t _om_publish(om_topic_t* topic, om_msg_t* msg) {
     _om_publish_to_suber(sub, topic);
   }
 
-  if (!topic->virtual) {
-    om_free(topic->msg.buff);
-    topic->msg.buff = NULL;
-  }
-
   return OM_OK;
 }
 
-om_status_t om_publish(om_topic_t* topic, void* buff, size_t size, bool block) {
+om_status_t om_publish(om_topic_t* topic, void* buff, uint32_t size,
+                       bool block) {
   OM_ASSERT(topic);
   OM_ASSERT(buff);
 
@@ -136,7 +143,7 @@ om_status_t om_sync() {
   return OM_OK;
 }
 
-om_suber_t* om_subscript(om_topic_t* topic, void* buff, size_t max_size,
+om_suber_t* om_subscript(om_topic_t* topic, void* buff, uint32_t max_size,
                          om_user_fun_t filter) {
   OM_ASSERT(topic);
   OM_ASSERT(buff);
@@ -145,8 +152,30 @@ om_suber_t* om_subscript(om_topic_t* topic, void* buff, size_t max_size,
   om_core_set_dump_target(sub, buff, max_size);
   om_core_add_suber(topic, sub);
   sub->user_fun.filter = filter;
+  sub->target = topic;
 
   return sub;
+}
+
+om_status_t om_suber_dump(om_suber_t* suber) {
+  OM_ASSERT(suber);
+  OM_ASSERT(suber->dump_target.enable);
+
+  if (suber->dump_target.new) {
+    om_mutex_lock(&suber->target->mutex);
+
+    suber->dump_target.new = false;
+    if (suber->target->msg.size <= suber->dump_target.max_size) {
+      memcpy(suber->dump_target.address, suber->target->msg.buff,
+             suber->target->msg.size);
+    }
+
+    om_mutex_unlock(&suber->target->mutex);
+
+    return OM_OK;
+  } else {
+    return OM_ERROR;
+  }
 }
 
 om_status_t om_msg_deinit() {

@@ -155,9 +155,9 @@ om_status_t om_config_filter(om_topic_t* topic, const char* format, ...) {
     switch (GET_CAPITAL(*index)) {
       case LIST_FLAG: {
         om_filter_t* filter = om_afl_filter_create(va_arg(valist, om_topic_t*));
-        size_t length = va_arg(valist, size_t);
-        size_t offset = va_arg(valist, size_t);
-        size_t scope = va_arg(valist, size_t);
+        uint32_t length = va_arg(valist, uint32_t);
+        uint32_t offset = va_arg(valist, uint32_t);
+        uint32_t scope = va_arg(valist, uint32_t);
         void* template = va_arg(valist, void*);
         om_afl_set_filter(filter, OM_AFL_MODE_LIST, offset, length, scope, 0,
                           template);
@@ -166,9 +166,9 @@ om_status_t om_config_filter(om_topic_t* topic, const char* format, ...) {
       }
       case DECOMPOSE_FLAG: {
         om_filter_t* filter = om_afl_filter_create(va_arg(valist, om_topic_t*));
-        size_t length = va_arg(valist, size_t);
-        size_t offset = va_arg(valist, size_t);
-        size_t scope = va_arg(valist, size_t);
+        uint32_t length = va_arg(valist, uint32_t);
+        uint32_t offset = va_arg(valist, uint32_t);
+        uint32_t scope = va_arg(valist, uint32_t);
         om_afl_set_filter(filter, OM_AFL_MODE_DECOMPOSE, offset, length, scope,
                           0, NULL);
         om_afl_add_filter(topic->afl, filter);
@@ -176,9 +176,9 @@ om_status_t om_config_filter(om_topic_t* topic, const char* format, ...) {
       }
       case RANGE_FLAG: {
         om_filter_t* filter = om_afl_filter_create(va_arg(valist, om_topic_t*));
-        size_t length = va_arg(valist, size_t);
-        size_t offset = va_arg(valist, size_t);
-        size_t scope = va_arg(valist, size_t);
+        uint32_t length = va_arg(valist, uint32_t);
+        uint32_t offset = va_arg(valist, uint32_t);
+        uint32_t scope = va_arg(valist, uint32_t);
         uint32_t start = va_arg(valist, uint32_t);
         uint32_t arg = va_arg(valist, uint32_t);
         om_afl_set_filter(filter, OM_AFL_MODE_RANGE, offset, length, start, arg,

@@ -51,7 +51,7 @@ inline int om_list_empty(const om_list_head_t* head) {
 }
 
 size_t om_list_get_num(const om_list_head_t* head) {
-  size_t num = 0;
+  uint32_t num = 0;
 
   om_list_head_t* pos;
   om_list_for_each(pos, head) { num++; }

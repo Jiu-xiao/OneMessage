@@ -86,10 +86,11 @@ START_TEST(om_log) {
   char buff[100] = {0};
   om_topic_t* topic_log = om_get_log_handle();
 
-  om_subscript(topic_log, buff, sizeof(buff), NULL);
+  om_suber_t* sub = om_subscript(topic_log, buff, sizeof(buff), NULL);
 
   ck_assert_msg(topic_log, "获取不到log话题。");
   om_print_log("init", OM_LOG_DEFAULT, "%s", str_log);
+  om_suber_dump(sub);
   ck_assert_msg(!strcmp(buff, "[Default][init]Log test.\r\n"), "LOG数据错误:%s",
                 buff);
   om_deinit();
@@ -116,9 +117,10 @@ START_TEST(om_afl) {
   om_topic_t* range = om_config_topic(NULL, NULL, "range");
   om_topic_t* decompose = om_config_topic(NULL, NULL, "decompose");
 
-  om_subscript(list, &(ans1), sizeof(ans1), NULL);
-  om_subscript(range, &(ans2), sizeof(ans2), NULL);
-  om_subscript(decompose, &(ans3.decompose), sizeof(ans3.decompose), NULL);
+  om_suber_t* list_sub = om_subscript(list, &(ans1), sizeof(ans1), NULL);
+  om_suber_t* range_sub = om_subscript(range, &(ans2), sizeof(ans2), NULL);
+  om_suber_t* decompose_sub =
+      om_subscript(decompose, &(ans3.decompose), sizeof(ans3.decompose), NULL);
 
   om_config_filter(source, "LDR", list, OM_PRASE_STRUCT(om_afl_test_t, list),
                    template, decompose,
@@ -127,16 +129,19 @@ START_TEST(om_afl) {
 
   memcpy(&test.list, template, sizeof(template));
   om_publish(source, &test, sizeof(test), true);
+  om_suber_dump(list_sub);
   ck_assert_msg(!memcmp(&test.list, &ans1.list, sizeof(ans1.list)),
                 "过滤器list模式数据错误");
   test.list[1] = 0;
   om_publish(source, &test, sizeof(test), true);
+  om_suber_dump(list_sub);
   ck_assert_msg(memcmp(&test.list, &ans1.list, sizeof(ans1.list)),
                 "过滤器list模式失效");
 
   for (uint32_t i = 0; i <= 100; i++) {
     test.range = 213 + i;
     om_publish(source, &test, sizeof(test), true);
+    om_suber_dump(range_sub);
     ck_assert_msg(test.range == ans2.range,
                   "过滤器range模式数据错误在%d,应为%d,实际为%d", i, test.range,
                   ans2.range);
@@ -145,6 +150,7 @@ START_TEST(om_afl) {
   for (uint32_t i = 1000; i <= 2000; i++) {
     test.range = 213 + i;
     om_publish(source, &test, sizeof(test), true);
+    om_suber_dump(range_sub);
     ck_assert_msg(test.range != ans2.range,
                   "过滤器range模式失效在%d,应为%d,实际为%d", i, test.range,
                   ans2.range);
@@ -152,6 +158,7 @@ START_TEST(om_afl) {
 
   test.decompose = 5.63f;
   om_publish(source, &test, sizeof(test), true);
+  om_suber_dump(decompose_sub);
   ck_assert_msg(test.decompose == ans3.decompose,
                 "过滤器decompose模式数据错误");
 

@@ -6,7 +6,7 @@
 #include "om_list.h"
 
 typedef struct {
-  size_t size;
+  uint32_t size;
   void* buff;
   om_time_t time;
 } om_msg_t;
@@ -53,12 +53,15 @@ typedef struct {
     om_user_fun_t filter;
     om_user_fun_t deploy;
   } user_fun;
+
   bool isLink;
   om_topic_t* target;
+
   struct {
     bool enable;
-    size_t max_size;
+    uint32_t max_size;
     void* address;
+    bool new;
   } dump_target;
 } om_suber_t;
 
@@ -94,7 +97,7 @@ om_status_t om_core_del_puber(om_list_head_t* head);
 om_status_t om_core_del_topic(om_list_head_t* head);
 
 om_status_t om_core_set_dump_target(om_suber_t* suber, void* target,
-                                    size_t max_size);
+                                    uint32_t max_size);
 
 om_topic_t* om_core_find_topic(const char* name, uint32_t timeout);
 

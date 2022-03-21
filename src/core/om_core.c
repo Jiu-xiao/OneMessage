@@ -170,7 +170,7 @@ om_topic_t* om_core_find_topic(const char* name, uint32_t timeout) {
 }
 
 om_status_t om_core_set_dump_target(om_suber_t* suber, void* target,
-                                    size_t max_size) {
+                                    uint32_t max_size) {
   OM_ASSERT(target);
   OM_ASSERT(suber);
 

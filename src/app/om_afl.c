@@ -32,9 +32,9 @@ om_status_t om_afl_add_filter(om_afl_t* afl, om_filter_t* filter) {
   return OM_OK;
 }
 
-om_status_t om_afl_set_filter(om_filter_t* filter, uint8_t mode, size_t offset,
-                              size_t length, size_t scope, uint32_t arg,
-                              void* template) {
+om_status_t om_afl_set_filter(om_filter_t* filter, uint8_t mode,
+                              uint32_t offset, uint32_t length, uint32_t scope,
+                              uint32_t arg, void* template) {
   OM_ASSERT(filter);
 
   filter->mode = mode;
