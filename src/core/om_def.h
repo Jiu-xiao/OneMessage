@@ -32,6 +32,8 @@ typedef enum {
 #define OM_CHECK(arg) (void)0;
 #endif
 
+#define OM_UNUSED(X) ((void)X)
+
 #if OM_VIRTUAL_TIME
 #define om_time_t uint32_t
 extern om_time_t _om_time_handle;

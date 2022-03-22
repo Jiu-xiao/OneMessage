@@ -45,6 +45,12 @@ void _INIT_LIST_HEAD(om_list_head_t* list);
     }                                              \
   } while (0)
 
+#define OM_PRASE_STRUCT(container, member)            \
+  sizeof(container), om_offset_of(container, member), \
+      om_member_size_of(container, member)
+
+#define OM_PRASE_VAR(_arg) (&_arg), (sizeof(_arg))
+
 void om_list_add(om_list_head_t* new, om_list_head_t* head);
 
 void om_list_add_tail(om_list_head_t* new, om_list_head_t* head);

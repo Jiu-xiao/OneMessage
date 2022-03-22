@@ -161,14 +161,14 @@ om_status_t om_suber_dump(om_suber_t* suber) {
   OM_ASSERT(suber);
   OM_ASSERT(suber->dump_target.enable);
 
-  if (suber->dump_target.new) {
+  if (suber->dump_target.new &&
+      suber->target->msg.size <= suber->dump_target.max_size) {
     om_mutex_lock(&suber->target->mutex);
 
     suber->dump_target.new = false;
-    if (suber->target->msg.size <= suber->dump_target.max_size) {
-      memcpy(suber->dump_target.address, suber->target->msg.buff,
-             suber->target->msg.size);
-    }
+
+    memcpy(suber->dump_target.address, suber->target->msg.buff,
+           suber->target->msg.size);
 
     om_mutex_unlock(&suber->target->mutex);
 

@@ -181,6 +181,9 @@ om_status_t om_config_filter(om_topic_t* topic, const char* format, ...) {
         uint32_t scope = va_arg(valist, uint32_t);
         uint32_t start = va_arg(valist, uint32_t);
         uint32_t arg = va_arg(valist, uint32_t);
+
+        OM_UNUSED(scope);
+
         om_afl_set_filter(filter, OM_AFL_MODE_RANGE, offset, length, start, arg,
                           NULL);
         om_afl_add_filter(topic->afl, filter);
