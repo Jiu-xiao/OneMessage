@@ -1,13 +1,15 @@
 # OneMessage
-一个基于`发布-订阅`模型的消息框架，为嵌入式设备设计，使用C语言编写。
+一个基于`发布-订阅`模型的多线程消息框架，用于嵌入式平台，纯C实现，性能和灵活性极高。
 ---
 ---
 ## 硬件支持
-已在linux和STM32F103上成功运行，欢迎适配到其他平台。
+已在linux,STM32F103,STM32F407上成功运行，欢迎适配到其他平台。
+* 简单示例
+    * [example for linux(use cmake)](https://gitee.com/jiu-xiao/msg-example.git)
 
-[example for linux(use cmake)](https://gitee.com/jiu-xiao/msg-example.git)
-
-[example for f103(use makefile)](https://gitee.com/jiu-xiao/om-example-mcu.git)
+    * [example for f103(use makefile)](https://gitee.com/jiu-xiao/om-example-mcu.git)
+* 使用本框架的开源项目
+    * [青岛大学Robomaster机器人嵌入式开源](https://gitee.com/qdu-rm-2022/qdu-rm-mcu)
 
 ## 特性
 * 发布-订阅
