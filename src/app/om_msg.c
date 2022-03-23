@@ -165,7 +165,7 @@ om_status_t om_suber_dump(om_suber_t* suber) {
   bool data_correct = suber->target->msg.size == suber->dump_target.max_size;
   OM_ASSERT(!suber->dump_target.new || data_correct);
 #else
-  bool data_correct = suber->target->msg.size <= suber->dump_max_size;
+  bool data_correct = suber->target->msg.size <= suber->dump_target.max_size;
 #endif
 
   if (suber->dump_target.new&& data_correct) {
