@@ -161,8 +161,14 @@ om_status_t om_suber_dump(om_suber_t* suber) {
   OM_ASSERT(suber);
   OM_ASSERT(suber->dump_target.enable);
 
-  if (suber->dump_target.new &&
-      suber->target->msg.size <= suber->dump_target.max_size) {
+#if OM_STRICT_LIMIT
+  bool data_correct = suber->target->msg.size == suber->dump_target.max_size;
+  OM_ASSERT(!suber->dump_target.new || data_correct);
+#else
+  bool data_correct = suber->target->msg.size <= suber->dump_max_size;
+#endif
+
+  if (suber->dump_target.new&& data_correct) {
     om_mutex_lock(&suber->target->mutex);
 
     suber->dump_target.new = false;

@@ -7,6 +7,9 @@
 /* 使能这个宏可能会提高刷新频率的精度，但会消耗更多性能 */
 #define OM_FREQ_USE_FLOAT (1)
 
+/* 严格限制导出数据时的长度 */
+#define OM_STRICT_LIMIT (0)
+
 /* 使用用户自定义的内存分配 */
 #define OM_USE_USER_MALLOC (0)
 

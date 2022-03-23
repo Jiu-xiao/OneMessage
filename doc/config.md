@@ -10,6 +10,14 @@
 
 >定义为om_sync()被调用的频率
 
+## OM_FREQ_USE_FLOAT
+
+>使能这个宏可能会提高刷新频率的精度，但会消耗更多性能
+
+## OM_STRICT_LIMIT
+
+>使能这个宏会严格限制导出数据的长度，只能导出和缓存区大小一样的数据
+
 ## OM_USE_USER_MALLOC
 
 >使用用户的内存分配函数，使能时需要自定义om_malloc和om_free。
