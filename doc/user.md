@@ -10,7 +10,7 @@
 
 ## 添加同步函数
 
-将`om_sync()`在中断或者线程按照OM_CALL_FREQ频率调用。
+将`om_sync(in_isr)`在中断或者线程按照OM_CALL_FREQ频率调用。
 
 ## 初始化
 
@@ -30,30 +30,30 @@ format参数支持大小写。
 
 ### 发布者配置
 
-| 选项 | 参数                                  | 功能              |
-| ---- | ------------------------------------- | ----------------- |
-| n    | om_status_t (`*fun`)(`om_msg_t *msg`) | 注册new函数       |
-| g    | om_status_t (`*fun`)(`om_msg_t *msg`) | 注册get函数       |
-| t    | om_topic_t *                          | 将发布者指向话题  |
-| q    | float                                 | 设置new的调用频率 |
+| 选项 | 参数                                                              | 功能              |
+| ---- | ----------------------------------------------------------------- | ----------------- |
+| n    | om_status_t (`*fun`)(`om_msg_t *msg, void *arg`), `void* fun_arg` | 注册new函数       |
+| g    | om_status_t (`*fun`)(`om_msg_t *msg, void *arg`), `void* fun_arg` | 注册get函数       |
+| t    | om_topic_t *                                                      | 将发布者指向话题  |
+| q    | float                                                             | 设置new的调用频率 |
 
 ### 订阅者配置
 
-| 选项 | 参数                                  | 功能               |
-| ---- | ------------------------------------- | ------------------ |
-| f    | om_status_t (`*fun`)(`om_msg_t *msg`) | 注册filter函数     |
-| d    | om_status_t (`*fun`)(`om_msg_t *msg`) | 注册deploy函数     |
-| t    | om_topic_t *                          | 将订阅者者指向话题 |
+| 选项 | 参数                                                              | 功能               |
+| ---- | ----------------------------------------------------------------- | ------------------ |
+| f    | om_status_t (`*fun`)(`om_msg_t *msg, void *arg`), `void* fun_arg` | 注册filter函数     |
+| d    | om_status_t (`*fun`)(`om_msg_t *msg, void *arg`), `void* fun_arg` | 注册deploy函数     |
+| t    | om_topic_t *                                                      | 将订阅者者指向话题 |
 
 ### 话题配置
 
 | 选项 | 参数                                                                           | 功能                                                                     |
 | ---- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| f    | om_status_t (`*fun`)(`om_msg_t *msg`)                                          | 注册filter函数                                                           |
+| f    | om_status_t (`*fun`)(`om_msg_t *msg, void *arg`), `void* fun_arg`              | 注册filter函数                                                           |
 | l    | om_topic_t *                                                                   | 指向参数中的话题                                                         |
 | s    | om_suber_t *                                                                   | 将订阅者指向话题                                                         |
 | p    | om_puber_t *                                                                   | 将发布者指向话题                                                         |
-| d    | om_status_t (`*fun`)(`om_msg_t *msg`)                                          | 先将fun注册为新创建的订阅者的deploy函数，再将订阅者指向话题              |
+| d    | om_status_t (`*fun`)(`om_msg_t *msg, void *arg`), `void* fun_arg`              | 先将fun注册为新创建的订阅者的deploy函数，再将订阅者指向话题              |
 | n或g | om_status_t (`*fun1`)(`om_msg_t *msg`)，om_status_t (`*fun2`)(`om_msg_t *msg`) | 先将fun1，fun2分别注册为新创建的发布者的new和get函数，再将发布者指向话题 |
 | t    | om_topic_t *                                                                   | 将参数中的话题指向自身                                                   |
 | v    | 无                                                                             | 设置为虚话题(`不拷贝消息内容，只传递指针`)                               |
@@ -61,7 +61,7 @@ format参数支持大小写。
 
 例：
 
-* om_config_suber(`NULL,"fdt",fun1,fun2,your_topic`)会返回一个新创建的指向your_topic的订阅者，且其filter函数为fun1,deploy函数为fun2。
+* om_config_suber(`NULL,"fdt",fun1,fun1_arg,fun2,fun2_arg,your_topic`)会返回一个新创建的指向your_topic的订阅者，且其filter函数为fun1,deploy函数为fun2。
 * om_config_topic(`your_topic,"sp",suber,puber`)会将订阅者suber和发布者puber指向your_topic。
 * om_config_topic(`NULL,"v","topic_name"`)会新创建一个名为topic_name虚话题并返回
 
@@ -75,6 +75,8 @@ format参数支持大小写。
 * OM_ERROR_NOT_INIT
 
 ## 用户函数
+
+调用用户函数时，会将注册时的fun_arg和消息一起传入。
 
 | 函数名 | 功能                                                                                          |
 | ------ | --------------------------------------------------------------------------------------------- |
@@ -91,14 +93,14 @@ format参数支持大小写。
 
 ## 主动发布
 
-    om_status_t om_publish(om_topic_t* topic, void* buff, uint32_t size, bool block)
+    om_status_t om_publish(om_topic_t* topic, void* buff, uint32_t size, bool block, bool in_isr)
 block参数决定当其他线程发布时是否阻塞
 
 ## 订阅话题
 
     om_suber_t om_subscript(om_topic_t *topic, void *buff, uint32_t max_size, om_user_fun_t filter)
 
-    om_status_t om_suber_dump(om_suber_t* suber)
+    om_status_t om_suber_dump(om_suber_t* suber, bool in_isr)
 
 * filter==NULL时不添加过滤器函数.
 * om_subscript会返回一个可导出话题数据的订阅者
@@ -107,7 +109,7 @@ block参数决定当其他线程发布时是否阻塞
 ## log
 
     om_topic_t* om_get_log_handle()    //返回log所在话题
-    om_status_t om_print_log(char* name, om_log_level_t level, const char* format,...)
+    om_status_t om_print_log(char* name, om_log_level_t level, bool block, bool in_isr, const char* format,...)
 
 | Level          | Color   |
 | -------------- | ------- |

@@ -41,6 +41,9 @@
 #define om_mutex_trylock(arg) pthread_mutex_trylock(arg) == 0 ? OM_OK : OM_ERROR
 #define om_mutex_unlock(arg) pthread_mutex_unlock(arg)
 
+#define om_mutex_lock_isr(arg) pthread_mutex_lock(arg)
+#define om_mutex_unlock_isr(arg) pthread_mutex_unlock(arg)
+
 /* 将运行时间作为消息发出的时间 */
 #define OM_VIRTUAL_TIME (0)
 

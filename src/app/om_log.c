@@ -23,8 +23,8 @@ om_status_t om_log_init() {
 
 inline om_topic_t* om_get_log_handle() { return om_log; }
 
-om_status_t om_print_log(char* name, om_log_level_t level, const char* format,
-                         ...) {
+om_status_t om_print_log(char* name, om_log_level_t level, bool block,
+                         bool in_isr, const char* format, ...) {
   if (!om_log_initd) return OM_ERROR_NOT_INIT;
 
   om_log_t log;
@@ -42,7 +42,7 @@ om_status_t om_print_log(char* name, om_log_level_t level, const char* format,
   va_start(vArgList, format);
   vsnprintf(log.data, OM_LOG_MAX_LEN, fm_buf, vArgList);
   va_end(vArgList);
-  return om_publish(om_log, &log, sizeof(om_log_t), true);
+  return om_publish(om_log, &log, sizeof(om_log_t), block, in_isr);
 }
 
 om_status_t om_log_deinit() {

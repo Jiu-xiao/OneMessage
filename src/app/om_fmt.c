@@ -37,6 +37,7 @@ om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
     switch (GET_CAPITAL(*index)) {
       case FILTER_FLAG:
         topic->user_fun.filter = va_arg(valist, om_user_fun_t);
+        topic->user_fun.filter_arg = va_arg(valist, void*);
         break;
       case LINK_FLAG:
         om_core_link(topic, va_arg(valist, om_topic_t*));
@@ -57,12 +58,14 @@ om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
         om_add_topic(topic);
         break;
       case DEPLOY_FLAG:
-        om_config_suber(NULL, "DT", va_arg(valist, om_user_fun_t), topic);
+        om_config_suber(NULL, "DT", va_arg(valist, om_user_fun_t),
+                        va_arg(valist, void*), topic);
         break;
       case NEW_FLAG:
       case GET_FLAG:
         om_config_puber(NULL, "NGT", va_arg(valist, om_user_fun_t),
-                        va_arg(valist, om_user_fun_t), topic);
+                        va_arg(valist, void*), va_arg(valist, om_user_fun_t),
+                        va_arg(valist, void*), topic);
         break;
       default:
         OM_ASSERT(false);
@@ -87,9 +90,11 @@ om_suber_t* om_config_suber(om_suber_t* suber, const char* format, ...) {
     switch (GET_CAPITAL(*index)) {
       case FILTER_FLAG:
         suber->user_fun.filter = va_arg(valist, om_user_fun_t);
+        suber->user_fun.filter_arg = va_arg(valist, void*);
         break;
       case DEPLOY_FLAG:
         suber->user_fun.deploy = va_arg(valist, om_user_fun_t);
+        suber->user_fun.deploy_arg = va_arg(valist, void*);
         break;
       case TOPIC_FLAG:
         om_core_add_suber(va_arg(valist, om_topic_t*), suber);
@@ -117,9 +122,13 @@ om_puber_t* om_config_puber(om_puber_t* puber, const char* format, ...) {
     switch (GET_CAPITAL(*index)) {
       case NEW_FLAG:
         puber->user_fun.new_message = va_arg(valist, om_user_fun_t);
+        puber->user_fun.new_arg = va_arg(valist, void*);
+
         break;
       case GET_FLAG:
         puber->user_fun.get_message = va_arg(valist, om_user_fun_t);
+        puber->user_fun.get_arg = va_arg(valist, void*);
+
         break;
       case TOPIC_FLAG:
         om_core_add_puber(va_arg(valist, om_topic_t*), puber);

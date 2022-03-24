@@ -56,9 +56,10 @@ om_status_t om_afl_set_filter(om_filter_t* filter, uint8_t mode,
 
 om_status_t _om_afl_filter_check(om_filter_t* filter, om_msg_t* msg);
 
-om_status_t _om_afl_filter_apply(om_filter_t* filter, om_msg_t* msg);
+om_status_t _om_afl_filter_apply(om_filter_t* filter, om_msg_t* msg, bool block,
+                                 bool in_isr);
 
-om_status_t om_afl_apply(om_msg_t* msg, om_afl_t* afl);
+om_status_t om_afl_apply(om_msg_t* msg, om_afl_t* afl, bool block, bool in_isr);
 
 om_status_t om_afl_filter_del(om_list_head_t* filter);
 

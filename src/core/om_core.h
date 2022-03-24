@@ -11,7 +11,7 @@ typedef struct {
   om_time_t time;
 } om_msg_t;
 
-typedef om_status_t (*om_user_fun_t)(om_msg_t* msg);
+typedef om_status_t (*om_user_fun_t)(om_msg_t* msg, void* arg);
 
 typedef struct {
   bool virtual;
@@ -25,6 +25,7 @@ typedef struct {
   om_list_head_t link; /* 指向本话题的订阅者 */
   struct {
     om_user_fun_t filter;
+    void* filter_arg;
   } user_fun;
   void* afl;
 } om_topic_t;
@@ -34,6 +35,8 @@ typedef struct {
   struct {
     om_user_fun_t new_message;
     om_user_fun_t get_message;
+    void* new_arg;
+    void* get_arg;
   } user_fun;
   om_msg_t msg_buff;
   struct {
@@ -52,6 +55,8 @@ typedef struct {
   struct {
     om_user_fun_t filter;
     om_user_fun_t deploy;
+    void* filter_arg;
+    void* deploy_arg;
   } user_fun;
 
   bool isLink;

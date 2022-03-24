@@ -46,6 +46,11 @@
 >>#define om_mutex_trylock(arg) pthread_mutex_trylock(arg) == 0 ? OM_OK:OM_ERROR
 >>
 >>#define om_mutex_unlock(arg) pthread_mutex_unlock(arg)
+>>
+>>#define om_mutex_lock_isr(arg) pthread_mutex_lock(arg)
+>>
+>>
+>>#define om_mutex_unlock_isr(arg) pthread_mutex_unlock(arg)
 >
 >FreeRTOS示例
 >>#include "semphr.h"
@@ -60,6 +65,10 @@
 >>#define om_mutex_trylock(arg) xSemaphoreTake(*arg,0) == pdTRUE ? OM_OK:OM_ERROR
 >>
 >>#define om_mutex_unlock(arg) xSemaphoreGive(*arg)
+>>
+>>#define om_mutex_lock_isr(arg) xSemaphoreTakeFromISR(*arg, NULL)
+>>
+>>#define om_mutex_unlock_isr(arg) xSemaphoreGiveFromISR(*arg, NULL)
 
 ## OM_VIRTUAL_TIME
 

@@ -97,15 +97,16 @@ om_status_t _om_afl_filter_check(om_filter_t* filter, om_msg_t* msg) {
   return OM_ERROR;
 }
 
-om_status_t _om_afl_filter_apply(om_filter_t* filter, om_msg_t* msg) {
+om_status_t _om_afl_filter_apply(om_filter_t* filter, om_msg_t* msg, bool block,
+                                 bool in_isr) {
   switch (filter->mode) {
     case OM_AFL_MODE_LIST:
     case OM_AFL_MODE_RANGE:
-      om_publish(filter->target, msg->buff, msg->size, true);
+      om_publish(filter->target, msg->buff, msg->size, block, in_isr);
       break;
     case OM_AFL_MODE_DECOMPOSE:
       om_publish(filter->target, msg->buff + filter->data.decomp.offset,
-                 filter->data.decomp.size, true);
+                 filter->data.decomp.size, block, in_isr);
       break;
     default:
       OM_ASSERT(false);
@@ -114,7 +115,8 @@ om_status_t _om_afl_filter_apply(om_filter_t* filter, om_msg_t* msg) {
   return OM_OK;
 }
 
-om_status_t om_afl_apply(om_msg_t* msg, om_afl_t* afl) {
+om_status_t om_afl_apply(om_msg_t* msg, om_afl_t* afl, bool block,
+                         bool in_isr) {
   OM_ASSERT(msg);
   OM_ASSERT(afl);
 
@@ -122,7 +124,7 @@ om_status_t om_afl_apply(om_msg_t* msg, om_afl_t* afl) {
   om_list_for_each(pos, &afl->filter) {
     om_filter_t* filter = om_list_entry(pos, om_filter_t, self);
     if (_om_afl_filter_check(filter, msg) == OM_OK)
-      _om_afl_filter_apply(filter, msg);
+      _om_afl_filter_apply(filter, msg, block, in_isr);
   }
 
   return OM_OK;

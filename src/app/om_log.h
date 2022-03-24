@@ -31,8 +31,8 @@ om_status_t om_log_init();
 
 om_topic_t* om_get_log_handle();
 
-om_status_t om_print_log(char* name, om_log_level_t level, const char* format,
-                         ...);
+om_status_t om_print_log(char* name, om_log_level_t level, bool block,
+                         bool in_isr, const char* format, ...);
 
 om_status_t om_log_deinit();
 #endif
