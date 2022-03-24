@@ -106,10 +106,10 @@ om_status_t om_publish(om_topic_t* topic, void* buff, uint32_t size, bool block,
   if (!in_isr) {
     if (block)
       om_mutex_lock(&topic->mutex);
-    else if (om_mutex_trylock(&om_mutex_handle) != OM_OK)
+    else if (om_mutex_trylock(&topic->mutex) != OM_OK)
       return OM_ERROR_BUSY;
   } else {
-    if (om_mutex_lock_isr(&om_mutex_handle) != OM_OK) return OM_ERROR_BUSY;
+    if (om_mutex_lock_isr(&topic->mutex) != OM_OK) return OM_ERROR_BUSY;
   }
 
   om_msg_t msg = {.buff = buff, .size = size};
