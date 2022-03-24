@@ -140,7 +140,23 @@ inline om_status_t _om_refresh_puber(om_puber_t* pub, om_topic_t* topic,
       pub->user_fun.get_message(&pub->msg_buff, pub->user_fun.get_arg) != OM_OK)
     return OM_ERROR;
 
+  om_status_t res = OM_OK;
+
+  if (in_isr) {
+    res = om_mutex_lock_isr(&topic->mutex);
+  } else {
+    res = om_mutex_lock(&topic->mutex);
+  }
+
+  if (res != OM_OK) return OM_ERROR;
+
   _om_publish(topic, &pub->msg_buff, block, in_isr);
+
+  if (in_isr) {
+    om_mutex_unlock_isr(&topic->mutex);
+  } else {
+    om_mutex_unlock(&topic->mutex);
+  }
 
   return OM_OK;
 }
@@ -152,7 +168,11 @@ om_status_t om_sync(bool in_isr) {
 
   if (!om_msg_initd) return OM_ERROR_NOT_INIT;
 
-  om_mutex_lock(&om_mutex_handle);
+  if (!in_isr) {
+    om_mutex_lock(&om_mutex_handle);
+  } else {
+    om_mutex_lock_isr(&om_mutex_handle);
+  }
 
   om_list_head_t *pos1, *pos2;
   om_list_for_each(pos1, &topic_list) {
@@ -163,7 +183,11 @@ om_status_t om_sync(bool in_isr) {
     }
   }
 
-  om_mutex_unlock(&om_mutex_handle);
+  if (!in_isr) {
+    om_mutex_unlock(&om_mutex_handle);
+  } else {
+    om_mutex_unlock_isr(&om_mutex_handle);
+  }
 
   return OM_OK;
 }
