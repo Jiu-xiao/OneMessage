@@ -63,6 +63,8 @@ om_status_t om_afl_apply(om_msg_t* msg, om_afl_t* afl, bool block, bool in_isr);
 
 om_status_t om_afl_filter_del(om_list_head_t* filter);
 
+uint32_t om_afl_get_num(om_afl_t* afl);
+
 om_status_t om_afl_del(om_afl_t* afl);
 
 #endif

@@ -18,7 +18,6 @@ typedef struct {
   om_mutex_t mutex;
   om_msg_t msg;
   char name[OM_TOPIC_MAX_NAME_LEN];
-  bool enable;
   om_list_head_t self;
   om_list_head_t suber;
   om_list_head_t puber;
@@ -72,7 +71,10 @@ typedef struct {
 
 typedef struct {
   om_list_head_t self;
-  om_suber_t* source;
+  struct {
+    om_suber_t* suber;
+    om_topic_t* topic;
+  } source;
 } om_link_t;
 
 om_topic_t* om_core_topic_create(const char* name);
@@ -87,7 +89,7 @@ om_puber_t* om_core_puber_create(float freq);
 
 om_status_t om_core_add_puber(om_topic_t* topic, om_puber_t* pub);
 
-om_link_t* om_core_link_create(om_suber_t* sub);
+om_link_t* om_core_link_create(om_suber_t* sub, om_topic_t* topic);
 
 om_status_t om_core_add_link(om_topic_t* topic, om_link_t* link);
 

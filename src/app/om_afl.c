@@ -1,4 +1,5 @@
 #include "om_afl.h"
+
 #include "om_msg.h"
 
 om_afl_t* om_afl_create(om_topic_t* source) {
@@ -139,6 +140,8 @@ om_status_t om_afl_filter_del(om_list_head_t* filter) {
 
   return OM_OK;
 }
+
+uint32_t om_afl_get_num(om_afl_t* afl) { return om_list_get_num(&afl->filter); }
 
 om_status_t om_afl_del(om_afl_t* afl) {
   om_del_all(&afl->filter, om_afl_filter_del);

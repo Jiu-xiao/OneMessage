@@ -67,10 +67,11 @@ om_status_t om_core_add_puber(om_topic_t* topic, om_puber_t* pub) {
   return OM_OK;
 }
 
-om_link_t* om_core_link_create(om_suber_t* sub) {
+om_link_t* om_core_link_create(om_suber_t* sub, om_topic_t* topic) {
   om_link_t* link = om_malloc(sizeof(*link));
   OM_ASSERT(link);
-  link->source = sub;
+  link->source.suber = sub;
+  link->source.topic = topic;
 
   return link;
 }
@@ -89,7 +90,7 @@ om_status_t om_core_link(om_topic_t* source, om_topic_t* target) {
 
   om_suber_t* sub = om_core_suber_create(target);
   om_core_add_suber(source, sub);
-  om_link_t* link = om_core_link_create(sub);
+  om_link_t* link = om_core_link_create(sub, source);
   om_core_add_link(target, link);
 
   return OM_OK;
@@ -100,9 +101,9 @@ om_status_t om_core_delink(om_list_head_t* head) {
   om_link_t* link = om_list_entry(head, om_link_t, self);
 
   om_list_del(&link->self);
-  om_list_del(&link->source->self);
+  om_list_del(&link->source.suber->self);
 
-  om_free(link->source);
+  om_free(link->source.suber);
   om_free(link);
 
   return OM_OK;
@@ -118,7 +119,7 @@ om_status_t om_core_del_suber(om_list_head_t* head) {
     om_list_head_t* pos;
     om_list_for_each(pos, &sub->target->link) {
       om_link_t* link = om_list_entry(pos, om_link_t, self);
-      if (link->source == sub) {
+      if (link->source.suber == sub) {
         om_list_del(&link->self);
         om_free(link);
         break;

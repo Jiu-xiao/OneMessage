@@ -1,6 +1,7 @@
+#include "om_msg.h"
+
 #include "om_core.h"
 #include "om_def.h"
-#include "om_msg.h"
 
 extern om_list_head_t topic_list;
 
@@ -192,15 +193,13 @@ om_status_t om_sync(bool in_isr) {
   return OM_OK;
 }
 
-om_suber_t* om_subscript(om_topic_t* topic, void* buff, uint32_t max_size,
-                         om_user_fun_t filter) {
+om_suber_t* om_subscript(om_topic_t* topic, void* buff, uint32_t max_size) {
   OM_ASSERT(topic);
   OM_ASSERT(buff);
 
   om_suber_t* sub = om_core_suber_create(NULL);
   om_core_set_dump_target(sub, buff, max_size);
   om_core_add_suber(topic, sub);
-  sub->user_fun.filter = filter;
   sub->target = topic;
 
   return sub;
@@ -265,24 +264,29 @@ om_status_t om_msg_del_puber(om_puber_t* puber) {
   return om_core_del_puber(&puber->self);
 }
 
-uint16_t om_msg_get_topic_num() { return om_list_get_num(&topic_list); }
+uint32_t om_msg_get_topic_num() { return om_list_get_num(&topic_list); }
 
-uint16_t om_msg_get_suber_num(om_topic_t* topic) {
+uint32_t om_msg_get_suber_num(om_topic_t* topic) {
   return om_list_get_num(&topic->suber);
 }
 
-uint16_t om_msg_get_puber_num(om_topic_t* topic) {
+uint32_t om_msg_get_puber_num(om_topic_t* topic) {
   return om_list_get_num(&topic->puber);
 }
 
-om_status_t om_msg_for_each(om_status_t (*fun)(om_topic_t*)) {
+uint32_t om_msg_get_link_num(om_topic_t* topic) {
+  return om_list_get_num(&topic->link);
+}
+
+om_status_t om_msg_for_each(om_status_t (*fun)(om_topic_t*, void* arg),
+                            void* arg) {
   OM_ASSERT(fun);
 
   om_list_head_t* pos;
 
   om_list_for_each(pos, &topic_list) {
     om_topic_t* topic = om_list_entry(pos, om_topic_t, self);
-    if (fun(topic) != OM_OK) return OM_ERROR;
+    if (fun(topic, arg) != OM_OK) return OM_ERROR;
   }
 
   return OM_OK;

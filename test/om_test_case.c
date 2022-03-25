@@ -95,7 +95,7 @@ START_TEST(om_log) {
   char buff[100] = {0};
   om_topic_t* topic_log = om_get_log_handle();
 
-  om_suber_t* sub = om_subscript(topic_log, buff, sizeof(buff), NULL);
+  om_suber_t* sub = om_subscript(topic_log, buff, sizeof(buff));
 
   ck_assert_msg(topic_log, "获取不到log话题。");
   om_print_log("init", OM_LOG_DEFAULT, true, false, "%s", str_log);
@@ -126,10 +126,10 @@ START_TEST(om_afl) {
   om_topic_t* range = om_config_topic(NULL, NULL, "range");
   om_topic_t* decompose = om_config_topic(NULL, NULL, "decompose");
 
-  om_suber_t* list_sub = om_subscript(list, &(ans1), sizeof(ans1), NULL);
-  om_suber_t* range_sub = om_subscript(range, &(ans2), sizeof(ans2), NULL);
+  om_suber_t* list_sub = om_subscript(list, &(ans1), sizeof(ans1));
+  om_suber_t* range_sub = om_subscript(range, &(ans2), sizeof(ans2));
   om_suber_t* decompose_sub =
-      om_subscript(decompose, &(ans3.decompose), sizeof(ans3.decompose), NULL);
+      om_subscript(decompose, &(ans3.decompose), sizeof(ans3.decompose));
 
   om_config_filter(source, "LDR", list, OM_PRASE_STRUCT(om_afl_test_t, list),
                    template, decompose,
