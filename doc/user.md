@@ -98,11 +98,10 @@ block参数决定当其他线程发布时是否阻塞
 
 ## 订阅话题
 
-    om_suber_t om_subscript(om_topic_t *topic, void *buff, uint32_t max_size, om_user_fun_t filter)
+    om_suber_t om_subscript(om_topic_t *topic, void *buff, uint32_t max_size)
 
     om_status_t om_suber_dump(om_suber_t* suber, bool in_isr)
 
-* filter==NULL时不添加过滤器函数.
 * om_subscript会返回一个可导出话题数据的订阅者
 * 当订阅者接收到新数据时，调用om_suber_dump会将数据写入buff,并返回OM_OK.
 
@@ -118,6 +117,11 @@ block参数决定当其他线程发布时是否阻塞
 | OM_LOG_ERROR   | RED     |
 | OM_LOG_PASS    | GREEN   |
 | OM_LOG_NOTICE  | BLUE    |
+
+## 打印话题信息到buff
+
+    om_status_t om_print_topic_message(om_topic_t* topic, char* buff, uint32_t buff_size)
+
 
 ## 查找话题
 
