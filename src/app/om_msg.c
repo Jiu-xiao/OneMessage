@@ -291,3 +291,5 @@ om_status_t om_msg_for_each(om_status_t (*fun)(om_topic_t*, void* arg),
 
   return OM_OK;
 }
+
+om_time_t om_msg_get_last_time(om_topic_t* topic) { return topic->msg.time; }

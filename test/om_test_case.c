@@ -107,7 +107,6 @@ START_TEST(om_log) {
 END_TEST
 
 typedef struct {
-  double res;
   uint32_t range;
   uint8_t list[10];
   float decompose;

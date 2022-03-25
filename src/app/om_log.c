@@ -14,7 +14,7 @@ static const char *color_tab[OM_LOG_COLOR_NUMBER][3] = {
     {"\033[32m", "\033[0m", "Pass"},
     {"\033[34m", "\033[0m", "Notice"},
     {"\033[33m", "\033[0m", "Waring"},
-    {"\0", "\0", "Default"}};
+    {"", "", "Default"}};
 
 om_status_t om_log_init() {
   om_log = om_core_topic_create("om_log");
@@ -57,12 +57,16 @@ om_status_t om_print_suber_message(om_suber_t *suber, char *buff,
     snprintf(buff, buff_size, "\t\tsuber mode:\tdump <-- [%s]\r\n",
              suber->target->name);
   }
+
+  return OM_OK;
 }
 
 om_status_t om_print_link_message(om_link_t *link, char *buff,
                                   uint32_t buff_size) {
   snprintf(buff, buff_size, "\t\tlink mode:\tthis <-- [%s]\r\n",
            link->source.topic->name);
+
+  return OM_OK;
 }
 
 om_status_t om_print_afl_message(om_filter_t *filter, char *buff,
@@ -85,17 +89,19 @@ om_status_t om_print_afl_message(om_filter_t *filter, char *buff,
 
   snprintf(buff, buff_size, "\t\tfilter mode:\tthis --(%s)--> [%s]\r\n",
            mode_str, filter->target->name);
+
+  return OM_OK;
 }
 
 om_status_t om_print_topic_message(om_topic_t *topic, char *buff,
                                    uint32_t buff_size) {
-  char buff4buff[20 + OM_LOG_MAX_LEN];
+  char *buff4buff = (char *)om_malloc(buff_size / 4);
 
   snprintf(buff, buff_size,
            "name: [%s]\r\n\t"
            "option:\t[ %s%s%s]\r\n\t"
-           "buffer_size:[%d]\r\n\t"
-           "suber:[%d] \tpuber:[%d] \tlink:[%d]\r\n",
+           "buffer_size:[%u]\r\n\t"
+           "suber:[%u] \tpuber:[%u] \tlink:[%u]\r\n",
            topic->name, STR_SELECT(topic->user_fun.filter, " filter_fun", ),
            STR_SELECT(topic->afl, "advanced_filter ", ),
            STR_SELECT(topic->virtual, "virtual ", "real "), topic->msg.size,
@@ -105,24 +111,28 @@ om_status_t om_print_topic_message(om_topic_t *topic, char *buff,
   om_list_head_t *pos;
   om_list_for_each(pos, &topic->suber) {
     om_suber_t *suber = om_list_entry(pos, om_suber_t, self);
-    om_print_suber_message(suber, buff4buff, sizeof(buff4buff));
-    strncat(buff, buff4buff, sizeof(buff4buff));
+    om_print_suber_message(suber, buff4buff, buff_size);
+    strncat(buff, buff4buff, buff_size);
   }
   om_list_for_each(pos, &topic->link) {
     om_link_t *link = om_list_entry(pos, om_link_t, self);
-    om_print_link_message(link, buff4buff, sizeof(buff4buff));
-    strncat(buff, buff4buff, sizeof(buff4buff));
+    om_print_link_message(link, buff4buff, buff_size);
+    strncat(buff, buff4buff, buff_size);
   }
   if (topic->afl) {
-    snprintf(buff4buff, sizeof(buff4buff), "\tadvanced_filter:[%d]\r\n",
+    snprintf(buff4buff, buff_size, "\tadvanced_filter:[%u]\r\n",
              om_afl_get_num(topic->afl));
-    strncat(buff, buff4buff, sizeof(buff4buff));
+    strncat(buff, buff4buff, buff_size);
     om_list_for_each(pos, &((om_afl_t *)topic->afl)->filter) {
       om_filter_t *filter = om_list_entry(pos, om_filter_t, self);
-      om_print_afl_message(filter, buff4buff, sizeof(buff4buff));
-      strncat(buff, buff4buff, sizeof(buff4buff));
+      om_print_afl_message(filter, buff4buff, buff_size);
+      strncat(buff, buff4buff, buff_size);
     }
   }
+
+  om_free(buff4buff);
+
+  return OM_OK;
 }
 
 om_status_t om_log_deinit() {

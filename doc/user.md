@@ -147,14 +147,15 @@ block参数决定当其他线程发布时是否阻塞
 
 ## 其他API
 
-| 函数名             | 功能       |
-| ------------------ | ---------- |
-| om_topic_add_puber | 添加发布者 |
-| om_topic_add_suber | 添加订阅者 |
-| om_topic_link      | 链接话题   |
-| om_msg_del_topic   | 销毁话题   |
-| om_msg_del_suber   | 销毁订阅者 |
-| om_msg_del_puber   | 销毁发布者 |
+| 函数名               | 功能                     |
+| -------------------- | ------------------------ |
+| om_topic_add_puber   | 添加发布者               |
+| om_topic_add_suber   | 添加订阅者               |
+| om_topic_link        | 链接话题                 |
+| om_msg_del_topic     | 销毁话题                 |
+| om_msg_del_suber     | 销毁订阅者               |
+| om_msg_del_puber     | 销毁发布者               |
+| om_msg_get_last_time | 获得话题最后一次消息时间 |
 
 ## 高级过滤器
 

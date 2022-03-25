@@ -52,4 +52,6 @@ uint32_t om_msg_get_link_num(om_topic_t* topic);
 om_status_t om_msg_for_each(om_status_t (*fun)(om_topic_t*, void* arg),
                             void* arg);
 
+om_time_t om_msg_get_last_time(om_topic_t* topic);
+
 #endif
