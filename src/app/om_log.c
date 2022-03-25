@@ -100,13 +100,13 @@ om_status_t om_print_topic_message(om_topic_t *topic, char *buff,
   snprintf(buff, buff_size,
            "name: [%s]\r\n\t"
            "option:\t[ %s%s%s]\r\n\t"
-           "buffer_size:[%u]\r\n\t"
-           "suber:[%u] \tpuber:[%u] \tlink:[%u]\r\n",
+           "buffer_size:[%d]\r\n\t"
+           "suber:[%d] \tpuber:[%d] \tlink:[%d]\r\n",
            topic->name, STR_SELECT(topic->user_fun.filter, " filter_fun", ),
            STR_SELECT(topic->afl, "advanced_filter ", ),
-           STR_SELECT(topic->virtual, "virtual ", "real "), topic->msg.size,
-           om_msg_get_suber_num(topic), om_msg_get_puber_num(topic),
-           om_msg_get_link_num(topic));
+           STR_SELECT(topic->virtual, "virtual ", "real "),
+           (int)topic->msg.size, (int)om_msg_get_suber_num(topic),
+           (int)om_msg_get_puber_num(topic), (int)om_msg_get_link_num(topic));
 
   om_list_head_t *pos;
   om_list_for_each(pos, &topic->suber) {
@@ -120,8 +120,8 @@ om_status_t om_print_topic_message(om_topic_t *topic, char *buff,
     strncat(buff, buff4buff, buff_size);
   }
   if (topic->afl) {
-    snprintf(buff4buff, buff_size, "\tadvanced_filter:[%u]\r\n",
-             om_afl_get_num(topic->afl));
+    snprintf(buff4buff, buff_size, "\tadvanced_filter:[%d]\r\n",
+             (int)om_afl_get_num(topic->afl));
     strncat(buff, buff4buff, buff_size);
     om_list_for_each(pos, &((om_afl_t *)topic->afl)->filter) {
       om_filter_t *filter = om_list_entry(pos, om_filter_t, self);
