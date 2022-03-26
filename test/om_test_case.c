@@ -98,9 +98,9 @@ START_TEST(om_log) {
   om_suber_t* sub = om_subscript(topic_log, buff, sizeof(buff));
 
   ck_assert_msg(topic_log, "获取不到log话题。");
-  om_print_log("init", OM_LOG_DEFAULT, true, false, "%s", str_log);
+  om_print_log("init", OM_LOG_LEVEL_DEFAULT, true, false, "%s", str_log);
   om_suber_dump(sub, false);
-  ck_assert_msg(!strcmp(buff, "[Default][init]Log test.\r\n"), "LOG数据错误:%s",
+  ck_assert_msg(!strcmp(buff, "[init]\033[mLog test.\r\n"), "LOG数据错误:%s",
                 buff);
   om_deinit();
 }

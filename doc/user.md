@@ -110,14 +110,27 @@ block参数决定当其他线程发布时是否阻塞
     om_topic_t* om_get_log_handle()    //返回log所在话题
     om_status_t om_print_log(char* name, om_log_level_t level, bool block, bool in_isr, const char* format,...)
 
-| Level          | Color   |
-| -------------- | ------- |
-| OM_LOG_DEFAULT | DEFAULT |
-| OM_LOG_WARNING | YELLOW  |
-| OM_LOG_ERROR   | RED     |
-| OM_LOG_PASS    | GREEN   |
-| OM_LOG_NOTICE  | BLUE    |
+| Level                | Color   |
+| -------------------- | ------- |
+| OM_LOG_LEVEL_DEFAULT | DEFAULT |
+| OM_LOG_LEVEL_WARNING | YELLOW  |
+| OM_LOG_LEVEL_ERROR   | RED     |
+| OM_LOG_LEVEL_PASS    | GREEN   |
+| OM_LOG_LEVEL_NOTICE  | BLUE    |
 
+并提供以下宏来增加代码可读性
+
+    OMLOG_DEFAULT
+    OMLOG_WARNING
+    OMLOG_ERROR
+    OMLOG_PASS
+    OMLOG_NOTICE
+    // in isr
+    OMLOG_DEFAULT_ISR
+    OMLOG_WARNING_ISR
+    OMLOG_ERROR_ISR
+    OMLOG_PASS_ISR
+    OMLOG_NOTICE_ISR
 ## 打印话题信息到buff
 
     om_status_t om_print_topic_message(om_topic_t* topic, char* buff, uint32_t buff_size)
