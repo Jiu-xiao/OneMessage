@@ -94,17 +94,13 @@ om_suber_t* om_config_suber(om_suber_t* suber, const char* format, ...) {
   for (const uint8_t* index = (const uint8_t*)format; *index != '\0'; index++) {
     OM_ASSERT(isalpha(*index));
     switch (GET_CAPITAL(*index)) {
-      case FILTER_FLAG:
-        suber->user_fun.filter = va_arg(valist, om_user_fun_t);
-        suber->user_fun.filter_arg = va_arg(valist, void*);
-
-        OM_ASSERT(suber->user_fun.filter);
-        break;
       case DEPLOY_FLAG:
-        suber->user_fun.deploy = va_arg(valist, om_user_fun_t);
-        suber->user_fun.deploy_arg = va_arg(valist, void*);
+        suber->mode = OM_SUBER_MODE_DEPLOY;
 
-        OM_ASSERT(suber->user_fun.deploy);
+        suber->data.as_deploy.deploy = va_arg(valist, om_user_fun_t);
+        suber->data.as_deploy.deploy_arg = va_arg(valist, void*);
+
+        OM_ASSERT(suber->data.as_deploy.deploy);
         break;
       case TOPIC_FLAG:
         om_core_add_suber(va_arg(valist, om_topic_t*), suber);

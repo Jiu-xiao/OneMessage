@@ -49,24 +49,35 @@ typedef struct {
   } freq;
 } om_puber_t;
 
+typedef enum {
+  OM_SUBER_MODE_UNKNOW,
+  OM_SUBER_MODE_LINK,
+  OM_SUBER_MODE_DUMP,
+  OM_SUBER_MODE_DEPLOY,
+} om_suber_mode_t;
+
 typedef struct {
+  om_suber_mode_t mode;
+
   om_list_head_t self;
-  struct {
-    om_user_fun_t filter;
-    om_user_fun_t deploy;
-    void* filter_arg;
-    void* deploy_arg;
-  } user_fun;
+  om_topic_t* master;
 
-  bool isLink;
-  om_topic_t* target;
+  union {
+    struct {
+      om_user_fun_t deploy;
+      void* deploy_arg;
+    } as_deploy;
 
-  struct {
-    bool enable;
-    uint32_t max_size;
-    void* address;
-    bool new;
-  } dump_target;
+    struct {
+      om_topic_t* target;
+    } as_link;
+
+    struct {
+      uint32_t max_size;
+      uint8_t* buff;
+      bool new;
+    } as_dump;
+  } data;
 } om_suber_t;
 
 typedef struct {

@@ -26,6 +26,11 @@ om_topic_t* om_core_topic_create(const char* name) {
 om_status_t om_core_add_topic(om_topic_t* topic) {
   OM_ASSERT(topic);
 
+  if (om_core_find_topic(topic->name, 0) != NULL) {
+    OM_ASSERT(false);
+    return OM_ERROR;
+  }
+
   om_list_add_tail(&topic->self, &topic_list);
   return OM_OK;
 }
@@ -35,8 +40,8 @@ om_suber_t* om_core_suber_create(om_topic_t* link) {
   OM_ASSERT(suber);
   memset(suber, 0, sizeof(*suber));
   if (link) {
-    suber->isLink = true;
-    suber->target = link;
+    suber->mode = OM_SUBER_MODE_LINK;
+    suber->data.as_link.target = link;
   }
   return suber;
 }
@@ -44,6 +49,8 @@ om_suber_t* om_core_suber_create(om_topic_t* link) {
 om_status_t om_core_add_suber(om_topic_t* topic, om_suber_t* sub) {
   OM_ASSERT(topic);
   OM_ASSERT(sub);
+
+  sub->master = topic;
 
   om_list_add_tail(&sub->self, &(topic->suber));
   return OM_OK;
@@ -114,10 +121,10 @@ om_status_t om_core_del_suber(om_list_head_t* head) {
   om_suber_t* sub = om_list_entry(head, om_suber_t, self);
 
   om_list_del(&sub->self);
-  if (sub->isLink) {
-    OM_ASSERT(sub->target);
+  if (sub->mode == OM_SUBER_MODE_LINK) {
+    OM_ASSERT(sub->master);
     om_list_head_t* pos;
-    om_list_for_each(pos, &sub->target->link) {
+    om_list_for_each(pos, &sub->master->link) {
       om_link_t* link = om_list_entry(pos, om_link_t, self);
       if (link->source.suber == sub) {
         om_list_del(&link->self);
@@ -164,8 +171,10 @@ om_topic_t* om_core_find_topic(const char* name, uint32_t timeout) {
       om_topic_t* topic = om_list_entry(pos, om_topic_t, self);
       if (!strncmp(name, topic->name, OM_TOPIC_MAX_NAME_LEN)) return topic;
     }
-    timeout--;
-    om_delay_ms(1);
+    if (timeout) {
+      om_delay_ms(1);
+      timeout--;
+    }
   } while (timeout);
   return NULL;
 }
@@ -175,10 +184,9 @@ om_status_t om_core_set_dump_target(om_suber_t* suber, void* target,
   OM_ASSERT(target);
   OM_ASSERT(suber);
 
-  suber->dump_target.max_size = max_size;
-  suber->dump_target.address = target;
-  suber->dump_target.enable = true;
-
+  suber->mode = OM_SUBER_MODE_DUMP;
+  suber->data.as_dump.max_size = max_size;
+  suber->data.as_dump.buff = target;
   return OM_OK;
 }
 
