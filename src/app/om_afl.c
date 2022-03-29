@@ -1,5 +1,7 @@
 #include "om_afl.h"
 
+#include "om_fmt.h"
+#include "om_log.h"
 #include "om_msg.h"
 
 om_afl_t* om_afl_create(om_topic_t* source) {

@@ -1,5 +1,7 @@
 #include "om_log.h"
 
+#include "om_afl.h"
+#include "om_fmt.h"
 #include "om_msg.h"
 
 #define STR_SELECT(_bool, _str, _str1) ((_bool) ? "" _str : ""_str1)

@@ -8,7 +8,7 @@ typedef enum {
   OM_AFL_MODE_RANGE,
   OM_AFL_MODE_DECOMPOSE,
   OM_AFL_MODE_NUMBER
-} OM_AFL_MODE_t;
+} om_afl_mode_t;
 
 typedef struct {
   om_topic_t* source_topic;
@@ -34,7 +34,7 @@ typedef struct {
 
 typedef struct {
   uint32_t length;
-  OM_AFL_MODE_t mode;
+  om_afl_mode_t mode;
   union {
     _om_afl_filter_list_t list;
     _om_afl_filter_range_t range;

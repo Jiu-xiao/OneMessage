@@ -1,8 +1,6 @@
 #include "om_core.h"
 
-#if OM_VIRTUAL_TIME
-om_time_t _om_time_handle;
-#endif
+uint32_t _om_time_handle;
 
 LIST_HEAD(topic_list);
 
@@ -189,6 +187,8 @@ om_status_t om_core_set_dump_target(om_suber_t* suber, void* target,
   suber->data.as_dump.buff = target;
   return OM_OK;
 }
+
+inline uint32_t om_core_get_time() { return _om_time_handle; }
 
 void om_error(const char* file, uint32_t line) {
   (void)(file);

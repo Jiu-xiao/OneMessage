@@ -1,7 +1,8 @@
 #include "om_msg.h"
 
-#include "om_core.h"
-#include "om_def.h"
+#include "om_afl.h"
+#include "om_fmt.h"
+#include "om_log.h"
 
 extern om_list_head_t topic_list;
 
@@ -170,9 +171,7 @@ inline om_status_t _om_refresh_puber(om_puber_t* pub, om_topic_t* topic,
 }
 
 om_status_t om_sync(bool in_isr) {
-#if OM_VIRTUAL_TIME
-  om_time_update(_om_time_handle);
-#endif
+  _om_time_handle++;
 
   if (!om_msg_initd) return OM_ERROR_NOT_INIT;
 

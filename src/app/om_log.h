@@ -1,9 +1,9 @@
 #ifndef __OM_LOG_H__
 #define __OM_LOG_H__
 
-#include "om_color.h"
 #include "om_core.h"
 
+#if OM_LOG_OUTPUT
 #define OMLOG_DEFAULT(format, args...) \
   om_print_log("Default", OM_LOG_LEVEL_DEFAULT, true, false, format, ##args)
 #define OMLOG_WARNING(format, args...) \
@@ -26,7 +26,6 @@
 #define OMLOG_NOTICE_ISR(format, args...) \
   om_print_log("Notice", OM_LOG_LEVEL_NOTICE, false, true, format, ##args)
 
-#if OM_LOG_OUTPUT
 typedef enum {
   OM_LOG_COLOR_RED,
   OM_LOG_COLOR_GREEN,

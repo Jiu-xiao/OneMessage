@@ -1,7 +1,6 @@
 #ifndef __OM_MSG_H__
 #define __OM_MSG_H__
 
-#include "om_afl.h"
 #include "om_core.h"
 
 #define om_topic_add_puber om_core_add_puber

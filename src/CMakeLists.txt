@@ -2,17 +2,9 @@ cmake_minimum_required(VERSION 3.11)
 project(OneMessage)
 
 file(
-  GLOB
-  ${PROJECT_NAME}_SOURCES
-  "${CMAKE_CURRENT_SOURCE_DIR}/om.c"
-  "${CMAKE_CURRENT_SOURCE_DIR}/app/om_msg.c"
-  "${CMAKE_CURRENT_SOURCE_DIR}/app/om_log.c"
-  "${CMAKE_CURRENT_SOURCE_DIR}/app/om_fmt.c"
-  "${CMAKE_CURRENT_SOURCE_DIR}/app/om_afl.c"
-  "${CMAKE_CURRENT_SOURCE_DIR}/core/om_core.c"
-  "${CMAKE_CURRENT_SOURCE_DIR}/comp/om_list.c"
-  "${CMAKE_CURRENT_SOURCE_DIR}/comp/om_color.c"
-  "${CMAKE_CURRENT_SOURCE_DIR}/comp/om_mutex.c")
+  GLOB ${PROJECT_NAME}_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/app/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/core/*.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/comp/*.c")
 
 add_library(${PROJECT_NAME} STATIC)
 

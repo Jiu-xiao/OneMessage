@@ -1,6 +1,7 @@
 #ifndef __OM_CORE_H__
 #define __OM_CORE_H__
 
+#include "om_color.h"
 #include "om_def.h"
 #include "om_lib.h"
 #include "om_list.h"
@@ -88,6 +89,8 @@ typedef struct {
   } source;
 } om_link_t;
 
+extern uint32_t _om_time_handle;
+
 om_topic_t* om_core_topic_create(const char* name);
 
 om_status_t om_core_add_topic(om_topic_t* topic);
@@ -118,6 +121,8 @@ om_status_t om_core_set_dump_target(om_suber_t* suber, void* target,
                                     uint32_t max_size);
 
 om_topic_t* om_core_find_topic(const char* name, uint32_t timeout);
+
+uint32_t om_core_get_time(void);
 
 void om_error(const char* file, uint32_t line);
 #endif

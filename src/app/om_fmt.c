@@ -1,6 +1,7 @@
 #include "om_fmt.h"
 
 #include "om_afl.h"
+#include "om_log.h"
 #include "om_msg.h"
 
 #define GET_CAPITAL(_c) (isupper(_c) ? _c : toupper(_c))
