@@ -15,7 +15,7 @@ typedef struct {
 typedef om_status_t (*om_user_fun_t)(om_msg_t* msg, void* arg);
 
 typedef struct {
-  bool virtual;
+  bool virtual_mode;
   om_mutex_t mutex;
   om_msg_t msg;
   char name[OM_TOPIC_MAX_NAME_LEN];
@@ -76,7 +76,7 @@ typedef struct {
     struct {
       uint32_t max_size;
       uint8_t* buff;
-      bool new;
+      bool new_data;
     } as_dump;
   } data;
 } om_suber_t;

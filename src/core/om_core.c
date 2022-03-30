@@ -156,7 +156,7 @@ om_status_t om_core_del_topic(om_list_head_t* head) {
   om_del_all(&topic->link, om_core_delink);
   om_del_all(&topic->puber, om_core_del_puber);
   om_del_all(&topic->suber, om_core_del_suber);
-  if (!topic->virtual && topic->msg.buff) om_free(topic->msg.buff);
+  if (!topic->virtual_mode && topic->msg.buff) om_free(topic->msg.buff);
   om_free(topic);
 
   return OM_OK;

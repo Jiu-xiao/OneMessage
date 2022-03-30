@@ -37,7 +37,7 @@ om_status_t om_afl_add_filter(om_afl_t* afl, om_filter_t* filter) {
 
 om_status_t om_afl_set_filter(om_filter_t* filter, uint8_t mode,
                               uint32_t offset, uint32_t length, uint32_t scope,
-                              uint32_t arg, void* template) {
+                              uint32_t arg, void* fl_template) {
   OM_ASSERT(filter);
 
   filter->mode = mode;
@@ -47,7 +47,7 @@ om_status_t om_afl_set_filter(om_filter_t* filter, uint8_t mode,
     case OM_AFL_MODE_LIST:
       filter->data.list.scope = scope;
       filter->data.list.offset = offset;
-      filter->data.list.template = template;
+      filter->data.list.fl_template = fl_template;
       break;
     case OM_AFL_MODE_RANGE:
       filter->data.range.offset = offset;
@@ -77,7 +77,7 @@ om_status_t _om_afl_filter_check(om_filter_t* filter, om_msg_t* msg) {
       if (msg->size < filter->data.list.scope + filter->data.list.offset)
         return OM_ERROR;
       buff += filter->data.list.offset;
-      if (!memcmp(buff, filter->data.list.template, filter->data.list.scope))
+      if (!memcmp(buff, filter->data.list.fl_template, filter->data.list.scope))
         return OM_OK;
       break;
     case OM_AFL_MODE_RANGE:

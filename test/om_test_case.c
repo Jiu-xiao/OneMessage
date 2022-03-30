@@ -118,7 +118,7 @@ START_TEST(om_afl) {
   om_delay_ms(1000);
 
   om_afl_test_t test = {0}, ans1 = {0}, ans2 = {0}, ans3 = {0};
-  uint8_t template[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  uint8_t fl_template[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
   om_topic_t* source = om_config_topic(NULL, NULL, "source");
   om_topic_t* list = om_config_topic(NULL, NULL, "list");
@@ -131,11 +131,11 @@ START_TEST(om_afl) {
       om_subscript(decompose, &(ans3.decompose), sizeof(ans3.decompose));
 
   om_config_filter(source, "LDR", list, OM_PRASE_STRUCT(om_afl_test_t, list),
-                   template, decompose,
+                   fl_template, decompose,
                    OM_PRASE_STRUCT(om_afl_test_t, decompose), range,
                    OM_PRASE_STRUCT(om_afl_test_t, range), 213, 100);
 
-  memcpy(&test.list, template, sizeof(template));
+  memcpy(&test.list, fl_template, sizeof(fl_template));
   om_publish(source, &test, sizeof(test), true, false);
   om_suber_dump(list_sub, false);
   ck_assert_msg(!memcmp(&test.list, &ans1.list, sizeof(ans1.list)),

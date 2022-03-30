@@ -51,21 +51,21 @@ void _INIT_LIST_HEAD(om_list_head_t* list);
 
 #define OM_PRASE_VAR(_arg) (&_arg), (sizeof(_arg))
 
-void om_list_add(om_list_head_t* new, om_list_head_t* head);
+void om_list_add(om_list_head_t* new_data, om_list_head_t* head);
 
-void om_list_add_tail(om_list_head_t* new, om_list_head_t* head);
+void om_list_add_tail(om_list_head_t* new_data, om_list_head_t* head);
 
 void om_list_del(om_list_head_t* entry);
 
 void om_list_del_init(om_list_head_t* entry);
 
-void om_list_replace(om_list_head_t* old, om_list_head_t* new);
+void om_list_replace(om_list_head_t* old, om_list_head_t* new_data);
 
 int om_list_empty(const om_list_head_t* head);
 
 void __list_del(om_list_head_t* prev, om_list_head_t* next);
 
-void __list_add(om_list_head_t* new, om_list_head_t* prev,
+void __list_add(om_list_head_t* new_data, om_list_head_t* prev,
                 om_list_head_t* next);
 
 void __list_del_entry(om_list_head_t* entry);

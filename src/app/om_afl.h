@@ -18,7 +18,7 @@ typedef struct {
 typedef struct {
   uint32_t offset;
   uint32_t scope;
-  void* template;
+  void* fl_template;
 } _om_afl_filter_list_t;
 
 typedef struct {
@@ -52,7 +52,7 @@ om_status_t om_afl_add_filter(om_afl_t* afl, om_filter_t* filter);
 
 om_status_t om_afl_set_filter(om_filter_t* filter, uint8_t mode,
                               uint32_t offset, uint32_t length, uint32_t scope,
-                              uint32_t arg, void* template);
+                              uint32_t arg, void* fl_template);
 
 om_status_t _om_afl_filter_check(om_filter_t* filter, om_msg_t* msg);
 

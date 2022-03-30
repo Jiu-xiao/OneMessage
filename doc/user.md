@@ -177,7 +177,7 @@ block参数决定当其他线程发布时是否阻塞
 过滤器配置
 | 选项 | 参数                                                                                              | 功能               |
 | ---- | ------------------------------------------------------------------------------------------------- | ------------------ |
-| l    | `om_topic_t* target,uint32_t length,uint32_t offset,uint32_t scope,void* template`                | 设置过滤器列表模式 |
+| l    | `om_topic_t* target,uint32_t length,uint32_t offset,uint32_t scope,void* fl_template`                | 设置过滤器列表模式 |
 | r    | `om_topic_t* target,uint32_t length,uint32_t offset,uint32_t scope,uint32_t start,uint32_t range` | 设置过滤器范围模式 |
 | d    | `om_topic_t* target,uint32_t length,uint32_t offset,uint32_t scope`                               | 设置过滤器分解模式 |
 

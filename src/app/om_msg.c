@@ -46,7 +46,7 @@ inline om_status_t _om_publish_to_suber(om_suber_t* sub, om_topic_t* topic,
       }
       break;
     case OM_SUBER_MODE_DUMP:
-      sub->data.as_dump.new = true;
+      sub->data.as_dump.new_data = true;
       break;
     case OM_SUBER_MODE_UNKNOW:
       break;
@@ -72,7 +72,7 @@ inline om_status_t _om_publish_to_topic(om_topic_t* topic, om_msg_t* msg,
       topic->user_fun.filter(msg, topic->user_fun.filter_arg) != OM_OK)
     return OM_ERROR;
 
-  if (topic->virtual)
+  if (topic->virtual_mode)
     memcpy(&topic->msg, msg, sizeof(*msg));
   else {
     if (topic->msg.buff != NULL) om_free(topic->msg.buff);
@@ -216,18 +216,18 @@ om_status_t om_suber_dump(om_suber_t* suber, bool in_isr) {
 
 #if OM_STRICT_LIMIT
   bool data_correct = suber->master->msg.size == suber->data.as_dump.max_size;
-  OM_ASSERT(!suber->data.as_dump.new || data_correct);
+  OM_ASSERT(!suber->data.as_dump.new_data || data_correct);
 #else
   bool data_correct = suber->master->msg.size <= suber->data.as_dump.max_size;
 #endif
 
-  if (suber->data.as_dump.new&& data_correct) {
+  if (suber->data.as_dump.new_data && data_correct) {
     if (!in_isr)
       om_mutex_lock(&suber->master->mutex);
     else
       om_mutex_lock_isr(&suber->master->mutex);
 
-    suber->data.as_dump.new = false;
+    suber->data.as_dump.new_data = false;
 
     memcpy(suber->data.as_dump.buff, suber->master->msg.buff,
            suber->master->msg.size);

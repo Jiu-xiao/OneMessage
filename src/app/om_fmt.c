@@ -56,7 +56,7 @@ om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
         om_core_link(va_arg(valist, om_topic_t*), topic);
         break;
       case VIRTUAL_FLAG:
-        topic->virtual = true;
+        topic->virtual_mode = true;
         break;
       case ADD2LIST:
         om_add_topic(topic);
@@ -178,9 +178,9 @@ om_status_t om_config_filter(om_topic_t* topic, const char* format, ...) {
         uint32_t length = va_arg(valist, uint32_t);
         uint32_t offset = va_arg(valist, uint32_t);
         uint32_t scope = va_arg(valist, uint32_t);
-        void* template = va_arg(valist, void*);
+        void* fl_template = va_arg(valist, void*);
         om_afl_set_filter(filter, OM_AFL_MODE_LIST, offset, length, scope, 0,
-                          template);
+                          fl_template);
         om_afl_add_filter(topic->afl, filter);
         break;
       }
