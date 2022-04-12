@@ -30,7 +30,7 @@ om_status_t om_sync(bool in_isr);
 
 om_suber_t* om_subscript(om_topic_t* topic, void* buff, uint32_t max_size);
 
-om_status_t om_suber_dump(om_suber_t* suber, bool in_isr);
+om_status_t om_suber_export(om_suber_t* suber, bool in_isr);
 
 om_status_t om_msg_deinit();
 

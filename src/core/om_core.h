@@ -33,10 +33,8 @@ typedef struct {
 typedef struct {
   om_list_head_t self;
   struct {
-    om_user_fun_t new_message;
-    om_user_fun_t get_message;
-    void* new_arg;
-    void* get_arg;
+    om_user_fun_t refresh_callback;
+    void* refresh_cb_arg;
   } user_fun;
   om_msg_t msg_buff;
   struct {
@@ -53,8 +51,8 @@ typedef struct {
 typedef enum {
   OM_SUBER_MODE_UNKNOW,
   OM_SUBER_MODE_LINK,
-  OM_SUBER_MODE_DUMP,
-  OM_SUBER_MODE_DEPLOY,
+  OM_SUBER_MODE_EXPORT,
+  OM_SUBER_MODE_DEFAULT,
 } om_suber_mode_t;
 
 typedef struct {
@@ -65,9 +63,9 @@ typedef struct {
 
   union {
     struct {
-      om_user_fun_t deploy;
-      void* deploy_arg;
-    } as_deploy;
+      om_user_fun_t sub_callback;
+      void* sub_cb_arg;
+    } as_suber;
 
     struct {
       om_topic_t* target;
@@ -77,7 +75,7 @@ typedef struct {
       uint32_t max_size;
       uint8_t* buff;
       bool new_data;
-    } as_dump;
+    } as_export;
   } data;
 } om_suber_t;
 
@@ -117,8 +115,8 @@ om_status_t om_core_del_puber(om_list_head_t* head);
 
 om_status_t om_core_del_topic(om_list_head_t* head);
 
-om_status_t om_core_set_dump_target(om_suber_t* suber, void* target,
-                                    uint32_t max_size);
+om_status_t om_core_set_export_target(om_suber_t* suber, void* target,
+                                      uint32_t max_size);
 
 om_topic_t* om_core_find_topic(const char* name, uint32_t timeout);
 

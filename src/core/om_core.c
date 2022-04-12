@@ -177,14 +177,14 @@ om_topic_t* om_core_find_topic(const char* name, uint32_t timeout) {
   return NULL;
 }
 
-om_status_t om_core_set_dump_target(om_suber_t* suber, void* target,
-                                    uint32_t max_size) {
+om_status_t om_core_set_export_target(om_suber_t* suber, void* target,
+                                      uint32_t max_size) {
   OM_ASSERT(target);
   OM_ASSERT(suber);
 
-  suber->mode = OM_SUBER_MODE_DUMP;
-  suber->data.as_dump.max_size = max_size;
-  suber->data.as_dump.buff = target;
+  suber->mode = OM_SUBER_MODE_EXPORT;
+  suber->data.as_export.max_size = max_size;
+  suber->data.as_export.buff = target;
   return OM_OK;
 }
 

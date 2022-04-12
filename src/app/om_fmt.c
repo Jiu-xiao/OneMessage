@@ -9,9 +9,8 @@
 /* MSG */
 #define ADD2LIST ('A')
 #define FILTER_FLAG ('F')
-#define NEW_FLAG ('N')
-#define GET_FLAG ('G')
-#define DEPLOY_FLAG ('D')
+#define REFRESH_FLAG ('R')
+#define SUBER_CB_FLAG ('D')
 #define LINK_FLAG ('L')
 #define SUBER_FLAG ('S')
 #define PUBER_FLAG ('P')
@@ -62,18 +61,15 @@ om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
       case ADD2LIST:
         om_add_topic(topic);
         break;
-      case DEPLOY_FLAG: {
+      case SUBER_CB_FLAG: {
         om_user_fun_t fun = va_arg(valist, om_user_fun_t);
         void* arg = va_arg(valist, void*);
         om_config_suber(NULL, "DT", fun, arg, topic);
       } break;
-      case NEW_FLAG:
-      case GET_FLAG: {
-        om_user_fun_t fun_new = va_arg(valist, om_user_fun_t);
-        void* arg_new = va_arg(valist, void*);
-        om_user_fun_t fun_get = va_arg(valist, om_user_fun_t);
-        void* arg_get = va_arg(valist, void*);
-        om_config_puber(NULL, "NGT", fun_new, arg_new, fun_get, arg_get, topic);
+      case REFRESH_FLAG: {
+        om_user_fun_t fun_refresh = va_arg(valist, om_user_fun_t);
+        void* arg_refresh = va_arg(valist, void*);
+        om_config_puber(NULL, "RT", fun_refresh, arg_refresh, topic);
       } break;
       default:
         OM_ASSERT(false);
@@ -96,13 +92,13 @@ om_suber_t* om_config_suber(om_suber_t* suber, const char* format, ...) {
   for (const uint8_t* index = (const uint8_t*)format; *index != '\0'; index++) {
     OM_ASSERT(isalpha(*index));
     switch (GET_CAPITAL(*index)) {
-      case DEPLOY_FLAG:
-        suber->mode = OM_SUBER_MODE_DEPLOY;
+      case SUBER_CB_FLAG:
+        suber->mode = OM_SUBER_MODE_DEFAULT;
 
-        suber->data.as_deploy.deploy = va_arg(valist, om_user_fun_t);
-        suber->data.as_deploy.deploy_arg = va_arg(valist, void*);
+        suber->data.as_suber.sub_callback = va_arg(valist, om_user_fun_t);
+        suber->data.as_suber.sub_cb_arg = va_arg(valist, void*);
 
-        OM_ASSERT(suber->data.as_deploy.deploy);
+        OM_ASSERT(suber->data.as_suber.sub_callback);
         break;
       case TOPIC_FLAG:
         om_core_add_suber(va_arg(valist, om_topic_t*), suber);
@@ -128,18 +124,11 @@ om_puber_t* om_config_puber(om_puber_t* puber, const char* format, ...) {
   for (const uint8_t* index = (const uint8_t*)format; *index != '\0'; index++) {
     OM_ASSERT(isalpha(*index));
     switch (GET_CAPITAL(*index)) {
-      case NEW_FLAG:
-        puber->user_fun.new_message = va_arg(valist, om_user_fun_t);
-        puber->user_fun.new_arg = va_arg(valist, void*);
+      case REFRESH_FLAG:
+        puber->user_fun.refresh_callback = va_arg(valist, om_user_fun_t);
+        puber->user_fun.refresh_cb_arg = va_arg(valist, void*);
 
-        OM_ASSERT(puber->user_fun.new_message);
-
-        break;
-      case GET_FLAG:
-        puber->user_fun.get_message = va_arg(valist, om_user_fun_t);
-        puber->user_fun.get_arg = va_arg(valist, void*);
-
-        OM_ASSERT(puber->user_fun.get_message);
+        OM_ASSERT(puber->user_fun.refresh_callback);
 
         break;
       case TOPIC_FLAG:

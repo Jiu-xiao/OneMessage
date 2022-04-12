@@ -26,8 +26,9 @@ inline om_status_t _om_publish_to_suber(om_suber_t* sub, om_topic_t* topic,
   OM_ASSERT(topic);
 
   switch (sub->mode) {
-    case OM_SUBER_MODE_DEPLOY:
-      sub->data.as_deploy.deploy(&topic->msg, sub->data.as_deploy.deploy_arg);
+    case OM_SUBER_MODE_DEFAULT:
+      sub->data.as_suber.sub_callback(&topic->msg,
+                                      sub->data.as_suber.sub_cb_arg);
       break;
     case OM_SUBER_MODE_LINK:
       if (!in_isr) {
@@ -46,8 +47,8 @@ inline om_status_t _om_publish_to_suber(om_suber_t* sub, om_topic_t* topic,
         om_mutex_unlock_isr(&sub->data.as_link.target->mutex);
       }
       break;
-    case OM_SUBER_MODE_DUMP:
-      sub->data.as_dump.new_data = true;
+    case OM_SUBER_MODE_EXPORT:
+      sub->data.as_export.new_data = true;
       break;
     case OM_SUBER_MODE_UNKNOW:
       break;
@@ -137,17 +138,15 @@ om_status_t om_publish(om_topic_t* topic, void* buff, uint32_t size, bool block,
 
 inline om_status_t _om_refresh_puber(om_puber_t* pub, om_topic_t* topic,
                                      bool block, bool in_isr) {
-  OM_ASSERT(pub->user_fun.get_message);
-  OM_ASSERT(pub->user_fun.new_message);
+  OM_ASSERT(pub->user_fun.refresh_callback);
 
   pub->freq.counter--;
   if (pub->freq.counter > 0) return OM_ERROR;
 
   pub->freq.counter += pub->freq.reload;
 
-  if (pub->user_fun.new_message(&pub->msg_buff, pub->user_fun.new_arg) !=
-          OM_OK ||
-      pub->user_fun.get_message(&pub->msg_buff, pub->user_fun.get_arg) != OM_OK)
+  if (pub->user_fun.refresh_callback(&pub->msg_buff,
+                                     pub->user_fun.refresh_cb_arg) != OM_OK)
     return OM_ERROR;
 
   om_status_t res = OM_OK;
@@ -205,32 +204,32 @@ om_suber_t* om_subscript(om_topic_t* topic, void* buff, uint32_t max_size) {
   OM_ASSERT(buff);
 
   om_suber_t* sub = om_core_suber_create(NULL);
-  om_core_set_dump_target(sub, buff, max_size);
+  om_core_set_export_target(sub, buff, max_size);
   om_core_add_suber(topic, sub);
 
   return sub;
 }
 
-om_status_t om_suber_dump(om_suber_t* suber, bool in_isr) {
+om_status_t om_suber_export(om_suber_t* suber, bool in_isr) {
   OM_ASSERT(suber);
-  OM_ASSERT(suber->mode == OM_SUBER_MODE_DUMP);
+  OM_ASSERT(suber->mode == OM_SUBER_MODE_EXPORT);
 
 #if OM_STRICT_LIMIT
-  bool data_correct = suber->master->msg.size == suber->data.as_dump.max_size;
-  OM_ASSERT(!suber->data.as_dump.new_data || data_correct);
+  bool data_correct = suber->master->msg.size == suber->data.as_export.max_size;
+  OM_ASSERT(!suber->data.as_export.new_data || data_correct);
 #else
-  bool data_correct = suber->master->msg.size <= suber->data.as_dump.max_size;
+  bool data_correct = suber->master->msg.size <= suber->data.as_export.max_size;
 #endif
 
-  if (suber->data.as_dump.new_data && data_correct) {
+  if (suber->data.as_export.new_data && data_correct) {
     if (!in_isr)
       om_mutex_lock(&suber->master->mutex);
     else
       om_mutex_lock_isr(&suber->master->mutex);
 
-    suber->data.as_dump.new_data = false;
+    suber->data.as_export.new_data = false;
 
-    memcpy(suber->data.as_dump.buff, suber->master->msg.buff,
+    memcpy(suber->data.as_export.buff, suber->master->msg.buff,
            suber->master->msg.size);
 
     if (!in_isr)

@@ -5,27 +5,20 @@ static char str1[] = "This is str1";
 static char str2[] = "This is str2";
 static char str3[] = "This is str3";
 
-static bool msg_new = false, filter = false, deploy = false, get = false;
+static bool msg_new = false, filter = false, sub_callback = false;
 
 static int call_counter = 0;
 
-static om_status_t new_fun(om_msg_t* msg, void* arg) {
+static om_status_t refresh_fun(om_msg_t* msg, void* arg) {
   OM_UNUSED(arg);
 
   call_counter++;
-  if (msg_new)
+  if (msg_new) {
+    msg->buff = str1;
+    msg->size = sizeof(str1);
     return OM_OK;
-  else
+  } else
     return OM_ERROR;
-}
-
-static om_status_t get_fun(om_msg_t* msg, void* arg) {
-  OM_UNUSED(arg);
-
-  get = true;
-  msg->buff = str1;
-  msg->size = sizeof(str1);
-  return OM_OK;
 }
 
 static char str_tmp[20];
@@ -33,7 +26,7 @@ static char str_tmp[20];
 static om_status_t deploy_fun(om_msg_t* msg, void* arg) {
   OM_UNUSED(arg);
 
-  deploy = true;
+  sub_callback = true;
   strncpy(str_tmp, msg->buff, 20);
   return OM_OK;
 }
@@ -53,9 +46,8 @@ static float pub_freq = 12.5;
 START_TEST(publish) {
   om_init();
   om_status_t res = OM_OK;
-  om_topic_t* topic =
-      om_config_topic(NULL, "fdna", "topic", filter_fun, NULL, deploy_fun, NULL,
-                      new_fun, NULL, get_fun, NULL);
+  om_topic_t* topic = om_config_topic(NULL, "fdra", "topic", filter_fun, NULL,
+                                      deploy_fun, NULL, refresh_fun, NULL);
   om_topic_t* topic2 = om_config_topic(NULL, "la", "topic2", topic);
   ck_assert_msg(topic, "topic 指针为 NULL.");
   ck_assert_msg(topic2, "topic2 指针为 NULL.");
@@ -64,12 +56,12 @@ START_TEST(publish) {
   ck_assert_msg(call_counter == 100, "new_fun调用了%d次，应为100次",
                 call_counter);
 
-  ck_assert_msg(!deploy, "意外调用了deploy函数。");
+  ck_assert_msg(!sub_callback, "意外调用了deploy函数。");
   ck_assert_msg(!filter, "意外调用了filter函数。");
   msg_new = true;
 
   for (uint32_t i = 0; i < 100; i++) om_sync(false);
-  ck_assert_msg(deploy, "未调用deploy函数。");
+  ck_assert_msg(sub_callback, "未调用deploy函数。");
   ck_assert_msg(filter, "未调用filter函数。");
   ck_assert_msg(!strncmp(str_tmp, str1, 20), "sync数据损坏。");
   msg_new = false;
@@ -99,7 +91,7 @@ START_TEST(om_log) {
 
   ck_assert_msg(topic_log, "获取不到log话题。");
   om_print_log("init", OM_LOG_LEVEL_DEFAULT, true, false, "%s", str_log);
-  om_suber_dump(sub, false);
+  om_suber_export(sub, false);
   ck_assert_msg(!strcmp(buff, "[init]\033[mLog test.\r\n"), "LOG数据错误:%s",
                 buff);
   om_deinit();
@@ -137,19 +129,19 @@ START_TEST(om_afl) {
 
   memcpy(&test.list, fl_template, sizeof(fl_template));
   om_publish(source, &test, sizeof(test), true, false);
-  om_suber_dump(list_sub, false);
+  om_suber_export(list_sub, false);
   ck_assert_msg(!memcmp(&test.list, &ans1.list, sizeof(ans1.list)),
                 "过滤器list模式数据错误");
   test.list[1] = 0;
   om_publish(source, &test, sizeof(test), true, false);
-  om_suber_dump(list_sub, false);
+  om_suber_export(list_sub, false);
   ck_assert_msg(memcmp(&test.list, &ans1.list, sizeof(ans1.list)),
                 "过滤器list模式失效");
 
   for (uint32_t i = 0; i <= 100; i++) {
     test.range = 213 + i;
     om_publish(source, &test, sizeof(test), true, false);
-    om_suber_dump(range_sub, false);
+    om_suber_export(range_sub, false);
     ck_assert_msg(test.range == ans2.range,
                   "过滤器range模式数据错误在%d,应为%d,实际为%d", i, test.range,
                   ans2.range);
@@ -158,7 +150,7 @@ START_TEST(om_afl) {
   for (uint32_t i = 1000; i <= 2000; i++) {
     test.range = 213 + i;
     om_publish(source, &test, sizeof(test), true, false);
-    om_suber_dump(range_sub, false);
+    om_suber_export(range_sub, false);
     ck_assert_msg(test.range != ans2.range,
                   "过滤器range模式失效在%d,应为%d,实际为%d", i, test.range,
                   ans2.range);
@@ -166,7 +158,7 @@ START_TEST(om_afl) {
 
   test.decompose = 5.63f;
   om_publish(source, &test, sizeof(test), true, false);
-  om_suber_dump(decompose_sub, false);
+  om_suber_export(decompose_sub, false);
   ck_assert_msg(test.decompose == ans3.decompose,
                 "过滤器decompose模式数据错误");
 

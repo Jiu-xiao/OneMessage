@@ -10,20 +10,20 @@
 om_status_t om_print_suber_message(om_suber_t* suber, char* buff,
                                    uint32_t buff_size) {
   switch (suber->mode) {
-    case OM_SUBER_MODE_DEPLOY:
+    case OM_SUBER_MODE_DEFAULT:
       snprintf(buff, buff_size,
-               "\tsuber mode:\t[%s] --[deploy]--> user_fun[%p]\r\n",
-               suber->master->name, suber->data.as_deploy.deploy);
+               "\tsuber mode:\t[%s] --[sub_callback]--> user_fun[%p]\r\n",
+               suber->master->name, suber->data.as_suber.sub_callback);
       break;
     case OM_SUBER_MODE_LINK:
       snprintf(buff, buff_size, "\t\tsuber mode:\t[%s] --[link]--> [%s]\r\n",
                suber->master->name, suber->data.as_link.target->name);
       break;
-    case OM_SUBER_MODE_DUMP:
+    case OM_SUBER_MODE_EXPORT:
       snprintf(buff, buff_size,
-               "\tsuber mode:\t[%s] --[dump]--> buffer:%d[%p]\r\n",
-               suber->master->name, (int)suber->data.as_dump.max_size,
-               suber->data.as_dump.buff);
+               "\tsuber mode:\t[%s] --[export]--> buffer:%d[%p]\r\n",
+               suber->master->name, (int)suber->data.as_export.max_size,
+               suber->data.as_export.buff);
       break;
     case OM_SUBER_MODE_UNKNOW:
       snprintf(buff, buff_size, "\t\tsuber mode:\t[%s] --[unknow]-- [%p]\r\n",
