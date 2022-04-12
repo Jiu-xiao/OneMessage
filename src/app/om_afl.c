@@ -3,6 +3,7 @@
 #include "om_fmt.h"
 #include "om_log.h"
 #include "om_msg.h"
+#include "om_run.h"
 
 om_afl_t* om_afl_create(om_topic_t* source) {
   om_afl_t* afl = om_malloc(sizeof(om_afl_t));

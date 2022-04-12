@@ -3,6 +3,7 @@
 #include "om_afl.h"
 #include "om_fmt.h"
 #include "om_log.h"
+#include "om_run.h"
 
 extern om_list_head_t topic_list;
 

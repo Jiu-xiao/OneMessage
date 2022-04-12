@@ -6,6 +6,7 @@ extern "C" {
 #include "om_fmt.h"
 #include "om_log.h"
 #include "om_msg.h"
+#include "om_run.h"
 
 om_status_t om_init();
 
