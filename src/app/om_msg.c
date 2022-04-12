@@ -5,16 +5,13 @@
 #include "om_log.h"
 #include "om_run.h"
 
-extern om_list_head_t topic_list;
+extern om_list_head_t om_topic_list;
 
-om_mutex_t om_mutex_handle;
+extern om_mutex_t om_mutex_handle;
 
 static bool om_msg_initd = false;
 
 om_status_t om_msg_init() {
-  om_mutex_init(&om_mutex_handle);
-  om_mutex_unlock(&om_mutex_handle);
-
   om_msg_initd = true;
 
   return OM_OK;
@@ -182,7 +179,7 @@ om_status_t om_sync(bool in_isr) {
   }
 
   om_list_head_t *pos1, *pos2;
-  om_list_for_each(pos1, &topic_list) {
+  om_list_for_each(pos1, &om_topic_list) {
     om_topic_t* topic = om_list_entry(pos1, om_topic_t, self);
     om_list_for_each(pos2, &topic->puber) {
       om_puber_t* pub = om_list_entry(pos2, om_puber_t, self);
@@ -246,7 +243,7 @@ om_status_t om_suber_export(om_suber_t* suber, bool in_isr) {
 om_status_t om_msg_deinit() {
   om_msg_initd = false;
 
-  om_del_all(&topic_list, om_core_del_topic);
+  om_del_all(&om_topic_list, om_core_del_topic);
 
   return OM_OK;
 }
@@ -269,7 +266,7 @@ om_status_t om_msg_del_puber(om_puber_t* puber) {
   return om_core_del_puber(&puber->self);
 }
 
-uint32_t om_msg_get_topic_num() { return om_list_get_num(&topic_list); }
+uint32_t om_msg_get_topic_num() { return om_list_get_num(&om_topic_list); }
 
 uint32_t om_msg_get_suber_num(om_topic_t* topic) {
   return om_list_get_num(&topic->suber);
@@ -289,7 +286,7 @@ om_status_t om_msg_for_each(om_status_t (*fun)(om_topic_t*, void* arg),
 
   om_list_head_t* pos;
 
-  om_list_for_each(pos, &topic_list) {
+  om_list_for_each(pos, &om_topic_list) {
     om_topic_t* topic = om_list_entry(pos, om_topic_t, self);
     if (fun(topic, arg) != OM_OK) return OM_ERROR;
   }

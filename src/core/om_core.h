@@ -89,6 +89,8 @@ typedef struct {
 
 extern uint32_t _om_time_handle;
 
+om_status_t om_core_init();
+
 om_topic_t* om_core_topic_create(const char* name);
 
 om_status_t om_core_add_topic(om_topic_t* topic);
