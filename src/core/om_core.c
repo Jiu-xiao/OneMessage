@@ -4,6 +4,10 @@ uint32_t _om_time_handle;
 
 om_mutex_t om_mutex_handle;
 
+#if OM_REPORT_ACTIVITY
+static uint32_t om_topic_num;
+#endif
+
 LIST_HEAD(om_topic_list);
 
 om_status_t om_core_init() {
@@ -39,6 +43,10 @@ om_status_t om_core_add_topic(om_topic_t* topic) {
     OM_ASSERT(false);
     return OM_ERROR;
   }
+
+#if OM_REPORT_ACTIVITY
+  topic->id = om_topic_num++;
+#endif
 
   om_list_add_tail(&topic->self, &om_topic_list);
 
@@ -151,7 +159,7 @@ om_status_t om_core_del_suber(om_list_head_t* head) {
   if (sub->mode == OM_SUBER_MODE_LINK) {
     OM_ASSERT(sub->master);
     om_list_head_t* pos;
-    om_list_for_each(pos, &sub->master->link) {
+    om_list_for_each(pos, &sub->data.as_link.target->link) {
       om_link_t* link = om_list_entry(pos, om_link_t, self);
       if (link->source.suber == sub) {
         om_list_del(&link->self);

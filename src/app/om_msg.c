@@ -26,6 +26,9 @@ inline om_status_t _om_publish_to_suber(om_suber_t* sub, om_topic_t* topic,
     case OM_SUBER_MODE_DEFAULT:
       sub->data.as_suber.sub_callback(&topic->msg,
                                       sub->data.as_suber.sub_cb_arg);
+#if OM_REPORT_ACTIVITY
+      om_add_report(OM_ACTIVITY_SUBSCRIBE, topic->id);
+#endif
       break;
     case OM_SUBER_MODE_LINK:
       if (!in_isr) {
@@ -35,6 +38,9 @@ inline om_status_t _om_publish_to_suber(om_suber_t* sub, om_topic_t* topic,
           if (om_mutex_trylock(&sub->data.as_link.target->mutex) != OM_OK)
             break;
         }
+#if OM_REPORT_ACTIVITY
+        om_add_report(OM_ACTIVITY_LINK, topic->id);
+#endif
         _om_publish(sub->data.as_link.target, &topic->msg, block, in_isr);
         om_mutex_unlock(&sub->data.as_link.target->mutex);
       } else {
@@ -81,6 +87,10 @@ inline om_status_t _om_publish_to_topic(om_topic_t* topic, om_msg_t* msg,
     topic->msg.size = msg->size;
     topic->msg.time = msg->time;
   }
+
+#if OM_REPORT_ACTIVITY
+  om_add_report(OM_ACTIVITY_PUBLISH, topic->id);
+#endif
 
   return OM_OK;
 }
@@ -187,6 +197,10 @@ om_status_t om_sync(bool in_isr) {
     }
   }
 
+#if OM_REPORT_ACTIVITY
+  om_send_report();
+#endif
+
   if (!in_isr) {
     om_mutex_unlock(&om_mutex_handle);
   } else {
@@ -233,6 +247,10 @@ om_status_t om_suber_export(om_suber_t* suber, bool in_isr) {
       om_mutex_unlock(&suber->master->mutex);
     else
       om_mutex_unlock_isr(&suber->master->mutex);
+
+#if OM_REPORT_ACTIVITY
+    om_add_report(OM_ACTIVITY_EXPORT, suber->master->id);
+#endif
 
     return OM_OK;
   } else {

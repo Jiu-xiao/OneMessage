@@ -65,3 +65,9 @@
 
 /* 话题名称最大长度 */
 #define OM_TOPIC_MAX_NAME_LEN (10)
+
+#define OM_REPORT_ACTIVITY (1)
+
+#if OM_REPORT_ACTIVITY
+#define OM_REPORT_BUFF_NUM (100)
+#endif

@@ -7,6 +7,69 @@
 
 #define STR_SELECT(_bool, _str, _str1) ((_bool) ? "" _str : ""_str1)
 
+#if OM_REPORT_ACTIVITY
+static om_report_t om_report_buff[OM_REPORT_BUFF_NUM];
+
+static uint32_t om_report_data_num = 0;
+
+static om_mutex_t om_report_mutex;
+
+__attribute__((weak)) om_status_t om_report_callback(uint8_t* buff,
+                                                     uint32_t size) {
+  OM_UNUSED(buff);
+  OM_UNUSED(size);
+
+  return OM_OK;
+}
+
+__attribute__((weak)) uint32_t om_get_realtime() {
+  static uint32_t tick;
+  return tick++;
+}
+
+om_status_t om_run_init() {
+  om_mutex_init(&om_report_mutex);
+  om_mutex_unlock(&om_report_mutex);
+
+  return OM_OK;
+}
+
+om_status_t om_add_report(om_activity_t activity, uint32_t id) {
+  om_mutex_lock(&om_report_mutex);
+
+  if (om_report_data_num >= OM_REPORT_BUFF_NUM) {
+    om_mutex_unlock(&om_report_mutex);
+    return OM_ERROR;
+  }
+
+  om_report_buff[om_report_data_num].activity = activity;
+  om_report_buff[om_report_data_num].id = id;
+  om_report_buff[om_report_data_num].time = om_get_realtime();
+
+  om_report_data_num++;
+
+  om_mutex_unlock(&om_report_mutex);
+
+  return OM_OK;
+}
+
+om_status_t om_send_report() {
+  om_mutex_lock(&om_report_mutex);
+
+  if (om_report_data_num > 0) {
+    om_report_callback((uint8_t*)om_report_buff,
+                       om_report_data_num * sizeof(om_report_t));
+  }
+
+  om_report_data_num = 0;
+
+  om_mutex_unlock(&om_report_mutex);
+
+  return OM_OK;
+}
+
+#endif
+
 om_status_t om_print_suber_message(om_suber_t* suber, char* buff,
                                    uint32_t buff_size) {
   switch (suber->mode) {

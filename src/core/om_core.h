@@ -19,6 +19,9 @@ typedef struct {
   om_mutex_t mutex;
   om_msg_t msg;
   char name[OM_TOPIC_MAX_NAME_LEN];
+#if OM_REPORT_ACTIVITY
+  uint32_t id;
+#endif
   om_list_head_t self;
   om_list_head_t suber;
   om_list_head_t puber;

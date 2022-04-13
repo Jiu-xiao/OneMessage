@@ -9,6 +9,9 @@ om_status_t om_init() {
 #if OM_LOG_OUTPUT
   res += om_log_init();
 #endif
+#if OM_REPORT_ACTIVITY
+  res += om_run_init();
+#endif
   return res;
 }
 
