@@ -20,7 +20,7 @@ typedef struct {
 
 om_status_t om_run_init();
 
-om_status_t om_run_add_report(om_activity_t activity, uint32_t id);
+om_status_t om_run_add_report(om_activity_t activity, uint32_t id, bool in_isr);
 
 om_status_t om_send_report_data();
 

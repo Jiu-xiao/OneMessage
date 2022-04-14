@@ -74,11 +74,18 @@ om_status_t om_generate_map() {
   return OM_OK;
 }
 
-om_status_t om_run_add_report(om_activity_t activity, uint32_t id) {
-  om_mutex_lock(&om_report_mutex);
+om_status_t om_run_add_report(om_activity_t activity, uint32_t id,
+                              bool in_isr) {
+  if (!in_isr)
+    om_mutex_lock(&om_report_mutex);
+  else
+    om_mutex_lock_isr(&om_report_mutex);
 
   if (om_report_data_num >= OM_REPORT_DATA_BUFF_NUM) {
-    om_mutex_unlock(&om_report_mutex);
+    if (!in_isr)
+      om_mutex_unlock(&om_report_mutex);
+    else
+      om_mutex_unlock_isr(&om_report_mutex);
     return OM_ERROR;
   }
 
@@ -87,7 +94,10 @@ om_status_t om_run_add_report(om_activity_t activity, uint32_t id) {
 
   om_report_data_num++;
 
-  om_mutex_unlock(&om_report_mutex);
+  if (!in_isr)
+    om_mutex_unlock(&om_report_mutex);
+  else
+    om_mutex_unlock_isr(&om_report_mutex);
 
   return OM_OK;
 }

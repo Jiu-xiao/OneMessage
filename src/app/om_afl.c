@@ -103,6 +103,10 @@ om_status_t _om_afl_filter_check(om_filter_t* filter, om_msg_t* msg) {
 
 om_status_t _om_afl_filter_apply(om_filter_t* filter, om_msg_t* msg, bool block,
                                  bool in_isr) {
+#if OM_REPORT_ACTIVITY
+  om_run_add_report(OM_ACTIVITY_FILTER, filter->target->id, in_isr);
+#endif
+
   switch (filter->mode) {
     case OM_AFL_MODE_LIST:
     case OM_AFL_MODE_RANGE:
@@ -116,10 +120,6 @@ om_status_t _om_afl_filter_apply(om_filter_t* filter, om_msg_t* msg, bool block,
       OM_ASSERT(false);
       return OM_ERROR;
   }
-
-#if OM_REPORT_ACTIVITY
-  om_run_add_report(OM_ACTIVITY_FILTER, filter->target->id);
-#endif
 
   return OM_OK;
 }

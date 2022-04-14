@@ -27,7 +27,7 @@ inline om_status_t _om_publish_to_suber(om_suber_t* sub, om_topic_t* topic,
       sub->data.as_suber.sub_callback(&topic->msg,
                                       sub->data.as_suber.sub_cb_arg);
 #if OM_REPORT_ACTIVITY
-      om_run_add_report(OM_ACTIVITY_SUBSCRIBE, topic->id);
+      om_run_add_report(OM_ACTIVITY_SUBSCRIBE, topic->id, in_isr);
 #endif
       break;
     case OM_SUBER_MODE_LINK:
@@ -39,7 +39,7 @@ inline om_status_t _om_publish_to_suber(om_suber_t* sub, om_topic_t* topic,
             break;
         }
 #if OM_REPORT_ACTIVITY
-        om_run_add_report(OM_ACTIVITY_LINK, topic->id);
+        om_run_add_report(OM_ACTIVITY_LINK, topic->id, in_isr);
 #endif
         _om_publish(sub->data.as_link.target, &topic->msg, block, in_isr);
         om_mutex_unlock(&sub->data.as_link.target->mutex);
@@ -89,7 +89,7 @@ inline om_status_t _om_publish_to_topic(om_topic_t* topic, om_msg_t* msg,
   }
 
 #if OM_REPORT_ACTIVITY
-  om_run_add_report(OM_ACTIVITY_PUBLISH, topic->id);
+  om_run_add_report(OM_ACTIVITY_PUBLISH, topic->id, in_isr);
 #endif
 
   return OM_OK;
@@ -245,7 +245,7 @@ om_status_t om_suber_export(om_suber_t* suber, bool in_isr) {
       om_mutex_unlock_isr(&suber->master->mutex);
 
 #if OM_REPORT_ACTIVITY
-    om_run_add_report(OM_ACTIVITY_EXPORT, suber->master->id);
+    om_run_add_report(OM_ACTIVITY_EXPORT, suber->master->id, in_isr);
 #endif
 
     return OM_OK;
