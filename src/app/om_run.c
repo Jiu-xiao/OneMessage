@@ -7,11 +7,12 @@
 
 #define STR_SELECT(_bool, _str, _str1) ((_bool) ? "" _str : ""_str1)
 
+#if OM_REPORT_ACTIVITY
+
 static const char OM_REPORT_MAP_PREFIX[] = {'@', 'm', 's', 'g'};
 
 static const char OM_REPORT_MAP_SUFFIX[] = {'@', 'e', 'n', 'd'};
 
-#if OM_REPORT_ACTIVITY
 static om_report_t om_report_buff[OM_REPORT_DATA_BUFF_NUM];
 
 static uint8_t om_report_map[OM_REPORT_MAP_BUFF_SIZE +
