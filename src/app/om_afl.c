@@ -118,7 +118,7 @@ om_status_t _om_afl_filter_apply(om_filter_t* filter, om_msg_t* msg, bool block,
   }
 
 #if OM_REPORT_ACTIVITY
-  om_add_report(OM_ACTIVITY_FILTER, filter->target->id);
+  om_run_add_report(OM_ACTIVITY_FILTER, filter->target->id);
 #endif
 
   return OM_OK;

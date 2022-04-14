@@ -14,16 +14,15 @@ typedef enum {
 } om_activity_t;
 
 typedef struct {
-  uint8_t activity;
-  uint16_t id;
+  uint32_t id_activity;
   uint32_t time;
 } om_report_t;
 
 om_status_t om_run_init();
 
-om_status_t om_add_report(om_activity_t activity, uint32_t id);
+om_status_t om_run_add_report(om_activity_t activity, uint32_t id);
 
-om_status_t om_send_report();
+om_status_t om_send_report_data();
 
 #endif
 

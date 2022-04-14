@@ -69,5 +69,11 @@
 #define OM_REPORT_ACTIVITY (1)
 
 #if OM_REPORT_ACTIVITY
+
+#define OM_REPORT_DATA_BUFF_NUM (128)
+#define OM_REPORT_MAP_BUFF_SIZE (1024)
+// #define om_get_realtime user_get_realtime_fun
+// #define om_report_transmit user_report_transmit_fun
+
 #define OM_REPORT_BUFF_NUM (100)
 #endif

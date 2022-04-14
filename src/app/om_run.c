@@ -7,25 +7,37 @@
 
 #define STR_SELECT(_bool, _str, _str1) ((_bool) ? "" _str : ""_str1)
 
+static const char OM_REPORT_MAP_PREFIX[] = {'@', 'm', 's', 'g'};
+
+static const char OM_REPORT_MAP_SUFFIX[] = {'@', 'e', 'n', 'd'};
+
 #if OM_REPORT_ACTIVITY
-static om_report_t om_report_buff[OM_REPORT_BUFF_NUM];
+static om_report_t om_report_buff[OM_REPORT_DATA_BUFF_NUM];
+
+static uint8_t om_report_map[OM_REPORT_MAP_BUFF_SIZE +
+                             sizeof(OM_REPORT_MAP_PREFIX) +
+                             sizeof(OM_REPORT_MAP_SUFFIX)];
 
 static uint32_t om_report_data_num = 0;
 
+static uint32_t om_report_map_len = 0;
+
 static om_mutex_t om_report_mutex;
 
-__attribute__((weak)) om_status_t om_report_callback(uint8_t* buff,
-                                                     uint32_t size) {
-  OM_UNUSED(buff);
-  OM_UNUSED(size);
-
-  return OM_OK;
-}
-
-__attribute__((weak)) uint32_t om_get_realtime() {
+#ifndef om_get_realtime
+uint32_t om_get_realtime() {
   static uint32_t tick;
+
   return tick++;
 }
+#endif
+
+#ifndef om_report_transmit
+void om_report_transmit(uint8_t* buff, uint32_t size) {
+  OM_UNUSED(buff);
+  OM_UNUSED(size);
+}
+#endif
 
 om_status_t om_run_init() {
   om_mutex_init(&om_report_mutex);
@@ -34,16 +46,42 @@ om_status_t om_run_init() {
   return OM_OK;
 }
 
-om_status_t om_add_report(om_activity_t activity, uint32_t id) {
+om_status_t _om_generate_map(om_topic_t* topic, void* arg) {
+  uint8_t** buff = (uint8_t**)arg;
+  uint32_t len = strlen(topic->name) + 1;
+
+  if (*buff - om_report_map + len <= OM_REPORT_MAP_BUFF_SIZE) {
+    sprintf((char*)*buff, "%s", topic->name);
+    *buff += len;
+    return OM_OK;
+  }
+
+  return OM_ERROR;
+}
+
+om_status_t om_generate_map() {
+  uint8_t* buff = om_report_map + sizeof(OM_REPORT_MAP_PREFIX);
+  om_msg_for_each(_om_generate_map, &buff);
+
+  memcpy(om_report_map, OM_REPORT_MAP_PREFIX, sizeof(OM_REPORT_MAP_PREFIX));
+  memcpy(buff, OM_REPORT_MAP_SUFFIX, sizeof(OM_REPORT_MAP_SUFFIX));
+
+  buff += sizeof(OM_REPORT_MAP_SUFFIX);
+
+  om_report_map_len = buff - om_report_map;
+
+  return OM_OK;
+}
+
+om_status_t om_run_add_report(om_activity_t activity, uint32_t id) {
   om_mutex_lock(&om_report_mutex);
 
-  if (om_report_data_num >= OM_REPORT_BUFF_NUM) {
+  if (om_report_data_num >= OM_REPORT_DATA_BUFF_NUM) {
     om_mutex_unlock(&om_report_mutex);
     return OM_ERROR;
   }
 
-  om_report_buff[om_report_data_num].activity = activity;
-  om_report_buff[om_report_data_num].id = id;
+  om_report_buff[om_report_data_num].id_activity = activity + (id << 16);
   om_report_buff[om_report_data_num].time = om_get_realtime();
 
   om_report_data_num++;
@@ -53,11 +91,15 @@ om_status_t om_add_report(om_activity_t activity, uint32_t id) {
   return OM_OK;
 }
 
-om_status_t om_send_report() {
+om_status_t om_send_report_data() {
   om_mutex_lock(&om_report_mutex);
 
   if (om_report_data_num > 0) {
-    om_report_callback((uint8_t*)om_report_buff,
+    om_generate_map();
+
+    om_report_transmit(om_report_map, om_report_map_len);
+
+    om_report_transmit((uint8_t*)om_report_buff,
                        om_report_data_num * sizeof(om_report_t));
   }
 
