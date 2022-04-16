@@ -92,3 +92,14 @@
 ## OM_LOG_MAX_LEN
 
 >日志最大长度
+
+## OM_REPORT_ACTIVITY
+
+>使能这个宏会开启活动上报
+>>OM_REPORT_DATA_BUFF_NUM 最大缓存活动条数
+>>
+>>OM_REPORT_MAP_BUFF_SIZE topic_map生成缓存区大小
+>>
+>>om_get_realtime 返回当前实时时间（整型），此函数的精度决定了活动记录的时间精度
+>>
+>>om_report_transmit(uint8_t* buff, uint32_t size) 发送数据

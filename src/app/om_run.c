@@ -49,10 +49,11 @@ om_status_t om_run_init() {
 
 om_status_t _om_generate_map(om_topic_t* topic, void* arg) {
   uint8_t** buff = (uint8_t**)arg;
-  uint32_t len = strlen(topic->name) + 1;
+  uint32_t len = strlen(topic->name) + 3;
 
   if (*buff - om_report_map + len <= OM_REPORT_MAP_BUFF_SIZE) {
-    sprintf((char*)*buff, "%s", topic->name);
+    memcpy(*buff, &topic->id, sizeof(topic->id));
+    sprintf((char*)(*buff + 2), "%s", topic->name);
     *buff += len;
     return OM_OK;
   }

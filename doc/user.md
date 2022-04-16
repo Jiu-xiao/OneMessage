@@ -81,8 +81,8 @@ format参数支持大小写。
 * OM_ERROR_NULL
 * OM_ERROR_BUSY
 * OM_ERROR_TIMEOUT
-* OM_ERROR_NOT_INIT                                  
-  
+* OM_ERROR_NOT_INIT
+
 
 ## 将话题加入队列
 
@@ -135,7 +135,7 @@ block参数决定当其他线程发布时是否阻塞
 
     om_status_t om_print_topic_message(om_topic_t* topic, char* buff, uint32_t buff_size)
 
-
+buff_size取决于话题的数量，请提供足够大的缓冲空间来保证正常打印
 ## 查找话题
 
     om_topic_t *om_core_find_topic(const char *name, uint32_t timeout)
@@ -208,3 +208,38 @@ block参数决定当其他线程发布时是否阻塞
 配置分解模式
 
     om_config_filter(source,"d",target_topic,OM_PRASE_STRUCT(om_example_t,decomp))
+
+## 活动上报
+
+    typedef enum {
+    OM_ACTIVITY_PUBLISH = 0,
+    OM_ACTIVITY_SUBSCRIBE,
+    OM_ACTIVITY_FILTER,
+    OM_ACTIVITY_LINK,
+    OM_ACTIVITY_EXPORT
+    } om_activity_t;
+
+    typedef struct {
+    uint32_t id_activity;
+    uint32_t time;
+    } om_report_t;
+
+    om_status_t om_send_report_data()
+
+| TOPIC_MAP | 前缀  | 话题1 ID | 话题1名称 | ... | ... | 话题N ID | 话题N名称 | 后缀  |
+| --------- | ----- | -------- | --------- | --- | --- | -------- | --------- | ----- |
+| 功能      | 识别  | ID       | 名称      | ... | ... | ID       | 名称      | 识别  |
+| 长度      | 4字节 | 2字节    | 不定      | ... | ... | 2字节    | 不定      | 4字节 |
+| 内容      | @msg  | 整型数   | 字符串    | ... | ... | 整形数   | 字符串 -  | @end  |
+
+| DATA | 包1 ID | 包1 活动      | 包1 时间 | ... | ... | ... | 包N ID | 包N 活动      | 包N 时间 |
+| ---- | ------ | ------------- | -------- | --- | --- | --- | ------ | ------------- | -------- |
+| 功能 | ID     | 活动类型      | 时间     | ... | ... | ... | ID     | 活动类型      | 时间     |
+| 长度 | 2字节  | 2字节         | 4字节    | ... | ... | ... | 2字节  | 2字节         | 4字节    |
+| 内容 | 整型数 | om_activity_t | 整型数   | ... | ... | ... | 整型数 | om_activity_t | 整型数   |
+
+`om_send_report_data`会先对所有队列中的话题生成一个表，前缀为`"@msg"`,后缀为`"@end"`,表元素为话题ID+话题名字符串，然后调用`om_report_transmit`发送。接着会把所有采集到的信息按照`om_report_t`格式打包并按时间排列，继续调用`om_report_transmit`发送。
+
+由于每次都要发送所有话题的名称，所以可以减少调用频率节省带宽，同时增大缓冲区避免数据丢失。
+
+`id_activity` 前16位为话题id,后十六位为活动类型。utils/prase_report.py只提供了`小端`数据的解析示例。

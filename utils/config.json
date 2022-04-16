@@ -1,0 +1,8 @@
+{
+    "config": {
+        "detection_cycle": 0.002,
+        "time_resolution": 0.00001,
+        "port": "/dev/ttyACM0",
+        "speed": 9600
+    }
+}

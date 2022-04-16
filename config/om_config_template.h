@@ -75,5 +75,4 @@
 // #define om_get_realtime user_get_realtime_fun
 // #define om_report_transmit user_report_transmit_fun
 
-#define OM_REPORT_BUFF_NUM (100)
 #endif

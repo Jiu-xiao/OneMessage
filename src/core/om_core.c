@@ -11,6 +11,10 @@ static uint32_t om_topic_num;
 LIST_HEAD(om_topic_list);
 
 om_status_t om_core_init() {
+#if OM_REPORT_ACTIVITY
+  om_topic_num = 0;
+#endif
+
   om_mutex_init(&om_mutex_handle);
   om_mutex_unlock(&om_mutex_handle);
 
