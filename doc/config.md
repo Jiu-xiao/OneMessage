@@ -57,7 +57,7 @@
 >>
 >>#define om_mutex_t SemaphoreHandle_t
 >>
->>#define om_mutex_init(arg) *arg = xSemaphoreCreateMutex(); \\ \
+>>#define om_mutex_init(arg) *arg = xSemaphoreCreateBinary(); \\\\
 >>xSemaphoreGive(*arg)
 >>
 >>#define om_mutex_lock(arg) xSemaphoreTake(*arg,portMAX_DELAY)
@@ -66,7 +66,7 @@
 >>
 >>#define om_mutex_unlock(arg) xSemaphoreGive(*arg)
 >>
->>#define om_mutex_lock_isr(arg) xSemaphoreTakeFromISR(*arg, NULL)
+>>#define om_mutex_lock_isr(arg) xSemaphoreTakeFromISR(*arg, NULL) == 0 ? OM_OK:OM_ERROR
 >>
 >>#define om_mutex_unlock_isr(arg) xSemaphoreGiveFromISR(*arg, NULL)
 
