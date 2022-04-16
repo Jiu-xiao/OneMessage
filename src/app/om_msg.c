@@ -127,7 +127,9 @@ om_status_t om_publish(om_topic_t* topic, void* buff, uint32_t size, bool block,
     else if (om_mutex_trylock(&topic->mutex) != OM_OK)
       return OM_ERROR_BUSY;
   } else {
-    if (om_mutex_lock_isr(&topic->mutex) != OM_OK) return OM_ERROR_BUSY;
+    if (om_mutex_lock_isr(&topic->mutex) != OM_OK) {
+      return OM_ERROR_BUSY;
+    }
   }
 
   om_msg_t msg = {.buff = buff, .size = size};
@@ -185,7 +187,7 @@ om_status_t om_sync(bool in_isr) {
   if (!in_isr) {
     om_mutex_lock(&om_mutex_handle);
   } else {
-    om_mutex_lock_isr(&om_mutex_handle);
+    if (om_mutex_lock_isr(&om_mutex_handle) != OM_OK) return OM_ERROR_BUSY;
   }
 
   om_list_head_t *pos1, *pos2;
@@ -231,8 +233,10 @@ om_status_t om_suber_export(om_suber_t* suber, bool in_isr) {
   if (suber->data.as_export.new_data && data_correct) {
     if (!in_isr)
       om_mutex_lock(&suber->master->mutex);
-    else
-      om_mutex_lock_isr(&suber->master->mutex);
+    else {
+      if (om_mutex_lock_isr(&suber->master->mutex) != OM_OK)
+        return OM_ERROR_BUSY;
+    }
 
     suber->data.as_export.new_data = false;
 

@@ -79,8 +79,9 @@ om_status_t om_run_add_report(om_activity_t activity, uint32_t id,
                               bool in_isr) {
   if (!in_isr)
     om_mutex_lock(&om_report_mutex);
-  else
-    om_mutex_lock_isr(&om_report_mutex);
+  else {
+    if (om_mutex_lock_isr(&om_report_mutex) != OM_OK) return OM_ERROR_BUSY;
+  }
 
   if (om_report_data_num >= OM_REPORT_DATA_BUFF_NUM) {
     if (!in_isr)

@@ -82,8 +82,10 @@ om_status_t _om_afl_filter_check(om_filter_t* filter, om_msg_t* msg) {
         return OM_OK;
       break;
     case OM_AFL_MODE_RANGE:
-      if (msg->size < filter->data.range.offset + sizeof(uint32_t))
+      if (msg->size < filter->data.range.offset + sizeof(uint32_t)) {
+        OM_ASSERT(false);
         return OM_ERROR;
+      }
       buff += filter->data.range.offset;
       if (*((uint32_t*)buff) - filter->data.range.start <=
           filter->data.range.range)
