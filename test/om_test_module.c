@@ -43,7 +43,7 @@ static om_status_t filter_fun(om_msg_t* msg, void* arg) {
 
 static float pub_freq = 12.5;
 
-START_TEST(publish) {
+START_TEST(_PUBLISH) {
   om_init();
   om_status_t res = OM_OK;
   om_topic_t* topic = om_config_topic(NULL, "fdra", "topic", filter_fun, NULL,
@@ -80,9 +80,8 @@ START_TEST(publish) {
 }
 END_TEST
 
-char str_log[] = {"Log test."};
-
-START_TEST(om_log) {
+START_TEST(_LOG) {
+  char str_log[] = {"Log test."};
   om_init();
   char buff[100] = {0};
   om_topic_t* topic_log = om_get_log_handle();
@@ -104,7 +103,7 @@ typedef struct {
   float decompose;
 } om_afl_test_t;
 
-START_TEST(om_afl) {
+START_TEST(_FILTER) {
   om_init();
 
   om_delay_ms(1000);
@@ -166,16 +165,20 @@ START_TEST(om_afl) {
 }
 END_TEST
 
-Suite* make_om_suite(void) {
-  Suite* om = suite_create("OneMessage单元测试");
-  TCase* tc_publish = tcase_create("订阅发布测试");
+Suite* make_om_module_suite(void) {
+  Suite* om_module = suite_create("模块测试");
+
   TCase* tc_log = tcase_create("日志测试");
-  TCase* tc_afl = tcase_create("过滤器测试");
-  suite_add_tcase(om, tc_publish);
-  suite_add_tcase(om, tc_log);
-  suite_add_tcase(om, tc_afl);
-  tcase_add_test(tc_publish, publish);
-  tcase_add_test(tc_log, om_log);
-  tcase_add_test(tc_afl, om_afl);
-  return om;
+  suite_add_tcase(om_module, tc_log);
+  tcase_add_test(tc_log, _LOG);
+
+  TCase* tc_public = tcase_create("订阅发布测试");
+  suite_add_tcase(om_module, tc_public);
+  tcase_add_test(tc_public, _PUBLISH);
+
+  TCase* tc_filter = tcase_create("高级过滤器测试");
+  suite_add_tcase(om_module, tc_filter);
+  tcase_add_test(tc_filter, _FILTER);
+
+  return om_module;
 }

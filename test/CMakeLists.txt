@@ -5,7 +5,7 @@ find_package(Check REQUIRED)
 include_directories(${CHECK_INCLUDE_DIRS})
 link_directories(${CHECK_LIBRARY_DIRS})
 
-file(GLOB ${PROJECT_NAME}_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/**")
+file(GLOB ${PROJECT_NAME}_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
 add_library(${PROJECT_NAME} STATIC)
 target_sources(${PROJECT_NAME} PUBLIC ${${PROJECT_NAME}_SOURCES})
 
