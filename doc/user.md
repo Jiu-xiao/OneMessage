@@ -10,7 +10,7 @@
 
 ## 添加同步函数
 
-将`om_sync(in_isr)`在中断或者线程按照OM_CALL_FREQ频率调用。
+将`om_sync(bool in_isr)`在中断或者线程按照OM_CALL_FREQ频率调用。
 
 ## 初始化
 
@@ -83,7 +83,6 @@ format参数支持大小写。
 * OM_ERROR_TIMEOUT
 * OM_ERROR_NOT_INIT
 
-
 ## 将话题加入队列
 
     om_status_t om_add_topic(om_topic_t *topic)
@@ -131,11 +130,13 @@ block参数决定当其他线程发布时是否阻塞
     OMLOG_ERROR_ISR
     OMLOG_PASS_ISR
     OMLOG_NOTICE_ISR
+
 ## 打印话题信息到buff
 
     om_status_t om_print_topic_message(om_topic_t* topic, char* buff, uint32_t buff_size)
 
 buff_size取决于话题的数量，请提供足够大的缓冲空间来保证正常打印
+
 ## 查找话题
 
     om_topic_t *om_core_find_topic(const char *name, uint32_t timeout)
@@ -169,6 +170,26 @@ buff_size取决于话题的数量，请提供足够大的缓冲空间来保证�
 | om_msg_del_suber     | 销毁订阅者               |
 | om_msg_del_puber     | 销毁发布者               |
 | om_msg_get_last_time | 获得话题最后一次消息时间 |
+
+## 事件触发器
+
+    om_event_group_t om_event_create_group(char* name);
+
+创建一个事件组。内部使用uint32_t来存放事件，一位对应一个事件，建议使用枚举加左移(1 << 0)的形式。
+
+示例：`om_event_group_t evt_group = om_event_create_group("test_group")`
+
+    om_status_t om_event_register(om_event_group_t group, uint32_t event, om_user_fun_t fun, void* arg);
+
+为某个事件注册回调函数，fun在事件发生时会被调用，并将msg和arg传入，msg包含此次触发的所有事件；
+
+示例：`om_event_register(evt_group, EVENT_1, callback_fun, fun_arg)`
+
+    om_status_t om_event_active(om_event_group_t group, uint32_t event, bool block， bool in_isr);
+
+触发事件。示例：`om_event_active(evt_group, EVENT_1, true, false)`
+
+注册和触发时可同时选择多个事件，如（EVENT_1 | EVENT_2），同时每个事件可注册多个回调函数。
 
 ## 高级过滤器
 
@@ -220,10 +241,7 @@ buff_size取决于话题的数量，请提供足够大的缓冲空间来保证�
     } om_activity_t;
 
     typedef struct {
-    uint32_t id_activity;
-    uint32_t time;
-    } om_report_t;
-
+    uint32_t id_activity;波
     om_status_t om_send_report_data()
 
 | TOPIC_MAP | 前缀  | 话题1 ID | 话题1名称 | ... | ... | 话题N ID | 话题N名称 | 后缀  |

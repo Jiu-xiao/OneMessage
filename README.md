@@ -1,38 +1,47 @@
 # OneMessage
-一个基于`发布-订阅`模型的多线程消息框架，用于嵌入式平台，纯C实现，性能和灵活性极高。
----
----
-## 硬件支持
-已在linux,STM32F103,STM32F407上成功运行，欢迎适配到其他平台。
-* 简单示例
-    * [example for linux(use cmake)](https://gitee.com/jiu-xiao/msg-example.git)
 
-    * [example for f103(use makefile)](https://gitee.com/jiu-xiao/om-example-mcu.git)
+一个基于`发布-订阅`模型的多线程消息框架，用于嵌入式平台，纯C实现，性能和灵活性极高
+---
+
+---
+
+## 硬件支持
+
+已在linux,STM32F103,STM32F407上成功运行，欢迎适配到其他平台。
+
+* 简单示例
+  * [example for linux(use cmake)](https://gitee.com/jiu-xiao/msg-example.git)
+
+  * [example for f103(use makefile)](https://gitee.com/jiu-xiao/om-example-mcu.git)
 * 使用本框架的开源项目
-    * [青岛大学Robomaster机器人嵌入式开源](https://gitee.com/qdu-rm-2022/qdu-rm-mcu)
+  * [青岛大学Robomaster机器人嵌入式开源](https://gitee.com/qdu-rm-2022/qdu-rm-mcu)
 
 ## 特性
+
 * 发布-订阅
-    * 话题为操作的主体，支持多发布者和多订阅者
-    * 话题可以作为话题的订阅者和发布者
-    * 可实现消息的分流/汇集/桥接
+  * 话题为操作的主体，支持多发布者和多订阅者
+  * 话题可以作为话题的订阅者和发布者
+  * 可实现消息的分流/汇集/桥接
 * 消息过滤器
-    * 支持为每个话题和订阅者注册过滤器，只接受符合条件的消息
-* 订阅部署
-    * 可为订阅者注册接收回调函数，自动解析收到的消息。
+  * 支持为每个话题和订阅者注册过滤器，只接受符合条件的消息
+* 订阅回调
+  * 可为订阅者注册接收回调函数，自动解析收到的消息。
 * 自动发布
-    * 可为话题注册更新函数，由OneMessage自动检测并发布。
+  * 可为话题注册更新函数，由OneMessage所管理的线程自动发布。
 * 快速配置
-    * 使用格式化输入的方式加载配置，使用较少的代码就能实现整个网络的搭建
+  * 使用格式化输入的方式配置话题，极少的工作量就能实现整个消息网络的搭建
+* 事件触发
+  * 以订阅为核心的事件触发器，在保证执行效率的同时，可以将多个事件作为触发条件，一个触发条件对应多个处理函数。
 * 批量筛选
-    * 对于条件简单且分支较多的话题，可开启高级过滤器而不需要注册大量函数，现已支持`列表`、`范围`、`分解`模式。
+  * 对于条件简单且分支较多的话题，可开启高级过滤器而不需要注册大量函数，现已支持`列表`、`范围`、`分解`模式。
 * 日志框架
-    * 使用示例程序打印的日志：![效果](img/log.png)
+  * 使用示例程序打印的日志：![效果](img/log.png)
 * 统计信息打印
-    * 显示所有话题、订阅者和发布者的模式、缓冲区、注册函数等信息
-    * 使用FreeRTOS命令行打印：![效果](img/cli.png)
+  * 显示所有话题、订阅者和发布者的模式、缓冲区、注册函数等信息
+  * 使用FreeRTOS命令行打印：![效果](img/cli.png)
 * 活动追踪
-    * 使用`utils/prase_report.py`将串口上传的数据转换成CSV文件：
+  * 可记录每个话题的发布/订阅/导出等活动
+  * 使用`utils/prase_report.py`将串口上传的数据转换成CSV文件：
 
         | time    | name      | activity  |
         | ------- | --------- | --------- |
@@ -48,18 +57,24 @@
         | 9.02387 | can_2_out | link      |
         | 9.02388 | can_2_out | publish   |
 
-
 -------
+
 ## 获取源码
+
 克隆这个仓库
+
 ```
 git clone https://gitee.com/jiu-xiao/one-message.git
 ```
+
 或者使用`git submodule`将其包含在你的仓库中
+
 ```
 git submodule add https://gitee.com/jiu-xiao/one-message.git <path>
 ```
+
 ## 代码结构
+
 ```
 OneMessage
 ├─config
@@ -69,6 +84,7 @@ OneMessage
 │  └─core
 └─test
 ```
+
 ****
 | 文件夹   | 功能         |
 | -------- | ------------ |
@@ -82,11 +98,15 @@ OneMessage
 | example  | 例程         |
 | utils    | 工具         |
 ****
+
 ## 文档
+
 > [配置文件](doc/config.md)
 
 > [使用说明](doc/user.md)
 
 > [开发文档](doc/dev.md)
+
 ## 这个项目的意义
+
 在复杂的工程中，为了实现线程的通信和数据的同步会耗费掉大量的开发时间，但往往bug都会出现在这些地方，所以需要找到一个稳定可靠的方案。OneMessage即是解决这个问题的一次尝试。

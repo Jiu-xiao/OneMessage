@@ -97,6 +97,39 @@ START_TEST(_LOG) {
 }
 END_TEST
 
+typedef enum { EVENT_1 = 1 << 0, EVENT_2 = 1 << 1 } test_event_t;
+
+uint32_t last_event, event_counter = 0;
+
+om_status_t event_callback(om_msg_t* msg, void* arg) {
+  OM_UNUSED(arg);
+
+  last_event = *((uint32_t*)msg->buff);
+  event_counter++;
+}
+
+START_TEST(_EVENT) {
+  om_init();
+
+  om_event_group_t evt_group = om_event_create_group("test_group");
+
+  om_event_register(evt_group, EVENT_1, event_callback, NULL);
+  om_event_register(evt_group, EVENT_2, event_callback, NULL);
+
+  om_event_active(evt_group, EVENT_1, true, false);
+
+  ck_assert_msg(event_counter == 1, "事件触发失败");
+  ck_assert_msg(last_event == EVENT_1, "触发了错误的事件");
+
+  om_event_active(evt_group, EVENT_2, true, false);
+
+  ck_assert_msg(event_counter == 2, "事件触发失败");
+  ck_assert_msg(last_event == EVENT_2, "触发了错误的事件");
+
+  om_deinit();
+}
+END_TEST
+
 typedef struct {
   uint32_t range;
   uint8_t list[10];
@@ -175,6 +208,10 @@ Suite* make_om_module_suite(void) {
   TCase* tc_public = tcase_create("订阅发布测试");
   suite_add_tcase(om_module, tc_public);
   tcase_add_test(tc_public, _PUBLISH);
+
+  TCase* tc_event = tcase_create("事件触发测试");
+  suite_add_tcase(om_module, tc_event);
+  tcase_add_test(tc_event, _EVENT);
 
   TCase* tc_filter = tcase_create("高级过滤器测试");
   suite_add_tcase(om_module, tc_filter);
