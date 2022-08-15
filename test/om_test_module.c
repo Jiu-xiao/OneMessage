@@ -99,7 +99,7 @@ END_TEST
 
 typedef enum { EVENT_1 = 1 << 0, EVENT_2 = 1 << 1 } test_event_t;
 
-uint32_t last_event, event_counter = 0;
+uint32_t last_event = 0, event_counter = 0;
 
 om_status_t event_callback(om_msg_t* msg, void* arg) {
   OM_UNUSED(arg);
@@ -113,13 +113,13 @@ START_TEST(_EVENT) {
 
   om_event_group_t evt_group = om_event_create_group("test_group");
 
-  om_event_register(evt_group, EVENT_1, event_callback, NULL);
-  om_event_register(evt_group, EVENT_2, event_callback, NULL);
+  om_event_register(evt_group, EVENT_1, OM_EVENT_END, event_callback, NULL);
+  om_event_register(evt_group, EVENT_2, OM_EVENT_START, event_callback, NULL);
 
   om_event_active(evt_group, EVENT_1, true, false);
 
-  ck_assert_msg(event_counter == 1, "事件触发失败");
-  ck_assert_msg(last_event == EVENT_1, "触发了错误的事件");
+  ck_assert_msg(event_counter == 0, "事件误触发");
+  ck_assert_msg(last_event == 0, "事件误触发");
 
   om_event_active(evt_group, EVENT_2, true, false);
 

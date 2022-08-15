@@ -179,11 +179,19 @@ buff_size取决于话题的数量，请提供足够大的缓冲空间来保证�
 
 示例：`om_event_group_t evt_group = om_event_create_group("test_group")`
 
-    om_status_t om_event_register(om_event_group_t group, uint32_t event, om_user_fun_t fun, void* arg);
+    om_status_t om_event_register(om_event_group_t group, uint32_t event, om_event_status_t status, om_user_fun_t fun, void* arg);
 
 为某个事件注册回调函数，fun在事件发生时会被调用，并将msg和arg传入，msg包含此次触发的所有事件；
 
-示例：`om_event_register(evt_group, EVENT_1, callback_fun, fun_arg)`
+status决定了调用回调函数的条件
+
+    typedef enum {
+    OM_EVENT_START,      //上一次触发条件不成立且本次成立
+    OM_EVENT_PROGRESS,   //只检查本次触发条件成立
+    OM_EVENT_END,        //上一次触发条件成立且本次不成立
+    } om_event_status_t;
+
+示例：`om_event_register(evt_group, EVENT_1, OM_EVENT_START, callback_fun, fun_arg)`
 
     om_status_t om_event_active(om_event_group_t group, uint32_t event, bool block， bool in_isr);
 
