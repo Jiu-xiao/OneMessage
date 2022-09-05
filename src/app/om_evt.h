@@ -21,6 +21,8 @@ typedef struct {
 
 om_event_group_t om_event_create_group(const char* name);
 
+om_event_group_t om_event_find_group(const char* name, uint32_t timeout);
+
 om_status_t om_event_register(om_event_group_t group, uint32_t event,
                               om_event_status_t status,
                               void (*callback)(uint32_t event, void* arg),
