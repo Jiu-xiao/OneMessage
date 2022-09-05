@@ -97,14 +97,14 @@ START_TEST(_LOG) {
 }
 END_TEST
 
-typedef enum { EVENT_1 = 1 << 0, EVENT_2 = 1 << 1 } test_event_t;
+typedef enum { EVENT_1 = 0x21, EVENT_2 = 0x01 } test_event_t;
 
 uint32_t last_event = 0, event_counter = 0;
 
-om_status_t event_callback(om_msg_t* msg, void* arg) {
+void event_callback(uint32_t event, void* arg) {
   OM_UNUSED(arg);
 
-  last_event = *((uint32_t*)msg->buff);
+  last_event = event;
   event_counter++;
 }
 

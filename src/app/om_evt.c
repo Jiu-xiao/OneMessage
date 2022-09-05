@@ -9,17 +9,17 @@
 static om_status_t om_event_check(om_msg_t* msg, void* arg) {
   om_event_t* evt = (om_event_t*)arg;
 
-  bool active = (*((uint32_t*)msg->buff) & evt->event) == evt->event;
+  bool active = *((uint32_t*)msg->buff) == evt->event;
 
   switch (evt->status) {
     case OM_EVENT_START:
-      if (!evt->last && active) evt->callback(msg, evt->arg);
+      if (!evt->last && active) evt->callback(evt->event, evt->arg);
       break;
     case OM_EVENT_PROGRESS:
-      if (active) evt->callback(msg, evt->arg);
+      if (active) evt->callback(evt->event, evt->arg);
       break;
     case OM_EVENT_END:
-      if (evt->last && !active) evt->callback(msg, evt->arg);
+      if (evt->last && !active) evt->callback(evt->event, evt->arg);
       break;
   }
 
@@ -28,20 +28,19 @@ static om_status_t om_event_check(om_msg_t* msg, void* arg) {
   return OM_OK;
 }
 
-om_event_group_t om_event_create_group(char* name) {
+om_event_group_t om_event_create_group(const char* name) {
   om_event_group_t group = om_config_topic(NULL, "VA", name);
   return group;
 }
 
 om_status_t om_event_register(om_event_group_t group, uint32_t event,
-                              om_event_status_t status, om_user_fun_t fun,
+                              om_event_status_t status,
+                              void (*callback)(uint32_t event, void* arg),
                               void* arg) {
-  OM_ASSERT(event < 32);
-
   om_event_t* evt = (om_event_t*)om_malloc(sizeof(om_event_t));
 
   evt->event = event;
-  evt->callback = fun;
+  evt->callback = callback;
   evt->arg = arg;
   evt->status = status;
 
@@ -51,5 +50,5 @@ om_status_t om_event_register(om_event_group_t group, uint32_t event,
 
 om_status_t om_event_active(om_event_group_t group, uint32_t event, bool block,
                             bool in_isr) {
-  om_publish(group, &event, sizeof(event), block, in_isr);
+  return om_publish(group, &event, sizeof(event), block, in_isr);
 }
