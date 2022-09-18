@@ -23,9 +23,6 @@ om_status_t _om_publish(om_topic_t* topic, om_msg_t* msg, bool block,
 om_status_t om_publish(om_topic_t* topic, void* buff, uint32_t size, bool block,
                        bool in_isr);
 
-om_status_t _om_refresh_puber(om_puber_t* pub, om_topic_t* topic, bool block,
-                              bool in_isr);
-
 om_status_t om_sync(bool in_isr);
 
 om_suber_t* om_subscript(om_topic_t* topic, void* buff, uint32_t max_size);
@@ -37,8 +34,6 @@ om_status_t om_msg_deinit();
 om_status_t om_msg_del_topic(om_topic_t* topic);
 
 om_status_t om_msg_del_suber(om_suber_t* suber);
-
-om_status_t om_msg_del_puber(om_puber_t* puber);
 
 uint32_t om_msg_get_topic_num();
 

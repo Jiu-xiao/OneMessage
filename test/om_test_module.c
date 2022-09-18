@@ -5,21 +5,7 @@ static char str1[] = "This is str1";
 static char str2[] = "This is str2";
 static char str3[] = "This is str3";
 
-static bool msg_new = false, filter = false, sub_callback = false;
-
-static int call_counter = 0;
-
-static om_status_t refresh_fun(om_msg_t* msg, void* arg) {
-  OM_UNUSED(arg);
-
-  call_counter++;
-  if (msg_new) {
-    msg->buff = str1;
-    msg->size = sizeof(str1);
-    return OM_OK;
-  } else
-    return OM_ERROR;
-}
+static bool filter = false, sub_callback = false;
 
 static char str_tmp[20];
 
@@ -46,25 +32,11 @@ static float pub_freq = 12.5;
 START_TEST(_PUBLISH) {
   om_init();
   om_status_t res = OM_OK;
-  om_topic_t* topic = om_config_topic(NULL, "fdra", "topic", filter_fun, NULL,
-                                      deploy_fun, NULL, refresh_fun, NULL);
+  om_topic_t* topic =
+      om_config_topic(NULL, "fda", "topic", filter_fun, NULL, deploy_fun, NULL);
   om_topic_t* topic2 = om_config_topic(NULL, "la", "topic2", topic);
   ck_assert_msg(topic, "topic 指针为 NULL.");
   ck_assert_msg(topic2, "topic2 指针为 NULL.");
-
-  for (uint32_t i = 0; i < 100; i++) om_sync(false);
-  ck_assert_msg(call_counter == 100, "new_fun调用了%d次，应为100次",
-                call_counter);
-
-  ck_assert_msg(!sub_callback, "意外调用了deploy函数。");
-  ck_assert_msg(!filter, "意外调用了filter函数。");
-  msg_new = true;
-
-  for (uint32_t i = 0; i < 100; i++) om_sync(false);
-  ck_assert_msg(sub_callback, "未调用deploy函数。");
-  ck_assert_msg(filter, "未调用filter函数。");
-  ck_assert_msg(!strncmp(str_tmp, str1, 20), "sync数据损坏。");
-  msg_new = false;
 
   ck_assert_msg(om_find_topic("topic", 0) == topic, "无法根据名称寻找话题。");
 

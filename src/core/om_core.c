@@ -2,8 +2,6 @@
 
 uint32_t _om_time_handle;
 
-om_mutex_t om_mutex_handle;
-
 #if OM_REPORT_ACTIVITY
 static uint32_t om_topic_num;
 #endif
@@ -14,9 +12,6 @@ om_status_t om_core_init() {
 #if OM_REPORT_ACTIVITY
   om_topic_num = 0;
 #endif
-
-  om_mutex_init(&om_mutex_handle);
-  om_mutex_unlock(&om_mutex_handle);
 
   return OM_OK;
 }
@@ -41,8 +36,6 @@ om_topic_t* om_core_topic_create(const char* name) {
 om_status_t om_core_add_topic(om_topic_t* topic) {
   OM_ASSERT(topic);
 
-  om_mutex_lock(&om_mutex_handle);
-
   if (om_core_find_topic(topic->name, 0) != NULL) {
     OM_ASSERT(false);
     return OM_ERROR;
@@ -53,8 +46,6 @@ om_status_t om_core_add_topic(om_topic_t* topic) {
 #endif
 
   om_list_add_tail(&topic->self, &om_topic_list);
-
-  om_mutex_unlock(&om_mutex_handle);
 
   return OM_OK;
 }
@@ -74,36 +65,9 @@ om_status_t om_core_add_suber(om_topic_t* topic, om_suber_t* sub) {
   OM_ASSERT(topic);
   OM_ASSERT(sub);
 
-  om_mutex_lock(&om_mutex_handle);
-
   sub->master = topic;
 
   om_list_add_tail(&sub->self, &(topic->suber));
-
-  om_mutex_unlock(&om_mutex_handle);
-
-  return OM_OK;
-}
-
-om_puber_t* om_core_puber_create(float freq) {
-  om_puber_t* puber = om_malloc(sizeof(*puber));
-  OM_ASSERT(puber);
-  memset(puber, 0, sizeof(*puber));
-  puber->freq.reload = OM_CALL_FREQ / freq;
-  puber->freq.counter = puber->freq.reload;
-
-  return puber;
-}
-
-om_status_t om_core_add_puber(om_topic_t* topic, om_puber_t* pub) {
-  OM_ASSERT(topic);
-  OM_ASSERT(pub);
-
-  om_mutex_lock(&om_mutex_handle);
-
-  om_list_add_tail(&pub->self, &(topic->puber));
-
-  om_mutex_unlock(&om_mutex_handle);
 
   return OM_OK;
 }
@@ -121,11 +85,7 @@ om_status_t om_core_add_link(om_topic_t* topic, om_link_t* link) {
   OM_ASSERT(topic);
   OM_ASSERT(link);
 
-  om_mutex_lock(&om_mutex_handle);
-
   om_list_add_tail(&link->self, &(topic->link));
-
-  om_mutex_unlock(&om_mutex_handle);
 
   return OM_OK;
 }
@@ -178,16 +138,6 @@ om_status_t om_core_del_suber(om_list_head_t* head) {
   return OM_OK;
 }
 
-om_status_t om_core_del_puber(om_list_head_t* head) {
-  OM_ASSERT(head);
-  om_puber_t* pub = om_list_entry(head, om_puber_t, self);
-
-  om_list_del(&pub->self);
-  free(pub);
-
-  return OM_OK;
-}
-
 om_status_t om_core_del_topic(om_list_head_t* head) {
   OM_ASSERT(head);
   om_topic_t* topic = om_list_entry(head, om_topic_t, self);
@@ -195,7 +145,6 @@ om_status_t om_core_del_topic(om_list_head_t* head) {
 
   om_list_del(&topic->self);
   om_del_all(&topic->link, om_core_delink);
-  om_del_all(&topic->puber, om_core_del_puber);
   om_del_all(&topic->suber, om_core_del_suber);
   if (!topic->virtual_mode && topic->msg.buff) om_free(topic->msg.buff);
   om_free(topic);

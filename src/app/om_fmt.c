@@ -9,11 +9,9 @@
 /* MSG */
 #define ADD2LIST ('A')
 #define FILTER_FLAG ('F')
-#define REFRESH_FLAG ('R')
 #define SUBER_CB_FLAG ('D')
 #define LINK_FLAG ('L')
 #define SUBER_FLAG ('S')
-#define PUBER_FLAG ('P')
 #define TOPIC_FLAG ('T')
 #define FREQ_FLAG ('Q')
 #define VIRTUAL_FLAG ('V')
@@ -49,9 +47,6 @@ om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
       case SUBER_FLAG:
         om_core_add_suber(topic, va_arg(valist, om_suber_t*));
         break;
-      case PUBER_FLAG:
-        om_core_add_puber(topic, va_arg(valist, om_puber_t*));
-        break;
       case TOPIC_FLAG:
         om_core_link(va_arg(valist, om_topic_t*), topic);
         break;
@@ -65,11 +60,6 @@ om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
         om_user_fun_t fun = va_arg(valist, om_user_fun_t);
         void* arg = va_arg(valist, void*);
         om_config_suber(NULL, "DT", fun, arg, topic);
-      } break;
-      case REFRESH_FLAG: {
-        om_user_fun_t fun_refresh = va_arg(valist, om_user_fun_t);
-        void* arg_refresh = va_arg(valist, void*);
-        om_config_puber(NULL, "RT", fun_refresh, arg_refresh, topic);
       } break;
       default:
         OM_ASSERT(false);
@@ -112,41 +102,6 @@ om_suber_t* om_config_suber(om_suber_t* suber, const char* format, ...) {
   va_end(valist);
 
   return suber;
-}
-
-om_puber_t* om_config_puber(om_puber_t* puber, const char* format, ...) {
-  if (!puber) puber = om_core_puber_create(OM_CALL_FREQ);
-  if (format == NULL) return puber;
-
-  va_list valist;
-  va_start(valist, format);
-
-  for (const uint8_t* index = (const uint8_t*)format; *index != '\0'; index++) {
-    OM_ASSERT(isalpha(*index));
-    switch (GET_CAPITAL(*index)) {
-      case REFRESH_FLAG:
-        puber->user_fun.refresh_callback = va_arg(valist, om_user_fun_t);
-        puber->user_fun.refresh_cb_arg = va_arg(valist, void*);
-
-        OM_ASSERT(puber->user_fun.refresh_callback);
-
-        break;
-      case TOPIC_FLAG:
-        om_core_add_puber(va_arg(valist, om_topic_t*), puber);
-        break;
-      case FREQ_FLAG:
-        puber->freq.reload = OM_CALL_FREQ / va_arg(valist, double);
-        puber->freq.counter = puber->freq.reload;
-        break;
-      default:
-        OM_ASSERT(false);
-        va_end(valist);
-        return NULL;
-    }
-  }
-  va_end(valist);
-
-  return puber;
 }
 
 om_status_t om_config_filter(om_topic_t* topic, const char* format, ...) {

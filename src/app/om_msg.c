@@ -7,8 +7,6 @@
 
 extern om_list_head_t om_topic_list;
 
-extern om_mutex_t om_mutex_handle;
-
 static bool om_msg_initd = false;
 
 om_status_t om_msg_init() {
@@ -145,69 +143,6 @@ om_status_t om_publish(om_topic_t* topic, void* buff, uint32_t size, bool block,
   return res;
 }
 
-inline om_status_t _om_refresh_puber(om_puber_t* pub, om_topic_t* topic,
-                                     bool block, bool in_isr) {
-  OM_ASSERT(pub->user_fun.refresh_callback);
-
-  pub->freq.counter--;
-  if (pub->freq.counter > 0) return OM_ERROR;
-
-  pub->freq.counter += pub->freq.reload;
-
-  if (pub->user_fun.refresh_callback(&pub->msg_buff,
-                                     pub->user_fun.refresh_cb_arg) != OM_OK)
-    return OM_ERROR;
-
-  om_status_t res = OM_OK;
-
-  if (in_isr) {
-    res = om_mutex_lock_isr(&topic->mutex);
-  } else {
-    res = om_mutex_lock(&topic->mutex);
-  }
-
-  if (res != OM_OK) return OM_ERROR;
-
-  _om_publish(topic, &pub->msg_buff, block, in_isr);
-
-  if (in_isr) {
-    om_mutex_unlock_isr(&topic->mutex);
-  } else {
-    om_mutex_unlock(&topic->mutex);
-  }
-
-  return OM_OK;
-}
-
-om_status_t om_sync(bool in_isr) {
-  _om_time_handle++;
-
-  if (!om_msg_initd) return OM_ERROR_NOT_INIT;
-
-  if (!in_isr) {
-    om_mutex_lock(&om_mutex_handle);
-  } else {
-    if (om_mutex_lock_isr(&om_mutex_handle) != OM_OK) return OM_ERROR_BUSY;
-  }
-
-  om_list_head_t *pos1, *pos2;
-  om_list_for_each(pos1, &om_topic_list) {
-    om_topic_t* topic = om_list_entry(pos1, om_topic_t, self);
-    om_list_for_each(pos2, &topic->puber) {
-      om_puber_t* pub = om_list_entry(pos2, om_puber_t, self);
-      _om_refresh_puber(pub, topic, true, in_isr);
-    }
-  }
-
-  if (!in_isr) {
-    om_mutex_unlock(&om_mutex_handle);
-  } else {
-    om_mutex_unlock_isr(&om_mutex_handle);
-  }
-
-  return OM_OK;
-}
-
 om_suber_t* om_subscript(om_topic_t* topic, void* buff, uint32_t max_size) {
   OM_ASSERT(topic);
   OM_ASSERT(buff);
@@ -276,12 +211,6 @@ om_status_t om_msg_del_suber(om_suber_t* suber) {
   OM_ASSERT(suber);
 
   return om_core_del_suber(&suber->self);
-}
-
-om_status_t om_msg_del_puber(om_puber_t* puber) {
-  OM_ASSERT(puber);
-
-  return om_core_del_puber(&puber->self);
 }
 
 uint32_t om_msg_get_topic_num() { return om_list_get_num(&om_topic_list); }

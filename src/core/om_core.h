@@ -33,24 +33,6 @@ typedef struct {
   void* afl;
 } om_topic_t;
 
-typedef struct {
-  om_list_head_t self;
-  struct {
-    om_user_fun_t refresh_callback;
-    void* refresh_cb_arg;
-  } user_fun;
-  om_msg_t msg_buff;
-  struct {
-#if OM_FREQ_USE_FLOAT
-    float reload;
-    float counter;
-#else
-    uint32_t reload;
-    uint32_t counter;
-#endif
-  } freq;
-} om_puber_t;
-
 typedef enum {
   OM_SUBER_MODE_UNKNOW,
   OM_SUBER_MODE_LINK,
@@ -101,10 +83,6 @@ om_status_t om_core_add_topic(om_topic_t* topic);
 om_suber_t* om_core_suber_create(om_topic_t* link);
 
 om_status_t om_core_add_suber(om_topic_t* topic, om_suber_t* sub);
-
-om_puber_t* om_core_puber_create(float freq);
-
-om_status_t om_core_add_puber(om_topic_t* topic, om_puber_t* pub);
 
 om_link_t* om_core_link_create(om_suber_t* sub, om_topic_t* topic);
 
