@@ -37,7 +37,10 @@ om_status_t om_event_init() {
   return OM_OK;
 }
 
-om_status_t om_event_deinit() { om_event_net = false; }
+om_status_t om_event_deinit() {
+  om_event_net = false;
+  return OM_OK;
+}
 
 om_event_group_t om_event_create_group(const char* name) {
   om_event_group_t group = om_config_topic(NULL, "VA", name, om_event_net);
