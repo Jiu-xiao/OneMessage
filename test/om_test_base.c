@@ -31,6 +31,8 @@ START_TEST(_MUTEX) {
   } else {
     ck_assert_msg(false, "加锁失败");
   }
+
+  om_mutex_delete(&ptr);
 }
 END_TEST
 

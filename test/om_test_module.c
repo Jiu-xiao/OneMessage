@@ -32,18 +32,22 @@ static float pub_freq = 12.5;
 START_TEST(_PUBLISH) {
   om_init();
   om_status_t res = OM_OK;
-  om_topic_t* topic =
-      om_config_topic(NULL, "fda", "topic", filter_fun, NULL, deploy_fun, NULL);
-  om_topic_t* topic2 = om_config_topic(NULL, "la", "topic2", topic);
+
+  om_net_t* net = om_create_net("test");
+
+  om_topic_t* topic = om_config_topic(NULL, "fda", "topic", filter_fun, NULL,
+                                      deploy_fun, NULL, net);
+  om_topic_t* topic2 = om_config_topic(NULL, "la", "topic2", topic, net);
   ck_assert_msg(topic, "topic 指针为 NULL.");
   ck_assert_msg(topic2, "topic2 指针为 NULL.");
 
-  ck_assert_msg(om_find_topic("topic", 0) == topic, "无法根据名称寻找话题。");
+  ck_assert_msg(om_find_topic("topic", net, 0) == topic,
+                "无法根据名称寻找话题。");
 
-  om_publish(om_find_topic("topic2", 0), str2, sizeof(str2), true, false);
+  om_publish(om_find_topic("topic2", net, 0), str2, sizeof(str2), true, false);
   ck_assert_msg(!strncmp(str_tmp, str2, 20), "publish数据损坏。");
 
-  om_publish(om_find_topic("topic2", 0), str3, sizeof(str3), true, false);
+  om_publish(om_find_topic("topic2", net, 0), str3, sizeof(str3), true, false);
   ck_assert_msg(strncmp(str_tmp, str3, 20), "filter函数未生效。");
 
   res = om_deinit();

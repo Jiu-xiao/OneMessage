@@ -1,12 +1,6 @@
 /* Debug */
 #define OM_DEBUG (1)
 
-/* OneMessage主线程调用的频率 */
-#define OM_CALL_FREQ (1000)
-
-/* 使能这个宏可能会提高刷新频率的精度，但会消耗更多性能 */
-#define OM_FREQ_USE_FLOAT (1)
-
 /* 严格限制导出数据时的长度 */
 #define OM_STRICT_LIMIT (0)
 
@@ -44,6 +38,8 @@
 #define om_mutex_lock_isr(arg) pthread_mutex_lock(arg)
 #define om_mutex_unlock_isr(arg) pthread_mutex_unlock(arg)
 
+#define om_mutex_delete(arg) pthread_mutex_destroy(arg)
+
 /* 将运行时间作为消息发出的时间 */
 #define OM_VIRTUAL_TIME (0)
 
@@ -65,14 +61,3 @@
 
 /* 话题名称最大长度 */
 #define OM_TOPIC_MAX_NAME_LEN (10)
-
-#define OM_REPORT_ACTIVITY (1)
-
-#if OM_REPORT_ACTIVITY
-
-#define OM_REPORT_DATA_BUFF_NUM (128)
-#define OM_REPORT_MAP_BUFF_SIZE (1024)
-// #define om_get_realtime user_get_realtime_fun
-// #define om_report_transmit user_report_transmit_fun
-
-#endif

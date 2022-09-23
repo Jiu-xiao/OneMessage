@@ -3,7 +3,6 @@
 #include "om_afl.h"
 #include "om_fmt.h"
 #include "om_msg.h"
-#include "om_run.h"
 
 #if OM_LOG_OUTPUT
 static om_topic_t* om_log;
@@ -42,7 +41,6 @@ static bool om_log_initd = false;
 
 om_status_t om_log_init() {
   om_log = om_core_topic_create("om_log");
-  om_core_add_topic(om_log);
   om_log_initd = true;
 
   return OM_OK;
@@ -76,6 +74,7 @@ om_status_t om_print_log(char* name, om_log_level_t level, bool block,
 }
 
 om_status_t om_log_deinit() {
+  om_core_del_topic(&(om_log->self));
   om_log_initd = false;
   return OM_OK;
 }

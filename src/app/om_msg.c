@@ -3,9 +3,8 @@
 #include "om_afl.h"
 #include "om_fmt.h"
 #include "om_log.h"
-#include "om_run.h"
 
-extern om_list_head_t om_topic_list;
+extern om_list_head_t _OM_NET_;
 
 static bool om_msg_initd = false;
 
@@ -24,9 +23,6 @@ inline om_status_t _om_publish_to_suber(om_suber_t* sub, om_topic_t* topic,
     case OM_SUBER_MODE_DEFAULT:
       sub->data.as_suber.sub_callback(&topic->msg,
                                       sub->data.as_suber.sub_cb_arg);
-#if OM_REPORT_ACTIVITY
-      om_run_add_report(OM_ACTIVITY_SUBSCRIBE, topic->id, in_isr);
-#endif
       break;
     case OM_SUBER_MODE_LINK:
       if (!in_isr) {
@@ -36,10 +32,9 @@ inline om_status_t _om_publish_to_suber(om_suber_t* sub, om_topic_t* topic,
           if (om_mutex_trylock(&sub->data.as_link.target->mutex) != OM_OK)
             break;
         }
-#if OM_REPORT_ACTIVITY
-        om_run_add_report(OM_ACTIVITY_LINK, topic->id, in_isr);
-#endif
+
         _om_publish(sub->data.as_link.target, &topic->msg, block, in_isr);
+
         om_mutex_unlock(&sub->data.as_link.target->mutex);
       } else {
         if (om_mutex_lock_isr(&sub->data.as_link.target->mutex) != OM_OK)
@@ -85,10 +80,6 @@ inline om_status_t _om_publish_to_topic(om_topic_t* topic, om_msg_t* msg,
     topic->msg.size = msg->size;
     topic->msg.time = msg->time;
   }
-
-#if OM_REPORT_ACTIVITY
-  om_run_add_report(OM_ACTIVITY_PUBLISH, topic->id, in_isr);
-#endif
 
   return OM_OK;
 }
@@ -183,10 +174,6 @@ om_status_t om_suber_export(om_suber_t* suber, bool in_isr) {
     else
       om_mutex_unlock_isr(&suber->master->mutex);
 
-#if OM_REPORT_ACTIVITY
-    om_run_add_report(OM_ACTIVITY_EXPORT, suber->master->id, in_isr);
-#endif
-
     return OM_OK;
   } else {
     return OM_ERROR;
@@ -196,7 +183,7 @@ om_status_t om_suber_export(om_suber_t* suber, bool in_isr) {
 om_status_t om_msg_deinit() {
   om_msg_initd = false;
 
-  om_del_all(&om_topic_list, om_core_del_topic);
+  om_del_all(&_OM_NET_, om_core_del_net);
 
   return OM_OK;
 }
@@ -213,7 +200,9 @@ om_status_t om_msg_del_suber(om_suber_t* suber) {
   return om_core_del_suber(&suber->self);
 }
 
-uint32_t om_msg_get_topic_num() { return om_list_get_num(&om_topic_list); }
+uint32_t om_msg_get_topic_num(om_net_t* net) {
+  return om_list_get_num(&(net->topic));
+}
 
 uint32_t om_msg_get_suber_num(om_topic_t* topic) {
   return om_list_get_num(&topic->suber);
@@ -227,13 +216,14 @@ uint32_t om_msg_get_link_num(om_topic_t* topic) {
   return om_list_get_num(&topic->link);
 }
 
-om_status_t om_msg_for_each(om_status_t (*fun)(om_topic_t*, void* arg),
-                            void* arg) {
+om_status_t om_msg_for_each_topic(om_net_t* net,
+                                  om_status_t (*fun)(om_topic_t*, void* arg),
+                                  void* arg) {
   OM_ASSERT(fun);
 
   om_list_head_t* pos;
 
-  om_list_for_each(pos, &om_topic_list) {
+  om_list_for_each(pos, &(net->topic)) {
     om_topic_t* topic = om_list_entry(pos, om_topic_t, self);
     if (fun(topic, arg) != OM_OK) return OM_ERROR;
   }

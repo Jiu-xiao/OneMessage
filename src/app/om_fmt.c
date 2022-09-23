@@ -3,7 +3,6 @@
 #include "om_afl.h"
 #include "om_log.h"
 #include "om_msg.h"
-#include "om_run.h"
 
 #define GET_CAPITAL(_c) (isupper(_c) ? _c : toupper(_c))
 /* MSG */
@@ -54,7 +53,8 @@ om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
         topic->virtual_mode = true;
         break;
       case ADD2LIST:
-        om_add_topic(topic);
+        om_net_t* net = va_arg(valist, om_net_t*);
+        om_add_topic(topic, net);
         break;
       case SUBER_CB_FLAG: {
         om_user_fun_t fun = va_arg(valist, om_user_fun_t);

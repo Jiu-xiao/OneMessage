@@ -8,6 +8,8 @@
 #define om_add_topic om_core_add_topic
 #define om_topic_link om_core_link
 #define om_find_topic om_core_find_topic
+#define om_find_net om_core_find_net
+#define om_create_net om_core_create_net
 
 om_status_t om_msg_init();
 
@@ -35,7 +37,7 @@ om_status_t om_msg_del_topic(om_topic_t* topic);
 
 om_status_t om_msg_del_suber(om_suber_t* suber);
 
-uint32_t om_msg_get_topic_num();
+uint32_t om_msg_get_topic_num(om_net_t* net);
 
 uint32_t om_msg_get_suber_num(om_topic_t* topic);
 
@@ -43,8 +45,9 @@ uint32_t om_msg_get_puber_num(om_topic_t* topic);
 
 uint32_t om_msg_get_link_num(om_topic_t* topic);
 
-om_status_t om_msg_for_each(om_status_t (*fun)(om_topic_t*, void* arg),
-                            void* arg);
+om_status_t om_msg_for_each_topic(om_net_t* net,
+                                  om_status_t (*fun)(om_topic_t*, void* arg),
+                                  void* arg);
 
 om_time_t om_msg_get_last_time(om_topic_t* topic);
 

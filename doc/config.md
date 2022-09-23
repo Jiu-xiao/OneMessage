@@ -6,14 +6,6 @@
 
 >使能这个宏将会开启OM_ASSENT和OM_CHECK，对空指针等异常情况进行检测，定位异常发生位置。
 
-## OM_CALL_FREQ
-
->定义为om_sync()被调用的频率
-
-## OM_FREQ_USE_FLOAT
-
->使能这个宏可能会提高刷新频率的精度，但会消耗更多性能
-
 ## OM_STRICT_LIMIT
 
 >使能这个宏会严格限制导出数据的长度，只能导出和缓存区大小一样的数据
@@ -49,8 +41,10 @@
 >>
 >>#define om_mutex_lock_isr(arg) pthread_mutex_lock(arg)
 >>
->>
 >>#define om_mutex_unlock_isr(arg) pthread_mutex_unlock(arg)
+>>
+>>#define om_mutex_delete(arg) pthread_mutex_destroy(arg)
+>>
 >
 >FreeRTOS示例
 >>#include "semphr.h"
@@ -69,6 +63,8 @@
 >>#define om_mutex_lock_isr(arg) xSemaphoreTakeFromISR(*arg, NULL) == pdTRUE ? OM_OK:OM_ERROR
 >>
 >>#define om_mutex_unlock_isr(arg) xSemaphoreGiveFromISR(*arg, NULL)
+>>
+>>#define om_mutex_delete(arg) vSemaphoreDelete(*arg)
 
 ## OM_VIRTUAL_TIME
 
@@ -92,14 +88,3 @@
 ## OM_LOG_MAX_LEN
 
 >日志最大长度
-
-## OM_REPORT_ACTIVITY
-
->使能这个宏会开启活动上报
->>OM_REPORT_DATA_BUFF_NUM 最大缓存活动条数
->>
->>OM_REPORT_MAP_BUFF_SIZE topic_map生成缓存区大小
->>
->>om_get_realtime 返回当前实时时间（整型），此函数的精度决定了活动记录的时间精度
->>
->>om_report_transmit(uint8_t* buff, uint32_t size) 发送数据
