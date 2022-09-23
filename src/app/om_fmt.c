@@ -52,10 +52,11 @@ om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
       case VIRTUAL_FLAG:
         topic->virtual_mode = true;
         break;
-      case ADD2LIST:
+      case ADD2LIST: {
         om_net_t* net = va_arg(valist, om_net_t*);
         om_add_topic(topic, net);
         break;
+      }
       case SUBER_CB_FLAG: {
         om_user_fun_t fun = va_arg(valist, om_user_fun_t);
         void* arg = va_arg(valist, void*);
