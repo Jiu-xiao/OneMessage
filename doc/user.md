@@ -12,12 +12,6 @@
 
     om_status_t om_init();
 
-## 创建网络
-
-    om_net_t* om_create_net(const char* name);
-
-返回值为指向新创建网络的指针，不允许重名网络的存在
-
 ## 配置
 
     om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...)
@@ -55,15 +49,13 @@ format参数支持大小写。
 | d    | om_status_t (`*fun`)(`om_msg_t *msg, void *arg`), `void* fun_arg` | 先将fun注册为新创建的订阅者的sub_callback函数,再将订阅者指向话题 |
 | t    | om_topic_t *                                                      | 将参数中的话题指向自身                                           |
 | v    | 无                                                                | 设置为虚话题(`不拷贝消息内容,只传递指针`)                        |
-| a    | om_net_t*                                                         | 将话题添加到网络                                                 |
+| a    | 无                                                                | 将话题添加到网络，使其可被查找                                   |
 
 例：
 
 * om_config_suber(`NULL,"fdt",fun1,fun1_arg,fun2,fun2_arg,your_topic`)会返回一个新创建的指向your_topic的订阅者,且其filter函数为fun1,sub_callback函数为fun2。
 * om_config_topic(`your_topic,"s",suber`)会将订阅者suber指向your_topic。
-* om_config_topic(`NULL,"va","topic_name",net`)会新创建一个名为topic_name虚话题并将其添加到net当中
-
-同一net中topic不允许重名
+* om_config_topic(`NULL,"va","topic_name"`)会新创建一个名为topic_name虚话题
 
 ## 返回值
 
@@ -118,12 +110,12 @@ block参数决定同时有其他线程发布这个话题时是否等待
 
 ## 查找话题
 
-    om_topic_t *om_core_find_topic(const char *name, om_net_t* net, uint32_t timeout)
+    om_topic_t *om_core_find_topic(const char *name, uint32_t timeout)
 如果能此网络找到对应名字的话题,返回此话题,否则返回NULL
 
 ## 获取话题等对象的数量
 
-    uint16_t om_msg_get_topic_num(om_net_t *net)
+    uint16_t om_msg_get_topic_num()
 
     uint16_t om_msg_get_suber_num(om_topic_t* topic)
 
@@ -131,14 +123,12 @@ block参数决定同时有其他线程发布这个话题时是否等待
 
 ## 用户函数遍历网络
 
-    om_status_t om_msg_for_each_topic(om_net_t* net,
-                                  om_status_t (*fun)(om_topic_t*, void* arg),
+    om_status_t om_msg_for_each_topic(om_status_t (*fun)(om_topic_t*, void* arg),
                                   void* arg)
 
 ## 注销
 
-    om_status_t om_deinit();
-释放OneMessage申请的所有内存空间
+设计时不考虑框架的注销，用户可以将某个话题删除，但是无法释放om_init()申请的内存。
 
 ## 其他API
 

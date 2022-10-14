@@ -13,9 +13,15 @@
 ## OM_USE_USER_MALLOC
 
 >使用用户的内存分配函数，使能时需要自定义om_malloc和om_free。
->>om_malloc 内存分配
+>
 >>
->>om_free 内存释放
+>>FreeRTOS示例
+>>
+>>>#include "FreeRTOS.h"
+>>>
+>>>#define om_malloc pvPortMalloc
+>>>
+>>>#define om_free vPortFree
 
 ## OM_DELAY
 
@@ -65,6 +71,7 @@
 >>#define om_mutex_unlock_isr(arg) xSemaphoreGiveFromISR(*arg, NULL)
 >>
 >>#define om_mutex_delete(arg) vSemaphoreDelete(*arg)
+
 
 ## OM_VIRTUAL_TIME
 

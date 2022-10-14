@@ -5,27 +5,14 @@
 #include "om_def.h"
 #include "om_lib.h"
 #include "om_list.h"
-
-typedef struct {
-  uint32_t size;
-  void* buff;
-  om_time_t time;
-} om_msg_t;
-
-typedef om_status_t (*om_user_fun_t)(om_msg_t* msg, void* arg);
-
-typedef struct {
-  om_list_head_t topic;
-  om_list_head_t self;
-  char name[OM_TOPIC_MAX_NAME_LEN];
-} om_net_t;
+#include "om_rbt.h"
 
 typedef struct {
   bool virtual_mode;
   om_mutex_t mutex;
   om_msg_t msg;
   char name[OM_TOPIC_MAX_NAME_LEN];
-  om_list_head_t self;
+  om_rbt_node_t self;
   om_list_head_t suber;
   om_list_head_t puber;
   om_list_head_t link; /* 指向本话题的订阅者 */
@@ -79,13 +66,9 @@ extern uint32_t _om_time_handle;
 
 om_status_t om_core_init();
 
-om_status_t om_core_deinit();
-
-om_net_t* om_core_create_net(const char* name);
-
 om_topic_t* om_core_topic_create(const char* name);
 
-om_status_t om_core_add_topic(om_topic_t* topic, om_net_t* net);
+om_status_t om_core_add_topic(om_topic_t* topic);
 
 om_suber_t* om_core_suber_create(om_topic_t* link);
 
@@ -103,17 +86,12 @@ om_status_t om_core_del_suber(om_list_head_t* head);
 
 om_status_t om_core_del_puber(om_list_head_t* head);
 
-om_status_t om_core_del_topic(om_list_head_t* head);
-
-om_status_t om_core_del_net(om_list_head_t* head);
+om_status_t om_core_del_topic(om_rbt_node_t* node);
 
 om_status_t om_core_set_export_target(om_suber_t* suber, void* target,
                                       uint32_t max_size);
 
-om_topic_t* om_core_find_topic(const char* name, om_net_t* net,
-                               uint32_t timeout);
-
-om_net_t* om_core_find_net(const char* name, uint32_t timeout);
+om_topic_t* om_core_find_topic(const char* name, uint32_t timeout);
 
 uint32_t om_core_get_time(void);
 

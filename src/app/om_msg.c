@@ -4,7 +4,7 @@
 #include "om_fmt.h"
 #include "om_log.h"
 
-extern om_list_head_t _OM_NET_;
+extern om_rbt_root_t _topic_list;
 
 static bool om_msg_initd = false;
 
@@ -180,14 +180,6 @@ om_status_t om_suber_export(om_suber_t* suber, bool in_isr) {
   }
 }
 
-om_status_t om_msg_deinit() {
-  om_msg_initd = false;
-
-  om_del_all(&_OM_NET_, om_core_del_net);
-
-  return OM_OK;
-}
-
 om_status_t om_msg_del_topic(om_topic_t* topic) {
   OM_ASSERT(topic);
 
@@ -200,9 +192,28 @@ om_status_t om_msg_del_suber(om_suber_t* suber) {
   return om_core_del_suber(&suber->self);
 }
 
-uint32_t om_msg_get_topic_num(om_net_t* net) {
-  return om_list_get_num(&(net->topic));
+typedef struct {
+  bool (*fun)(om_topic_t* topic, void* arg);
+  void* arg;
+} om_msg_cb_block;
+
+static bool _om_msg_foreach_topic(om_rbt_node_t* node, void* arg) {
+  om_msg_cb_block* block = (om_msg_cb_block*)arg;
+  om_topic_t* topic = om_container_of(node, om_topic_t, self);
+
+  return block->fun(topic, block->arg);
 }
+
+om_status_t om_msg_foreach_topic(bool (*fun)(om_topic_t* topic, void* arg),
+                                 void* arg) {
+  om_msg_cb_block block = {fun, arg};
+
+  om_rbtree_foreach(&_topic_list, _om_msg_foreach_topic, &block);
+
+  return OM_OK;
+}
+
+uint32_t om_msg_get_topic_num() { return om_rbtree_get_num(&_topic_list); }
 
 uint32_t om_msg_get_suber_num(om_topic_t* topic) {
   return om_list_get_num(&topic->suber);
@@ -214,21 +225,6 @@ uint32_t om_msg_get_puber_num(om_topic_t* topic) {
 
 uint32_t om_msg_get_link_num(om_topic_t* topic) {
   return om_list_get_num(&topic->link);
-}
-
-om_status_t om_msg_for_each_topic(om_net_t* net,
-                                  om_status_t (*fun)(om_topic_t*, void* arg),
-                                  void* arg) {
-  OM_ASSERT(fun);
-
-  om_list_head_t* pos;
-
-  om_list_for_each(pos, &(net->topic)) {
-    om_topic_t* topic = om_list_entry(pos, om_topic_t, self);
-    if (fun(topic, arg) != OM_OK) return OM_ERROR;
-  }
-
-  return OM_OK;
 }
 
 om_time_t om_msg_get_last_time(om_topic_t* topic) { return topic->msg.time; }

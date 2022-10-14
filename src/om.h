@@ -13,8 +13,6 @@ extern "C" {
 
 om_status_t om_init();
 
-om_status_t om_deinit();
-
 #ifdef __cplusplus
 }
 #endif

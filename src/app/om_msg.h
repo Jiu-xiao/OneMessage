@@ -31,23 +31,20 @@ om_suber_t* om_subscript(om_topic_t* topic, void* buff, uint32_t max_size);
 
 om_status_t om_suber_export(om_suber_t* suber, bool in_isr);
 
-om_status_t om_msg_deinit();
-
 om_status_t om_msg_del_topic(om_topic_t* topic);
 
 om_status_t om_msg_del_suber(om_suber_t* suber);
 
-uint32_t om_msg_get_topic_num(om_net_t* net);
+om_status_t om_msg_foreach_topic(bool (*fun)(om_topic_t* topic, void* arg),
+                                 void* arg);
+
+uint32_t om_msg_get_topic_num();
 
 uint32_t om_msg_get_suber_num(om_topic_t* topic);
 
 uint32_t om_msg_get_puber_num(om_topic_t* topic);
 
 uint32_t om_msg_get_link_num(om_topic_t* topic);
-
-om_status_t om_msg_for_each_topic(om_net_t* net,
-                                  om_status_t (*fun)(om_topic_t*, void* arg),
-                                  void* arg);
 
 om_time_t om_msg_get_last_time(om_topic_t* topic);
 

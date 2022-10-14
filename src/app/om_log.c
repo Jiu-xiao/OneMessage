@@ -73,9 +73,4 @@ om_status_t om_print_log(char* name, om_log_level_t level, bool block,
   return om_publish(om_log, &log, sizeof(om_log_t), block, in_isr);
 }
 
-om_status_t om_log_deinit() {
-  om_core_del_topic(&(om_log->self));
-  om_log_initd = false;
-  return OM_OK;
-}
 #endif

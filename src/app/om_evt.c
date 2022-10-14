@@ -5,8 +5,6 @@
 #include "om_log.h"
 #include "om_msg.h"
 
-static om_net_t* om_event_net = NULL;
-
 static bool om_event_initd = false;
 
 static om_status_t om_event_check(om_msg_t* msg, void* arg) {
@@ -31,24 +29,13 @@ static om_status_t om_event_check(om_msg_t* msg, void* arg) {
   return OM_OK;
 }
 
-om_status_t om_event_init() {
-  om_event_net = om_create_net("om_event_net");
-  om_event_initd = true;
-  return OM_OK;
-}
-
-om_status_t om_event_deinit() {
-  om_event_net = false;
-  return OM_OK;
-}
-
 om_event_group_t om_event_create_group(const char* name) {
-  om_event_group_t group = om_config_topic(NULL, "VA", name, om_event_net);
+  om_event_group_t group = om_config_topic(NULL, "VA", name);
   return group;
 }
 
 om_event_group_t om_event_find_group(const char* name, uint32_t timeout) {
-  return om_find_topic(name, om_event_net, timeout);
+  return om_find_topic(name, timeout);
 }
 
 om_status_t om_event_register(om_event_group_t group, uint32_t event,

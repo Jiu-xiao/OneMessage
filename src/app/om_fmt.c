@@ -53,8 +53,7 @@ om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
         topic->virtual_mode = true;
         break;
       case ADD2LIST: {
-        om_net_t* net = va_arg(valist, om_net_t*);
-        om_add_topic(topic, net);
+        om_add_topic(topic);
         break;
       }
       case SUBER_CB_FLAG: {

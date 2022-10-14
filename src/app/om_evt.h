@@ -19,10 +19,6 @@ typedef struct {
   om_event_status_t status;
 } om_event_t;
 
-om_status_t om_event_init();
-
-om_status_t om_event_deinit();
-
 om_event_group_t om_event_create_group(const char* name);
 
 om_event_group_t om_event_find_group(const char* name, uint32_t timeout);

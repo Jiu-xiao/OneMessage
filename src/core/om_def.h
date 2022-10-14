@@ -1,6 +1,8 @@
 #ifndef __OM_DEF_H_
 #define __OM_DEF_H_
 
+#include "om_lib.h"
+
 #ifdef OM_TEST
 #include "om_config_template.h"
 #else
@@ -21,6 +23,14 @@ typedef enum {
   OM_ERROR_NOT_INIT
 } om_status_t;
 
+typedef struct {
+  uint32_t size;
+  void* buff;
+  om_time_t time;
+} om_msg_t;
+
+typedef om_status_t (*om_user_fun_t)(om_msg_t* msg, void* arg);
+
 #if OM_DEBUG
 #define OM_ASSERT(arg) \
   if (!(arg)) om_error(__FILE__, __LINE__);
@@ -39,5 +49,15 @@ typedef enum {
 #define om_time_update(time) time++
 #define om_time_get(time) *time = _om_time_handle
 #endif
+
+#define om_offset_of(type, member) ((size_t) & ((type*)0)->member)
+
+#define om_member_size_of(type, member) (sizeof(typeof(((type*)0)->member)))
+
+#define om_container_of(ptr, type, member)               \
+  ({                                                     \
+    const typeof(((type*)0)->member)* __mptr = (ptr);    \
+    (type*)((char*)__mptr - om_offset_of(type, member)); \
+  })
 
 #endif

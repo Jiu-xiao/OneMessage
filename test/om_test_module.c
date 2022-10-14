@@ -33,24 +33,19 @@ START_TEST(_PUBLISH) {
   om_init();
   om_status_t res = OM_OK;
 
-  om_net_t* net = om_create_net("test");
-
-  om_topic_t* topic = om_config_topic(NULL, "fda", "topic", filter_fun, NULL,
-                                      deploy_fun, NULL, net);
-  om_topic_t* topic2 = om_config_topic(NULL, "la", "topic2", topic, net);
+  om_topic_t* topic =
+      om_config_topic(NULL, "fda", "topic", filter_fun, NULL, deploy_fun, NULL);
+  om_topic_t* topic2 = om_config_topic(NULL, "la", "topic2", topic);
   ck_assert_msg(topic, "topic 指针为 NULL.");
   ck_assert_msg(topic2, "topic2 指针为 NULL.");
 
-  ck_assert_msg(om_find_topic("topic", net, 0) == topic,
-                "无法根据名称寻找话题。");
+  ck_assert_msg(om_find_topic("topic", 0) == topic, "无法根据名称寻找话题。");
 
-  om_publish(om_find_topic("topic2", net, 0), str2, sizeof(str2), true, false);
+  om_publish(om_find_topic("topic2", 0), str2, sizeof(str2), true, false);
   ck_assert_msg(!strncmp(str_tmp, str2, 20), "publish数据损坏。");
 
-  om_publish(om_find_topic("topic2", net, 0), str3, sizeof(str3), true, false);
+  om_publish(om_find_topic("topic2", 0), str3, sizeof(str3), true, false);
   ck_assert_msg(strncmp(str_tmp, str3, 20), "filter函数未生效。");
-
-  res = om_deinit();
 
   fail_if(res);
 }
@@ -69,7 +64,6 @@ START_TEST(_LOG) {
   om_suber_export(sub, false);
   ck_assert_msg(!strcmp(buff, "[init]\033[mLog test.\r\n"), "LOG数据错误:%s",
                 buff);
-  om_deinit();
 }
 END_TEST
 
@@ -101,8 +95,6 @@ START_TEST(_EVENT) {
 
   ck_assert_msg(event_counter == 2, "事件触发失败");
   ck_assert_msg(last_event == EVENT_2, "触发了错误的事件");
-
-  om_deinit();
 }
 END_TEST
 
@@ -169,8 +161,6 @@ START_TEST(_FILTER) {
   om_suber_export(decompose_sub, false);
   ck_assert_msg(test.decompose == ans3.decompose,
                 "过滤器decompose模式数据错误");
-
-  om_deinit();
 }
 END_TEST
 
