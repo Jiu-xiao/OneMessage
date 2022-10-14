@@ -73,8 +73,7 @@ inline om_status_t _om_publish_to_topic(om_topic_t* topic, om_msg_t* msg,
   if (topic->virtual_mode)
     memcpy(&topic->msg, msg, sizeof(*msg));
   else {
-    if (topic->msg.buff != NULL) om_free(topic->msg.buff);
-    topic->msg.buff = om_malloc(msg->size);
+    if (topic->msg.buff == NULL) topic->msg.buff = om_malloc(msg->size);
     OM_ASSERT(topic->msg.buff);
     memcpy(topic->msg.buff, msg->buff, msg->size);
     topic->msg.size = msg->size;
