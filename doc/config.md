@@ -6,10 +6,6 @@
 
 >使能这个宏将会开启OM_ASSENT和OM_CHECK，对空指针等异常情况进行检测，定位异常发生位置。
 
-## OM_STRICT_LIMIT
-
->使能这个宏会严格限制导出数据的长度，只能导出和缓存区大小一样的数据
-
 ## OM_USE_USER_MALLOC
 
 >使用用户的内存分配函数，使能时需要自定义om_malloc和om_free。
@@ -73,9 +69,9 @@
 >>#define om_mutex_delete(arg) vSemaphoreDelete(*arg)
 
 
-## OM_VIRTUAL_TIME
+## OM_TIME
 
->在无RTC的设备上使能，将运行时间作为消息发出时间。未使能时需要自定义om_time_t，om_time_get。
+>发布消息和log时记录时间
 >>om_time_t 存放时间数据的类型
 >>
 >>om_time_t om_time_get() 返回时间
