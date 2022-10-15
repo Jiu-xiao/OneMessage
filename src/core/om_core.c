@@ -10,14 +10,14 @@ om_status_t om_core_init() {
   return OM_OK;
 }
 
-om_topic_t* om_core_topic_create(const char* name, size_t buff_len) {
+om_topic_t* om_core_topic_create(const char* name, uint32_t buff_len) {
   om_topic_t* topic = om_malloc(sizeof(om_topic_t));
 
   return om_core_topic_create_static(topic, name, buff_len);
 }
 
 om_topic_t* om_core_topic_create_static(om_topic_t* topic, const char* name,
-                                        size_t buff_len) {
+                                        uint32_t buff_len) {
   OM_ASSERT(topic);
 
   memset(topic, 0, sizeof(*topic));

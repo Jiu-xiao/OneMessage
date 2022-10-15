@@ -9,7 +9,7 @@
 
 typedef struct {
   bool virtual_mode;
-  size_t buff_len;
+  uint32_t buff_len;
   om_mutex_t mutex;
   om_msg_t msg;
   char name[OM_TOPIC_MAX_NAME_LEN];
@@ -65,10 +65,10 @@ typedef struct {
 
 om_status_t om_core_init();
 
-om_topic_t* om_core_topic_create(const char* name, size_t buff_len);
+om_topic_t* om_core_topic_create(const char* name, uint32_t buff_len);
 
 om_topic_t* om_core_topic_create_static(om_topic_t* topic, const char* name,
-                                        size_t buff_len);
+                                        uint32_t buff_len);
 
 om_status_t om_core_add_topic(om_topic_t* topic);
 
