@@ -101,7 +101,10 @@ om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...) {
 }
 
 om_suber_t* om_config_suber(om_suber_t* suber, const char* format, ...) {
-  if (!suber) suber = om_core_suber_create(NULL);
+  if (!suber)
+    suber = om_core_suber_create(NULL);
+  else
+    om_create_suber_static(suber, NULL);
   if (format == NULL) return suber;
 
   va_list valist;
