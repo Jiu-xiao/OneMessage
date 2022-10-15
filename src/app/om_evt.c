@@ -5,8 +5,6 @@
 #include "om_log.h"
 #include "om_msg.h"
 
-static bool om_event_initd = false;
-
 static om_status_t om_event_check(om_msg_t* msg, void* arg) {
   om_event_t* evt = (om_event_t*)arg;
 
