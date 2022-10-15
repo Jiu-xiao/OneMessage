@@ -6,14 +6,6 @@
 
 extern om_rbt_root_t _topic_list;
 
-static bool om_msg_initd = false;
-
-om_status_t om_msg_init() {
-  om_msg_initd = true;
-
-  return OM_OK;
-}
-
 inline om_status_t _om_publish_to_suber(om_suber_t* sub, om_topic_t* topic,
                                         bool block, bool in_isr) {
   OM_ASSERT(sub);
@@ -64,6 +56,11 @@ inline om_status_t _om_publish_to_topic(om_topic_t* topic, om_msg_t* msg,
   OM_UNUSED(in_isr);
   OM_UNUSED(block);
 
+  if (msg->size > topic->buff_len) {
+    OM_ASSERT(false);
+    return OM_ERROR;
+  }
+
   om_time_get(&msg->time);
 
   if (topic->user_fun.filter != NULL &&
@@ -73,7 +70,6 @@ inline om_status_t _om_publish_to_topic(om_topic_t* topic, om_msg_t* msg,
   if (topic->virtual_mode)
     memcpy(&topic->msg, msg, sizeof(*msg));
   else {
-    if (topic->msg.buff == NULL) topic->msg.buff = om_malloc(msg->size);
     OM_ASSERT(topic->msg.buff);
     memcpy(topic->msg.buff, msg->buff, msg->size);
     topic->msg.size = msg->size;
@@ -106,8 +102,6 @@ om_status_t om_publish(om_topic_t* topic, void* buff, uint32_t size, bool block,
                        bool in_isr) {
   OM_ASSERT(topic);
   OM_ASSERT(buff);
-
-  if (!om_msg_initd) return OM_ERROR_NOT_INIT;
 
   if (!in_isr) {
     if (block)
@@ -148,14 +142,8 @@ om_status_t om_suber_export(om_suber_t* suber, bool in_isr) {
   OM_ASSERT(suber);
   OM_ASSERT(suber->mode == OM_SUBER_MODE_EXPORT);
 
-#if OM_STRICT_LIMIT
-  bool data_correct = suber->master->msg.size == suber->data.as_export.max_size;
-  OM_ASSERT(!suber->data.as_export.new_data || data_correct);
-#else
-  bool data_correct = suber->master->msg.size <= suber->data.as_export.max_size;
-#endif
-
-  if (suber->data.as_export.new_data && data_correct) {
+  if (suber->data.as_export.new_data &&
+      (suber->master->msg.size <= suber->data.as_export.max_size)) {
     if (!in_isr)
       om_mutex_lock(&suber->master->mutex);
     else {

@@ -8,10 +8,12 @@
 #define om_add_topic om_core_add_topic
 #define om_topic_link om_core_link
 #define om_find_topic om_core_find_topic
-#define om_find_net om_core_find_net
-#define om_create_net om_core_create_net
-
-om_status_t om_msg_init();
+#define om_create_topic om_core_topic_create
+#define om_create_topic_static om_core_topic_create_static
+#define om_create_suber om_core_topic_create
+#define om_create_suber_static om_core_topic_create_static
+#define om_create_link om_core_topic_create
+#define om_create_link_static om_core_topic_create_static
 
 om_status_t _om_publish_to_suber(om_suber_t* sub, om_topic_t* topic, bool block,
                                  bool in_isr);

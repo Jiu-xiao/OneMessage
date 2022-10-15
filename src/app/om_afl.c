@@ -6,6 +6,17 @@
 
 om_afl_t* om_afl_create(om_topic_t* source) {
   om_afl_t* afl = om_malloc(sizeof(om_afl_t));
+
+  return om_afl_create_static(afl, source);
+}
+
+om_afl_filter_t* om_afl_filter_create(om_topic_t* target) {
+  om_afl_filter_t* filter = om_malloc(sizeof(om_afl_filter_t));
+
+  return om_afl_filter_create_static(filter, target);
+}
+
+om_afl_t* om_afl_create_static(om_afl_t* afl, om_topic_t* source) {
   OM_ASSERT(afl);
   memset(afl, 0, sizeof(om_afl_t));
 
@@ -16,17 +27,17 @@ om_afl_t* om_afl_create(om_topic_t* source) {
   return afl;
 }
 
-om_filter_t* om_afl_filter_create(om_topic_t* target) {
-  om_filter_t* filter = om_malloc(sizeof(om_filter_t));
+om_afl_filter_t* om_afl_filter_create_static(om_afl_filter_t* filter,
+                                             om_topic_t* target) {
   OM_ASSERT(filter);
-  memset(filter, 0, sizeof(om_filter_t));
+  memset(filter, 0, sizeof(om_afl_filter_t));
 
   filter->target = target;
 
   return filter;
 }
 
-om_status_t om_afl_add_filter(om_afl_t* afl, om_filter_t* filter) {
+om_status_t om_afl_add_filter(om_afl_t* afl, om_afl_filter_t* filter) {
   OM_ASSERT(afl);
   OM_ASSERT(filter);
 
@@ -35,7 +46,7 @@ om_status_t om_afl_add_filter(om_afl_t* afl, om_filter_t* filter) {
   return OM_OK;
 }
 
-om_status_t om_afl_set_filter(om_filter_t* filter, uint8_t mode,
+om_status_t om_afl_set_filter(om_afl_filter_t* filter, uint8_t mode,
                               uint32_t offset, uint32_t length, uint32_t scope,
                               uint32_t arg, void* fl_template) {
   OM_ASSERT(filter);
@@ -67,7 +78,7 @@ om_status_t om_afl_set_filter(om_filter_t* filter, uint8_t mode,
   return OM_OK;
 }
 
-om_status_t _om_afl_filter_check(om_filter_t* filter, om_msg_t* msg) {
+om_status_t _om_afl_filter_check(om_afl_filter_t* filter, om_msg_t* msg) {
   if (filter->length && msg->size != filter->length) return OM_ERROR;
 
   uint8_t* buff = msg->buff;
@@ -102,8 +113,8 @@ om_status_t _om_afl_filter_check(om_filter_t* filter, om_msg_t* msg) {
   return OM_ERROR;
 }
 
-om_status_t _om_afl_filter_apply(om_filter_t* filter, om_msg_t* msg, bool block,
-                                 bool in_isr) {
+om_status_t _om_afl_filter_apply(om_afl_filter_t* filter, om_msg_t* msg,
+                                 bool block, bool in_isr) {
   switch (filter->mode) {
     case OM_AFL_MODE_LIST:
     case OM_AFL_MODE_RANGE:
@@ -128,7 +139,7 @@ om_status_t om_afl_apply(om_msg_t* msg, om_afl_t* afl, bool block,
 
   om_list_head_t* pos;
   om_list_for_each(pos, &afl->filter) {
-    om_filter_t* filter = om_list_entry(pos, om_filter_t, self);
+    om_afl_filter_t* filter = om_list_entry(pos, om_afl_filter_t, self);
     if (_om_afl_filter_check(filter, msg) == OM_OK)
       _om_afl_filter_apply(filter, msg, block, in_isr);
   }
@@ -139,7 +150,7 @@ om_status_t om_afl_apply(om_msg_t* msg, om_afl_t* afl, bool block,
 om_status_t om_afl_filter_del(om_list_head_t* filter) {
   om_list_del(filter);
 
-  om_filter_t* t = om_list_entry(filter, om_filter_t, self);
+  om_afl_filter_t* t = om_list_entry(filter, om_afl_filter_t, self);
 
   om_free(t);
 

@@ -42,21 +42,26 @@ typedef struct {
   } data;
   om_list_head_t self;
   om_topic_t* target;
-} om_filter_t;
+} om_afl_filter_t;
 
 om_afl_t* om_afl_create(om_topic_t* source);
 
-om_filter_t* om_afl_filter_create(om_topic_t* target);
+om_afl_filter_t* om_afl_filter_create(om_topic_t* target);
 
-om_status_t om_afl_add_filter(om_afl_t* afl, om_filter_t* filter);
+om_afl_t* om_afl_create_static(om_afl_t* afl, om_topic_t* source);
 
-om_status_t om_afl_set_filter(om_filter_t* filter, uint8_t mode,
+om_afl_filter_t* om_afl_filter_create_static(om_afl_filter_t* filter,
+                                         om_topic_t* target);
+
+om_status_t om_afl_add_filter(om_afl_t* afl, om_afl_filter_t* filter);
+
+om_status_t om_afl_set_filter(om_afl_filter_t* filter, uint8_t mode,
                               uint32_t offset, uint32_t length, uint32_t scope,
                               uint32_t arg, void* fl_template);
 
-om_status_t _om_afl_filter_check(om_filter_t* filter, om_msg_t* msg);
+om_status_t _om_afl_filter_check(om_afl_filter_t* filter, om_msg_t* msg);
 
-om_status_t _om_afl_filter_apply(om_filter_t* filter, om_msg_t* msg, bool block,
+om_status_t _om_afl_filter_apply(om_afl_filter_t* filter, om_msg_t* msg, bool block,
                                  bool in_isr);
 
 om_status_t om_afl_apply(om_msg_t* msg, om_afl_t* afl, bool block, bool in_isr);

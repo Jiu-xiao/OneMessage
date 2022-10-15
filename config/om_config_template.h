@@ -1,9 +1,6 @@
 /* Debug */
 #define OM_DEBUG (1)
 
-/* 严格限制导出数据时的长度 */
-#define OM_STRICT_LIMIT (0)
-
 /* 使用用户自定义的内存分配 */
 #define OM_USE_USER_MALLOC (0)
 
@@ -60,4 +57,4 @@
 #endif
 
 /* 话题名称最大长度 */
-#define OM_TOPIC_MAX_NAME_LEN (10)
+#define OM_TOPIC_MAX_NAME_LEN (15)

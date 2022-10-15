@@ -5,7 +5,6 @@ om_status_t om_init() {
 
   res += om_core_init();
 
-  res += om_msg_init();
 #if OM_LOG_OUTPUT
   res += om_log_init();
 #endif

@@ -12,14 +12,22 @@ om_status_t om_core_init() {
   return OM_OK;
 }
 
-om_topic_t* om_core_topic_create(const char* name) {
+om_topic_t* om_core_topic_create(const char* name, size_t buff_len) {
   om_topic_t* topic = om_malloc(sizeof(om_topic_t));
+
+  return om_core_topic_create_static(topic, name, buff_len);
+}
+
+om_topic_t* om_core_topic_create_static(om_topic_t* topic, const char* name,
+                                        size_t buff_len) {
   OM_ASSERT(topic);
 
   memset(topic, 0, sizeof(*topic));
   strncpy(topic->name, name, OM_TOPIC_MAX_NAME_LEN);
 
   topic->self.key = topic->name;
+  topic->virtual_mode = true;
+  topic->buff_len = buff_len;
 
   INIT_LIST_HEAD(&topic->puber);
   INIT_LIST_HEAD(&topic->suber);
@@ -50,6 +58,11 @@ om_status_t om_core_add_topic(om_topic_t* topic) {
 
 om_suber_t* om_core_suber_create(om_topic_t* link) {
   om_suber_t* suber = om_malloc(sizeof(*suber));
+
+  return om_core_suber_create_static(suber, link);
+}
+
+om_suber_t* om_core_suber_create_static(om_suber_t* suber, om_topic_t* link) {
   OM_ASSERT(suber);
   memset(suber, 0, sizeof(*suber));
   if (link) {
@@ -76,6 +89,12 @@ om_status_t om_core_add_suber(om_topic_t* topic, om_suber_t* sub) {
 
 om_link_t* om_core_link_create(om_suber_t* sub, om_topic_t* topic) {
   om_link_t* link = om_malloc(sizeof(*link));
+
+  return om_core_link_create_static(link, sub, topic);
+}
+
+om_link_t* om_core_link_create_static(om_link_t* link, om_suber_t* sub,
+                                      om_topic_t* topic) {
   OM_ASSERT(link);
   link->source.suber = sub;
   link->source.topic = topic;
@@ -103,6 +122,19 @@ om_status_t om_core_link(om_topic_t* source, om_topic_t* target) {
   om_suber_t* sub = om_core_suber_create(target);
   om_core_add_suber(source, sub);
   om_link_t* link = om_core_link_create(sub, source);
+  om_core_add_link(target, link);
+
+  return OM_OK;
+}
+
+om_status_t om_core_link_static(om_suber_t* suber, om_link_t* link,
+                                om_topic_t* source, om_topic_t* target) {
+  OM_ASSERT(source);
+  OM_ASSERT(target);
+
+  om_core_suber_create_static(suber, target);
+  om_core_add_suber(source, suber);
+  om_core_link_create_static(link, suber, source);
   om_core_add_link(target, link);
 
   return OM_OK;

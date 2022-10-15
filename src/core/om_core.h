@@ -9,6 +9,7 @@
 
 typedef struct {
   bool virtual_mode;
+  size_t buff_len;
   om_mutex_t mutex;
   om_msg_t msg;
   char name[OM_TOPIC_MAX_NAME_LEN];
@@ -66,19 +67,30 @@ extern uint32_t _om_time_handle;
 
 om_status_t om_core_init();
 
-om_topic_t* om_core_topic_create(const char* name);
+om_topic_t* om_core_topic_create(const char* name, size_t buff_len);
+
+om_topic_t* om_core_topic_create_static(om_topic_t* topic, const char* name,
+                                        size_t buff_len);
 
 om_status_t om_core_add_topic(om_topic_t* topic);
 
 om_suber_t* om_core_suber_create(om_topic_t* link);
 
+om_suber_t* om_core_suber_create_static(om_suber_t* suber, om_topic_t* link);
+
 om_status_t om_core_add_suber(om_topic_t* topic, om_suber_t* sub);
 
 om_link_t* om_core_link_create(om_suber_t* sub, om_topic_t* topic);
 
+om_link_t* om_core_link_create_static(om_link_t* link, om_suber_t* sub,
+                                      om_topic_t* topic);
+
 om_status_t om_core_add_link(om_topic_t* topic, om_link_t* link);
 
 om_status_t om_core_link(om_topic_t* source, om_topic_t* target);
+
+om_status_t om_core_link_static(om_suber_t* suber, om_link_t* link,
+                                om_topic_t* source, om_topic_t* target);
 
 om_status_t om_core_delink(om_list_head_t* head);
 

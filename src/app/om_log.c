@@ -38,9 +38,14 @@ static const om_log_format_t LOG_FORMAT[OM_LOG_COLOR_NUMBER] = {
 #endif
 
 static bool om_log_initd = false;
+static om_mutex_t om_log_mutex;
+static om_topic_t om_log_topic;
 
 om_status_t om_log_init() {
-  om_log = om_core_topic_create("om_log");
+  om_log =
+      om_core_topic_create_static(&om_log_topic, "om_log", sizeof(om_log_t));
+  om_mutex_init(&om_log_mutex);
+  om_mutex_unlock(&om_log_mutex);
   om_log_initd = true;
 
   return OM_OK;
@@ -48,14 +53,17 @@ om_status_t om_log_init() {
 
 inline om_topic_t* om_get_log_handle() { return om_log; }
 
+static om_log_t log_buf;
+static char fm_buf[OM_LOG_MAX_LEN];
+
 om_status_t om_print_log(char* name, om_log_level_t level, bool block,
                          bool in_isr, const char* format, ...) {
   if (!om_log_initd) return OM_ERROR_NOT_INIT;
 
-  om_log_t log;
-  log.level = level;
-  om_time_get(&log.time);
-  char* fm_buf = om_malloc(OM_LOG_MAX_LEN);
+  om_mutex_lock(&om_log_mutex);
+
+  log_buf.level = level;
+  om_time_get(&log_buf.time);
 #if OM_LOG_COLORFUL
   snprintf(fm_buf, OM_LOG_MAX_LEN, "%s%s%s[%s]%s%s\r\n",
            OM_COLOR_BG[LOG_FORMAT[level].bg_color],
@@ -67,10 +75,14 @@ om_status_t om_print_log(char* name, om_log_level_t level, bool block,
 #endif
   va_list vArgList;
   va_start(vArgList, format);
-  vsnprintf(log.data, OM_LOG_MAX_LEN, fm_buf, vArgList);
+  vsnprintf(log_buf.data, OM_LOG_MAX_LEN, fm_buf, vArgList);
   va_end(vArgList);
-  om_free(fm_buf);
-  return om_publish(om_log, &log, sizeof(om_log_t), block, in_isr);
+  om_status_t res =
+      om_publish(om_log, &log_buf, sizeof(om_log_t), block, in_isr);
+
+  om_mutex_unlock(&om_log_mutex);
+
+  return res;
 }
 
 #endif

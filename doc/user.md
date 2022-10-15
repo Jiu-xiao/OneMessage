@@ -142,13 +142,13 @@ block参数决定同时有其他线程发布这个话题时是否等待
 
 ## 事件触发器
 
-    om_event_group_t om_event_create_group(char* name);
+    om_event_group_t * om_event_create_group(char* name);
 
 创建一个事件组。内部使用uint32_t来存放事件，一个值对应一个事件
 
-示例：`om_event_group_t evt_group = om_event_create_group("test_group")`
+示例：`om_event_group_t * evt_group = om_event_create_group("test_group")`
 
-    om_status_t om_event_register(om_event_group_t group, uint32_t event, om_event_status_t status, om_user_fun_t fun, void* arg);
+    om_status_t om_event_register(om_event_group_t * group, uint32_t event, om_event_status_t status, om_user_fun_t fun, void* arg);
 
 为某个事件注册回调函数，fun在事件发生时会被调用，并将event和arg传入
 
@@ -162,7 +162,7 @@ status决定了调用回调函数的条件
 
 示例：`om_event_register(evt_group, EVENT_1, OM_EVENT_START, callback_fun, fun_arg)`
 
-    om_status_t om_event_active(om_event_group_t group, uint32_t event, bool block， bool in_isr);
+    om_status_t om_event_active(om_event_group_t * group, uint32_t event, bool block， bool in_isr);
 
 触发事件。示例：`om_event_active(evt_group, EVENT_1, true, false)`
 
