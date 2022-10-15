@@ -26,7 +26,9 @@ typedef enum {
 typedef struct {
   uint32_t size;
   void* buff;
+#if OM_TIME
   om_time_t time;
+#endif
 } om_msg_t;
 
 typedef om_status_t (*om_user_fun_t)(om_msg_t* msg, void* arg);
@@ -43,12 +45,6 @@ typedef om_status_t (*om_user_fun_t)(om_msg_t* msg, void* arg);
 #endif
 
 #define OM_UNUSED(X) ((void)X)
-
-#if OM_VIRTUAL_TIME
-#define om_time_t uint32_t
-#define om_time_update(time) time++
-#define om_time_get(time) *time = _om_time_handle
-#endif
 
 #define om_offset_of(type, member) ((size_t) & ((type*)0)->member)
 

@@ -48,6 +48,8 @@ uint32_t om_msg_get_puber_num(om_topic_t* topic);
 
 uint32_t om_msg_get_link_num(om_topic_t* topic);
 
+#if OM_TIME
 om_time_t om_msg_get_last_time(om_topic_t* topic);
+#endif
 
 #endif

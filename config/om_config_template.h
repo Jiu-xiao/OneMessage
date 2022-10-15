@@ -38,9 +38,9 @@
 #define om_mutex_delete(arg) pthread_mutex_destroy(arg)
 
 /* 将运行时间作为消息发出的时间 */
-#define OM_VIRTUAL_TIME (0)
+#define OM_TIME (1)
 
-#if !OM_VIRTUAL_TIME
+#if OM_TIME
 #include <time.h>
 #define om_time_t time_t
 #define om_time_get(_time) time(_time)

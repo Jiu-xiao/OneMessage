@@ -61,7 +61,9 @@ inline om_status_t _om_publish_to_topic(om_topic_t* topic, om_msg_t* msg,
     return OM_ERROR;
   }
 
+#if OM_TIME
   om_time_get(&msg->time);
+#endif
 
   if (topic->user_fun.filter != NULL &&
       topic->user_fun.filter(msg, topic->user_fun.filter_arg) != OM_OK)
@@ -73,7 +75,9 @@ inline om_status_t _om_publish_to_topic(om_topic_t* topic, om_msg_t* msg,
     OM_ASSERT(topic->msg.buff);
     memcpy(topic->msg.buff, msg->buff, msg->size);
     topic->msg.size = msg->size;
+#if OM_TIME
     topic->msg.time = msg->time;
+#endif
   }
 
   return OM_OK;
@@ -214,4 +218,6 @@ uint32_t om_msg_get_link_num(om_topic_t* topic) {
   return om_list_get_num(&topic->link);
 }
 
+#if OM_TIME
 om_time_t om_msg_get_last_time(om_topic_t* topic) { return topic->msg.time; }
+#endif

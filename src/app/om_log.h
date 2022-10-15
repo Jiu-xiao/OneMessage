@@ -45,7 +45,9 @@ typedef enum {
 
 typedef struct {
   char data[OM_LOG_MAX_LEN];
+#if OM_TIME
   om_time_t time;
+#endif
   om_log_level_t level;
 } om_log_t;
 

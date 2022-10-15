@@ -61,7 +61,11 @@ om_status_t om_print_log(char* name, om_log_level_t level, bool block,
   om_mutex_lock(&om_log_mutex);
 
   log_buf.level = level;
+
+#if OM_TIME
   om_time_get(&log_buf.time);
+#endif
+
 #if OM_LOG_COLORFUL
   snprintf(fm_buf, OM_LOG_MAX_LEN, "%s%s%s[%s]%s%s\r\n",
            OM_COLOR_BG[LOG_FORMAT[level].bg_color],
