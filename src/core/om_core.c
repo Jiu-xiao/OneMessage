@@ -1,7 +1,5 @@
 #include "om_core.h"
 
-uint32_t _om_time_handle;
-
 RBT_ROOT(_topic_list);
 
 static om_mutex_t core_lock;
@@ -226,8 +224,6 @@ om_status_t om_core_set_export_target(om_suber_t* suber, void* target,
   suber->data.as_export.buff = target;
   return OM_OK;
 }
-
-inline uint32_t om_core_get_time() { return _om_time_handle; }
 
 void om_error(const char* file, uint32_t line) {
   (void)(file);
