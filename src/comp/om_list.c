@@ -1,54 +1,52 @@
 #include "om_list.h"
 
-inline void _INIT_LIST_HEAD(om_list_head_t* list) {
+void _INIT_LIST_HEAD(om_list_head_t* list) {
   list->next = list;
   list->prev = list;
 }
 
-inline void __list_add(om_list_head_t* new_data, om_list_head_t* prev,
-                       om_list_head_t* next) {
+void __list_add(om_list_head_t* new_data, om_list_head_t* prev,
+                om_list_head_t* next) {
   next->prev = new_data;
   new_data->next = next;
   new_data->prev = prev;
   prev->next = new_data;
 }
 
-inline void om_list_add(om_list_head_t* new_data, om_list_head_t* head) {
+void om_list_add(om_list_head_t* new_data, om_list_head_t* head) {
   __list_add(new_data, head, head->next);
 }
 
-inline void om_list_add_tail(om_list_head_t* new_data, om_list_head_t* head) {
+void om_list_add_tail(om_list_head_t* new_data, om_list_head_t* head) {
   __list_add(new_data, head->prev, head);
 }
 
-inline void __list_del(om_list_head_t* prev, om_list_head_t* next) {
+void __list_del(om_list_head_t* prev, om_list_head_t* next) {
   next->prev = prev;
   prev->next = next;
 }
 
-inline void om_list_del(om_list_head_t* entry) {
+void om_list_del(om_list_head_t* entry) {
   __list_del(entry->prev, entry->next);
 }
 
-inline void __list_del_entry(om_list_head_t* entry) {
+void __list_del_entry(om_list_head_t* entry) {
   __list_del(entry->prev, entry->next);
 }
 
-inline void om_list_del_init(om_list_head_t* entry) {
+void om_list_del_init(om_list_head_t* entry) {
   __list_del_entry(entry);
   INIT_LIST_HEAD(entry);
 }
 
-inline void om_list_replace(om_list_head_t* old, om_list_head_t* new_data) {
+void om_list_replace(om_list_head_t* old, om_list_head_t* new_data) {
   new_data->next = old->next;
   new_data->next->prev = new_data;
   new_data->prev = old->prev;
   new_data->prev->next = new_data;
 }
 
-inline int om_list_empty(const om_list_head_t* head) {
-  return head->next == head;
-}
+int om_list_empty(const om_list_head_t* head) { return head->next == head; }
 
 size_t om_list_get_num(const om_list_head_t* head) {
   uint32_t num = 0;
