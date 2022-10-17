@@ -204,7 +204,7 @@ START_TEST(_FILTER) {
   ck_assert_msg(memcmp(&test.list, &ans1.list, sizeof(ans1.list)),
                 "过滤器list模式失效");
 
-  for (uint32_t i = 0; i <= 100; i++) {
+  for (uint32_t i = 0; i < 100; i++) {
     test.range = 213 + i;
     om_publish(source, &test, sizeof(test), true, false);
     om_suber_export(range_sub, false);
@@ -213,7 +213,7 @@ START_TEST(_FILTER) {
                   ans2.range);
   }
 
-  for (uint32_t i = 1000; i <= 2000; i++) {
+  for (uint32_t i = 1000; i < 2000; i++) {
     test.range = 213 + i;
     om_publish(source, &test, sizeof(test), true, false);
     om_suber_export(range_sub, false);
@@ -270,7 +270,7 @@ START_TEST(_FILTER_STATIC) {
   ck_assert_msg(memcmp(&test.list, &ans1.list, sizeof(ans1.list)),
                 "过滤器list模式失效");
 
-  for (uint32_t i = 0; i <= 100; i++) {
+  for (uint32_t i = 0; i < 100; i++) {
     test.range = 213 + i;
     om_publish(&source, &test, sizeof(test), true, false);
     om_suber_export(range_sub, false);
@@ -279,7 +279,7 @@ START_TEST(_FILTER_STATIC) {
                   ans2.range);
   }
 
-  for (uint32_t i = 1000; i <= 2000; i++) {
+  for (uint32_t i = 1000; i < 2000; i++) {
     test.range = 213 + i;
     om_publish(&source, &test, sizeof(test), true, false);
     om_suber_export(range_sub, false);

@@ -217,6 +217,7 @@ block参数决定同时有其他线程发布这个话题时是否等待，in_isr
 | -------------------- | ------------------------ |
 | om_topic_add_suber   | 添加订阅者               |
 | om_topic_link        | 链接话题                 |
+| om_suber_available   | 判断订阅者是否有新消息   |
 | om_msg_del_topic     | 销毁话题                 |
 | om_msg_del_suber     | 销毁订阅者               |
 | om_msg_get_last_time | 获得话题最后一次消息时间 |
@@ -274,7 +275,7 @@ status决定了调用回调函数的条件
 
 在列表模式下,会从offset开始检测收到的消息是否与template相同,直到offset+scope为止,然后把整包发布到target话题。
 
-在范围模式下,会从offset到offset+scope视为一个整形数,然后判断其>=start且<=start+range,`暂时只支持uint32_t类型`,再将整包发布到target。
+在范围模式下,会从offset到offset+scope视为一个整形数,然后判断其大于等于start且小于start+range,`暂时只支持uint32_t类型`,再将整包发布到target。
 
 在分解模式下,会将offset到offset+scope这一段数据发布到target。
 

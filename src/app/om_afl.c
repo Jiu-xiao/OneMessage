@@ -97,7 +97,7 @@ om_status_t _om_afl_filter_check(om_afl_filter_t* filter, om_msg_t* msg) {
         return OM_ERROR;
       }
       buff += filter->data.range.offset;
-      if (*((uint32_t*)buff) - filter->data.range.start <=
+      if (*((uint32_t*)buff) - filter->data.range.start <
           filter->data.range.range)
         return OM_OK;
       break;
