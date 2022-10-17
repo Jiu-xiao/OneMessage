@@ -142,6 +142,10 @@ om_suber_t* om_subscript(om_topic_t* topic, void* buff, uint32_t max_size) {
   return sub;
 }
 
+inline bool om_suber_available(om_suber_t* suber) {
+  return suber->data.as_export.new_data;
+}
+
 om_status_t om_suber_export(om_suber_t* suber, bool in_isr) {
   OM_ASSERT(suber);
   OM_ASSERT(suber->mode == OM_SUBER_MODE_EXPORT);
