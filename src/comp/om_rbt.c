@@ -28,7 +28,7 @@
 static om_rbt_node_t *_search(om_rbt_t x, const char *key) {
   if (x == NULL) return NULL;
 
-  int8_t ans = strcmp(key, x->key);
+  int ans = strcmp(key, x->key);
 
   if (ans == 0)
     return x;
