@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "om_afl.h"
+#include "om_com.h"
 #include "om_evt.h"
 #include "om_fmt.h"
 #include "om_log.h"

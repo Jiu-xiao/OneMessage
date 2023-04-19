@@ -20,6 +20,8 @@ typedef enum {
   OM_ERROR_NULL,
   OM_ERROR_BUSY,
   OM_ERROR_TIMEOUT,
+  OM_ERROR_FULL,
+  OM_ERROR_EMPTY,
   OM_ERROR_NOT_INIT
 } om_status_t;
 
