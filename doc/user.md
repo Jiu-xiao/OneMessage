@@ -141,10 +141,12 @@
 ## 返回值
 
 * OM_OK = 0,
-* OM_ERROR = 1
-* OM_ERROR_NULL
-* OM_ERROR_BUSY
-* OM_ERROR_TIMEOUT
+* OM_ERROR = 1,
+* OM_ERROR_NULL,
+* OM_ERROR_BUSY,
+* OM_ERROR_TIMEOUT,
+* OM_ERROR_FULL,
+* OM_ERROR_EMPTY,
 * OM_ERROR_NOT_INIT
 
 ## 发布消息
@@ -199,8 +201,6 @@ block参数决定同时有其他线程发布这个话题时是否等待，in_isr
     uint16_t om_msg_get_topic_num()
 
     uint16_t om_msg_get_suber_num(om_topic_t* topic)
-
-    uint16_t om_msg_get_puber_num(om_topic_t* topic)
 
 ## 用户函数遍历网络
 
@@ -300,3 +300,86 @@ status决定了调用回调函数的条件
 配置分解模式
 
     om_config_filter(source,"d",target_topic,OM_PRASE_STRUCT(om_example_t,decomp))
+
+## 通信收发器
+
+为了满足跨进程和跨设备通信的需要，我们设计了这个通信收发器。它能够将任意一个topic中的数据连同topic的身份信息一同打包到一个数据包当中，同时能够处理其他设备通过任意方式传递来的数据包。
+
+设计上为了保证通信可靠性而放弃了一部分解析性能，因此建议用于接收频率不是很高（小于10Khz）且包长度不大（小于10kb）的场景，但是具体使用中不做限制;
+
+---
+
+创建一个通信节点。每个通信节点包含一个接收fifo（fifo_buff，buffer_size）和解析用的缓冲区（prase_buff, prase_buff_len)。同时也包含一个有map_len长度的om_com_map_item_t数组（map，map_len），用来存放topic的信息。
+
+buffer_size和prase_buff_len应当大于接收topic的最大数据长度+10，加大buff能够更好的应对组包的情况。
+
+    om_status_t om_com_create(om_com_t* com, uint32_t buffer_size, uint16_t map_len, uint32_t prase_buff_len);
+
+    om_status_t om_com_create_static(om_com_t* com, void* fifo_buff, uint32_t buffer_size, om_com_map_item_t* map, uint16_t map_len, uint8_t* prase_buff, uint32_t prase_buff_len);
+
+为通信节点添加topic。请确保在添加之前需要的topic已经创建完毕。
+
+    om_status_t om_com_add_topic(om_com_t* com, const char* topic_name);
+
+利用topic内的信息打包pack。因为加入了校验和topic信息，buff的长度应当比topic消息的长度多10个字节，我们提供了OM_COM_TYPE宏来快速创建缓冲区。
+
+    om_status_t om_com_generate_pack(om_topic_t* topic, void* buff);
+
+将接收到的数据包解析，如果存在完整的数据包，会直接发布到对应topic。支持拆包，组包，错位或者夹杂无效数据情况下的解析。
+
+    om_com_recv_ans_t om_com_prase_recv(om_com_t* com, uint8_t* buff, uint32_t size, bool block, bool in_isr);
+
+示例:
+
+定义数据结构体
+
+    typedef struct {
+        uint32_t test;
+        char str[10];
+    } om_com_test_t;
+
+发送端配置
+
+    /* 初始化OneMessage */
+    om_init();
+
+    /* 创建话题 */
+    om_topic_t* source = om_config_topic(NULL, "ca", "source", sizeof(om_com_test_t));
+
+    /* 创建发送缓冲区 */
+    OM_COM_TYPE(om_com_test_t) trans_buffer;
+
+    /* 创建发送数据 */
+    om_com_test_t test_data = {.str = "test data1", .test = 0x12345678};
+
+    /* 发布消息 */
+    om_publish(source, &test_data, sizeof(om_com_test_t), true, false);
+
+    /* 打包消息，写入缓冲区 */
+    om_com_generate_pack(source, &trans_buffer);
+
+    /* 使用任何一种方式发送数据 */
+    //user_trans_data(trans_buffer, sizeof(trans_buffer));
+
+接收端配置
+
+    /* 初始化OneMessage */
+    om_init();
+
+    /* 创建话题 */
+    om_topic_t* source = om_config_topic(NULL, "ca", "source", sizeof(om_com_test_t));
+
+    /* 接收节点变量 */
+    om_com_t com;
+
+    /* 创建接收节点 */
+    om_com_create(&com, 128, 5, 128);
+
+    /* 添加接收topic */
+    om_com_add_topic(&com, "source");
+
+    /* 使用任何一种方式接收数据 */
+    //user_recv_data(user_recv_buff, sizeof(user_recv_buff));
+
+    /* 解析接收到的数据 */
+    om_com_prase_recv(&com, (uint8_t*)&user_recv_buff, user_recv_len, true, false);
