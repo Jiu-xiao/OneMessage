@@ -170,8 +170,6 @@ typedef struct {
 START_TEST(_FILTER) {
   om_init();
 
-  om_delay_ms(1000);
-
   om_afl_test_t test = {0}, ans1 = {0}, ans2 = {0}, ans3 = {0};
   uint8_t fl_template[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
@@ -232,8 +230,6 @@ END_TEST
 
 START_TEST(_FILTER_STATIC) {
   om_init();
-
-  om_delay_ms(1000);
 
   om_afl_test_t test = {0}, ans1 = {0}, ans2 = {0}, ans3 = {0};
   uint8_t fl_template[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -296,6 +292,94 @@ START_TEST(_FILTER_STATIC) {
 }
 END_TEST
 
+typedef struct {
+  uint32_t test;
+  char str[10];
+} om_com_test_t;
+
+static uint32_t com_pub_count = 0;
+
+static om_status_t com_cb(om_msg_t* msg, void* arg) {
+  OM_UNUSED(arg);
+
+  com_pub_count++;
+
+  return OM_OK;
+}
+
+START_TEST(_COM) {
+  om_init();
+
+  om_topic_t* source = om_config_topic(NULL, "cad", "source",
+                                       sizeof(om_com_test_t), com_cb, NULL);
+
+  om_topic_t* source1 =
+      om_config_topic(NULL, "ca", "source1", sizeof(om_com_test_t));
+
+  om_com_t com;
+
+  om_com_test_t test_data = {.str = "test data1", .test = 0x12345678};
+
+  om_com_create(&com, 128, 5, 128);
+
+  om_com_add_topic(&com, "source1");
+
+  om_com_add_topic(&com, "source");
+
+  OM_COM_TYPE(om_com_test_t) trans_buffer;
+
+  om_publish(source, &test_data, sizeof(om_com_test_t), true, false);
+
+  ck_assert(com_pub_count == 1);
+
+  om_com_generate_pack(source, &trans_buffer);
+
+  test_data = (om_com_test_t){.str = "test data2", .test = 0x12785634};
+
+  om_publish(source, &test_data, sizeof(om_com_test_t), true, false);
+
+  ck_assert(com_pub_count == 2);
+
+  /* prase an entire packet of data */
+  for (int i = 0; i < 100; i++) {
+    com_pub_count = 0;
+    om_com_prase_recv(&com, (uint8_t*)&trans_buffer,
+                      OM_COM_TYPE_SIZE(om_com_test_t), true, false);
+
+    ck_assert(com_pub_count == 1);
+  }
+
+  om_com_test_t* test_ans = (om_com_test_t*)source->msg.buff;
+
+  ck_assert_msg(strncmp(test_ans->str, "test data1", 10) == 0, "数据损坏");
+  ck_assert_msg(test_ans->test == 0x12345678, "数据损坏");
+
+  /* prase packet by byte */
+  for (int j = 0; j < 100; j++) {
+    com_pub_count = 0;
+    for (int i = 0; i < sizeof(trans_buffer); i++) {
+      ck_assert(com_pub_count == 0);
+      uint8_t* data_buff = (uint8_t*)&trans_buffer;
+      om_com_prase_recv(&com, data_buff + i, 1, true, false);
+    }
+    ck_assert(com_pub_count == 1);
+  }
+
+  /* prase packet with invalid data */
+  for (uint8_t j = 0; j <= 254; j++) {
+    com_pub_count = 0;
+    for (int t = 0; t < j; t++) {
+      om_com_prase_recv(&com, &j, 1, true, false);
+    }
+    for (int i = 0; i < sizeof(trans_buffer); i++) {
+      ck_assert(com_pub_count == 0);
+      uint8_t* data_buff = (uint8_t*)&trans_buffer;
+      om_com_prase_recv(&com, data_buff + i, 1, true, false);
+    }
+    ck_assert(com_pub_count == 1);
+  }
+}
+
 Suite* make_om_module_suite(void) {
   Suite* om_module = suite_create("模块测试");
 
@@ -326,6 +410,10 @@ Suite* make_om_module_suite(void) {
   TCase* tc_filter_static = tcase_create("静态高级过滤器测试");
   suite_add_tcase(om_module, tc_filter_static);
   tcase_add_test(tc_filter_static, _FILTER_STATIC);
+
+  TCase* tc_com = tcase_create("通信收发器测试");
+  suite_add_tcase(om_module, tc_com);
+  tcase_add_test(tc_com, _COM);
 
   return om_module;
 }
