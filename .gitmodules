@@ -1,6 +1,0 @@
-[submodule "example/linux-cmake"]
-	path = example/linux-cmake
-	url = https://gitee.com/jiu-xiao/msg-example.git
-[submodule "example/f103-makefile"]
-	path = example/f103-makefile
-	url = https://gitee.com/jiu-xiao/om-example-mcu.git
