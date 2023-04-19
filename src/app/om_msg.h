@@ -3,7 +3,6 @@
 
 #include "om_core.h"
 
-#define om_topic_add_puber om_core_add_puber
 #define om_topic_add_suber om_core_add_suber
 #define om_add_topic om_core_add_topic
 #define om_topic_link om_core_link
@@ -45,8 +44,6 @@ om_status_t om_msg_foreach_topic(bool (*fun)(om_topic_t* topic, void* arg),
 uint32_t om_msg_get_topic_num();
 
 uint32_t om_msg_get_suber_num(om_topic_t* topic);
-
-uint32_t om_msg_get_puber_num(om_topic_t* topic);
 
 uint32_t om_msg_get_link_num(om_topic_t* topic);
 

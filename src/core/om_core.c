@@ -27,7 +27,6 @@ om_topic_t* om_core_topic_create_static(om_topic_t* topic, const char* name,
   topic->virtual_mode = true;
   topic->buff_len = buff_len;
 
-  INIT_LIST_HEAD(&topic->puber);
   INIT_LIST_HEAD(&topic->suber);
   INIT_LIST_HEAD(&topic->link);
 

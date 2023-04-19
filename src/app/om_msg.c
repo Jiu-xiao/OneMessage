@@ -214,9 +214,6 @@ uint32_t om_msg_get_suber_num(om_topic_t* topic) {
   return om_list_get_num(&topic->suber);
 }
 
-uint32_t om_msg_get_puber_num(om_topic_t* topic) {
-  return om_list_get_num(&topic->puber);
-}
 
 uint32_t om_msg_get_link_num(om_topic_t* topic) {
   return om_list_get_num(&topic->link);
