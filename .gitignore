@@ -2,3 +2,5 @@ build/*
 .vscode/*
 config/om_config.h
 utils/*.csv
+.cache/**
+.history/**
