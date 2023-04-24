@@ -91,3 +91,7 @@
 ## OM_LOG_MAX_LEN
 
 >日志最大长度
+
+## OM_LOG_LEVEL
+
+>日志最小打印等级 1:default 2:notice 3:pass 4:warning 5:error
