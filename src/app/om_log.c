@@ -54,7 +54,7 @@ inline om_topic_t* om_get_log_handle() { return &om_log_topic; }
 static om_log_t log_buf;
 static char fm_buf[OM_LOG_MAX_LEN];
 
-om_status_t om_print_log(char* name, om_log_level_t level, bool block,
+om_status_t om_print_log(const char* name, om_log_level_t level, bool block,
                          bool in_isr, const char* format, ...) {
   if (!om_log_initd) return OM_ERROR_NOT_INIT;
 
