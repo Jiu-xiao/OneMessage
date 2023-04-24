@@ -14,7 +14,7 @@ inline void om_fifo_create(om_fifo_t* fifo, void* fifo_ptr, uint32_t item_sum,
 
 inline bool om_fifo_writeable(om_fifo_t* fifo) { return !fifo->is_full; }
 
-inline om_status_t om_fifo_write(om_fifo_t* fifo, void* data) {
+inline om_status_t om_fifo_write(om_fifo_t* fifo, const void* data) {
   if (fifo->is_full) {
     return OM_ERROR_FULL;
   }
@@ -35,7 +35,7 @@ inline om_status_t om_fifo_write(om_fifo_t* fifo, void* data) {
   return OM_OK;
 }
 
-inline om_status_t om_fifo_writes(om_fifo_t* fifo, void* data,
+inline om_status_t om_fifo_writes(om_fifo_t* fifo, const void* data,
                                   uint32_t item_num) {
   if (om_fifo_writeable_item_count(fifo) < item_num) {
     return OM_ERROR_FULL;
@@ -118,7 +118,7 @@ om_status_t om_fifo_pop_batch(om_fifo_t* fifo, uint32_t item_num) {
   return OM_OK;
 }
 
-om_status_t om_fifo_push(om_fifo_t* fifo, void* data) {
+om_status_t om_fifo_push(om_fifo_t* fifo, const void* data) {
   return om_fifo_write(fifo, data);
 }
 
@@ -200,4 +200,17 @@ inline uint32_t om_fifo_writeable_item_count(om_fifo_t* fifo) {
              fifo->item_sum;
     }
   }
+}
+
+inline om_status_t om_fifo_reset(om_fifo_t* fifo) {
+  fifo->ptr_read = fifo->ptr_write;
+  fifo->is_full = false;
+
+  return OM_OK;
+}
+
+inline om_status_t om_fifo_overwrite(om_fifo_t* fifo, const void* data) {
+  om_fifo_reset(fifo);
+
+  return om_fifo_write(fifo, data);
 }
