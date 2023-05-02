@@ -14,8 +14,10 @@
 #define om_free free
 #endif
 
+#if OM_LOG_OUTPUT
 #if (OM_LOG_LEVEL < 1 || OM_LOG_LEVEL > 6)
 #error "OM_LOG_LEVEL must be between 1 and 6."
+#endif
 #endif
 
 typedef enum {
