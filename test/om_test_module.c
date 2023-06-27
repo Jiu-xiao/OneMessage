@@ -131,7 +131,7 @@ START_TEST(_EVENT) {
   om_event_active(evt_group, EVENT_2, true, false);
 
   ck_assert_msg(event_counter == 2, "事件触发失败");
-  ck_assert_msg(last_event == EVENT_2, "触发了错误的事件");
+  ck_assert_msg(last_event == EVENT_1, "触发了错误的事件,应为%d,实际为%d", EVENT_1, last_event);
 }
 END_TEST
 
@@ -157,7 +157,7 @@ START_TEST(_EVENT_STATIC) {
   om_event_active(&group, EVENT_2, true, false);
 
   ck_assert_msg(event_counter == 2, "事件触发失败");
-  ck_assert_msg(last_event == EVENT_2, "触发了错误的事件");
+  ck_assert_msg(last_event == EVENT_1, "触发了错误的事件,应为%d,实际为%d", EVENT_1, last_event);
 }
 END_TEST
 

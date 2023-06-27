@@ -80,7 +80,7 @@ om_status_t om_core_add_suber(om_topic_t* topic, om_suber_t* sub) {
 
   om_mutex_lock(&core_lock);
 
-  om_list_add_tail(&sub->self, &(topic->suber));
+  om_list_add(&sub->self, &(topic->suber));
 
   om_mutex_unlock(&core_lock);
 
@@ -108,7 +108,7 @@ om_status_t om_core_add_link(om_topic_t* topic, om_link_t* link) {
 
   om_mutex_lock(&core_lock);
 
-  om_list_add_tail(&link->self, &(topic->link));
+  om_list_add(&link->self, &(topic->link));
 
   om_mutex_unlock(&core_lock);
 

@@ -41,7 +41,7 @@ om_status_t om_afl_add_filter(om_afl_t* afl, om_afl_filter_t* filter) {
   OM_ASSERT(afl);
   OM_ASSERT(filter);
 
-  om_list_add_tail(&filter->self, &afl->filter);
+  om_list_add(&filter->self, &afl->filter);
 
   return OM_OK;
 }
