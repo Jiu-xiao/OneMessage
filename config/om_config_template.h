@@ -60,3 +60,6 @@
 
 /* 话题名称最大长度 */
 #define OM_TOPIC_MAX_NAME_LEN (15)
+
+#include <stdbool.h>
+static inline bool om_in_isr() { return false; }
