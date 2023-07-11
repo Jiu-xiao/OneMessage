@@ -1,11 +1,9 @@
 #include "om_list.h"
 
-void _INIT_LIST_HEAD(om_list_head_t* list) {
-  list->next = list;
-}
+void _INIT_LIST_HEAD(om_list_head_t* list) { list->next = list; }
 
-void __list_add(om_list_head_t* new_data, om_list_head_t* prev,
-                om_list_head_t* next) {
+static void __list_add(om_list_head_t* new_data, om_list_head_t* prev,
+                       om_list_head_t* next) {
   new_data->next = next;
   prev->next = new_data;
 }
@@ -14,20 +12,19 @@ void om_list_add(om_list_head_t* new_data, om_list_head_t* head) {
   __list_add(new_data, head, head->next);
 }
 
-void __list_del(om_list_head_t* prev, om_list_head_t* next) {
+static void __list_del(om_list_head_t* prev, om_list_head_t* next) {
   prev->next = next;
 }
 
-om_list_head_t* __list_get_prev(om_list_head_t* entry){
+static om_list_head_t* __list_get_prev(om_list_head_t* entry) {
   om_list_head_t* prev = entry;
-  while(prev->next != entry) {
+  while (prev->next != entry) {
     prev = prev->next;
   }
   return prev;
 }
 
 void om_list_del(om_list_head_t* entry) {
-
   __list_del(__list_get_prev(entry), entry->next);
 }
 

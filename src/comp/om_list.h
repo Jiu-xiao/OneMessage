@@ -4,7 +4,7 @@
 #include "om_def.h"
 
 typedef struct _om_list_head {
-  struct _om_list_head *next;
+  struct _om_list_head* next;
 } om_list_head_t;
 
 #define LIST_HEAD_INIT(name) \
@@ -47,11 +47,6 @@ void om_list_del(om_list_head_t* entry);
 void om_list_replace(om_list_head_t* old, om_list_head_t* new_data);
 
 int om_list_empty(const om_list_head_t* head);
-
-void __list_del(om_list_head_t* prev, om_list_head_t* next);
-
-void __list_add(om_list_head_t* new_data, om_list_head_t* prev,
-                om_list_head_t* next);
 
 size_t om_list_get_num(const om_list_head_t* head);
 #endif
