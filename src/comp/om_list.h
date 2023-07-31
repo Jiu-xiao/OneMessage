@@ -7,10 +7,10 @@ typedef struct _om_list_head {
   struct _om_list_head* next;
 } om_list_head_t;
 
-#define LIST_HEAD_INIT(name) \
+#define OM_LIST_HEAD_INIT(name) \
   { &(name), &(name) }
 
-#define LIST_HEAD(name) om_list_head_t name = LIST_HEAD_INIT(name)
+#define OM_LIST_HEAD(name) om_list_head_t name = OM_LIST_HEAD_INIT(name)
 
 #define om_list_for_each(pos, head) \
   for (pos = (head)->next; pos != (head); pos = pos->next)
@@ -20,9 +20,9 @@ typedef struct _om_list_head {
 
 #define om_list_entry(ptr, type, member) om_container_of(ptr, type, member)
 
-void _INIT_LIST_HEAD(om_list_head_t* list);
+void _OM_INIT_LIST_HEAD(om_list_head_t* list);
 
-#define INIT_LIST_HEAD(arg) _INIT_LIST_HEAD(arg)
+#define OM_INIT_LIST_HEAD(arg) _OM_INIT_LIST_HEAD(arg)
 
 #define om_del_all(source, del_fun)                \
   do {                                             \

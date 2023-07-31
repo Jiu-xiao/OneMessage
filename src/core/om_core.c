@@ -30,8 +30,8 @@ om_topic_t* om_core_topic_create_static(om_topic_t* topic, const char* name,
   topic->virtual_mode = true;
   topic->buff_len = buff_len;
 
-  INIT_LIST_HEAD(&topic->suber);
-  INIT_LIST_HEAD(&topic->link);
+  OM_INIT_LIST_HEAD(&topic->suber);
+  OM_INIT_LIST_HEAD(&topic->link);
 
   om_mutex_init(&topic->mutex);
   om_mutex_unlock(&topic->mutex);

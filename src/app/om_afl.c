@@ -20,7 +20,7 @@ om_afl_t* om_afl_create_static(om_afl_t* afl, om_topic_t* source) {
   OM_ASSERT(afl);
   memset(afl, 0, sizeof(om_afl_t));
 
-  INIT_LIST_HEAD(&afl->filter);
+  OM_INIT_LIST_HEAD(&afl->filter);
   afl->source_topic = source;
   source->afl = afl;
 

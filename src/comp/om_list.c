@@ -1,6 +1,6 @@
 #include "om_list.h"
 
-void _INIT_LIST_HEAD(om_list_head_t* list) { list->next = list; }
+void _OM_INIT_LIST_HEAD(om_list_head_t* list) { list->next = list; }
 
 static void __list_add(om_list_head_t* new_data, om_list_head_t* prev,
                        om_list_head_t* next) {
