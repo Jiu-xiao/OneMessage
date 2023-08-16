@@ -3,7 +3,7 @@
 #define CRC8_INIT 0xFF
 #define CRC32_INIT 0xFFFFFFFF
 
-static const uint8_t crc8_tab[256] = {
+const uint8_t OM_CRC8_TAB[256] = {
     0x00, 0x5e, 0xbc, 0xe2, 0x61, 0x3f, 0xdd, 0x83, 0xc2, 0x9c, 0x7e, 0x20,
     0xa3, 0xfd, 0x1f, 0x41, 0x9d, 0xc3, 0x21, 0x7f, 0xfc, 0xa2, 0x40, 0x1e,
     0x5f, 0x01, 0xe3, 0xbd, 0x3e, 0x60, 0x82, 0xdc, 0x23, 0x7d, 0x9f, 0xc1,
@@ -28,7 +28,7 @@ static const uint8_t crc8_tab[256] = {
     0xd7, 0x89, 0x6b, 0x35,
 };
 
-static const uint32_t crc32tab[] = {
+const uint32_t OM_CRC32_TAB[] = {
     0x00000000L, 0x77073096L, 0xee0e612cL, 0x990951baL, 0x076dc419L,
     0x706af48fL, 0xe963a535L, 0x9e6495a3L, 0x0edb8832L, 0x79dcb8a4L,
     0xe0d5e91eL, 0x97d2d988L, 0x09b64c2bL, 0x7eb17cbdL, 0xe7b82d07L,
@@ -86,7 +86,7 @@ uint8_t om_crc8_calc(const uint8_t* buf, size_t len) {
   uint8_t crc = CRC8_INIT;
 
   /* loop over the buffer data */
-  while (len-- > 0) crc = crc8_tab[(crc ^ *buf++) & 0xff];
+  while (len-- > 0) crc = OM_CRC8_TAB[(crc ^ *buf++) & 0xff];
 
   return crc;
 }
@@ -99,7 +99,7 @@ bool om_crc8_verify(const uint8_t* buf, size_t len) {
 }
 
 static inline uint32_t crc32_byte(uint32_t crc, const uint8_t data) {
-  return crc32tab[(crc ^ data) & 0xff] ^ (crc >> 8);
+  return OM_CRC32_TAB[(crc ^ data) & 0xff] ^ (crc >> 8);
 }
 
 uint32_t om_crc32_calc(const uint8_t* buf, size_t len) {

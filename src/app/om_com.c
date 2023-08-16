@@ -54,6 +54,12 @@ om_status_t om_com_add_topic(om_com_t* com, const char* topic_name) {
 
   om_topic_t* topic = om_core_find_topic(topic_name, 0);
   OM_ASSERT(topic);
+
+  topic->crc32 = om_crc32_calc((const uint8_t*)topic->name,
+                               strnlen(topic->name, OM_TOPIC_MAX_NAME_LEN));
+
+  /* The result of crc32 should not be 0, please change the topic name */
+  OM_ASSERT(topic->crc32 != 0);
   com->map[com->map_index].topic = topic;
   com->map[com->map_index].crc32 = topic->crc32;
   com->map_index++;
@@ -67,6 +73,11 @@ om_status_t om_com_generate_pack(om_topic_t* topic, void* buff) {
 
   if (topic->msg.buff == 0) {
     return OM_ERROR_NULL;
+  }
+
+  if (topic->crc32 == 0) {
+    topic->crc32 = om_crc32_calc((const uint8_t*)topic->name,
+                                 strnlen(topic->name, OM_TOPIC_MAX_NAME_LEN));
   }
 
   om_com_raw_type_t* raw_buff = buff;
