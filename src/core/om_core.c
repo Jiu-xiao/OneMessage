@@ -1,4 +1,5 @@
 #include "om_core.h"
+#include "om_crc.h"
 
 RBT_ROOT(_topic_list);
 
@@ -7,6 +8,8 @@ static om_mutex_t core_lock;
 om_status_t om_core_init() {
   om_mutex_init(&core_lock);
   om_mutex_unlock(&core_lock);
+  om_generate_crc32_table();
+  om_generate_crc8_table();
   return OM_OK;
 }
 

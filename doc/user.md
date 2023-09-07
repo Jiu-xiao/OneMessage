@@ -48,7 +48,7 @@
 
     om_suber_t* om_config_suber(om_suber_t* suber, const char* format, ...)
 
-1. topic/suber==NULL时,会自动创建对应类型的变量（动态分配内存）并返回,且om_config_topic的第一个可选参数为话题名，第二个参数的话题数据的最大大小。
+1. topic/suber==NULL时,会自动创建对应类型的变量(动态分配内存)并返回,且om_config_topic的第一个可选参数为话题名，第二个参数的话题数据的最大大小。
 
 1. 如果允许动态分配的情况下，建议使用om_config_topic/om_config_suber直接创建话题/订阅者/链接。
 
@@ -79,11 +79,11 @@
 | 选项 | 参数                                                              | 功能                                                                                    |
 | ---- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | f    | om_status_t (`*fun`)(`om_msg_t *msg, void *arg`), `void* fun_arg` | 注册filter函数                                                                          |
-| l    | om_topic_t *                                                      | 链接话题，以后收到的消息会转发到参数中的话题（会申请一块内存用来存放新的链接和订阅者）  |
+| l    | om_topic_t *                                                      | 链接话题，以后收到的消息会转发到参数中的话题(会申请一块内存用来存放新的链接和订阅者)  |
 | k    | om_suber_t*,om_link_t*,om_topic_t *                               | 链接话题，以后收到的消息会转发到参数中的话题，不会动态申请内存                          |
-| t    | om_suber_t *                                                      | 链接话题，参数中的话题收到的消息会转发到本话题（会申请一块内存用来存放新的链接和订阅者) |
+| t    | om_suber_t *                                                      | 链接话题，参数中的话题收到的消息会转发到本话题(会申请一块内存用来存放新的链接和订阅者) |
 | e    | om_suber_t*,om_link_t*,om_topic_t *                               | 链接话题，参数中的话题收到的消息会转发到本话题，不会动态申请内存                        |
-| d    | om_status_t (`*fun`)(`om_msg_t *msg, void *arg`), `void* fun_arg` | 先将fun注册为新创建（使用动态分配）的订阅者的sub_callback函数,再将订阅者指向话题        |
+| d    | om_status_t (`*fun`)(`om_msg_t *msg, void *arg`), `void* fun_arg` | 先将fun注册为新创建(使用动态分配)的订阅者的sub_callback函数,再将订阅者指向话题        |
 | s    | om_suber_t *                                                      | 将参数中的订阅者者添加到话题                                                            |
 | c    | 无                                                                | 申请一块内存作为话题的缓存区，以后接收消息时只拷贝数据，不传递指针                      |
 | x    | void *                                                            | 将参数指向的内存空间作为话题的缓存区，以后接收消息时只拷贝数据，不传递指针              |
@@ -120,7 +120,7 @@
 
 * 静态内存
 
-      // 定义变量（注意变量生命周期）
+      // 定义变量(注意变量生命周期)
       om_topic_t your_topic,your_topic1;
       om_suber_t your_suber,your_suber1;
       om_link_t your_link;
@@ -305,11 +305,11 @@ status决定了调用回调函数的条件
 
 为了满足跨进程和跨设备通信的需要，我们设计了这个通信收发器。它能够将任意一个topic中的数据连同topic的身份信息一同打包到一个数据包当中，同时能够处理其他设备通过任意方式传递来的数据包。
 
-设计上为了保证通信可靠性而放弃了一部分解析性能，因此建议用于接收频率不是很高（小于10Khz）且包长度不大（小于10kb）的场景，但是具体使用中不做限制;
+设计上为了保证通信可靠性而放弃了一部分解析性能，因此建议用于接收频率不是很高(小于10Khz)且包长度不大(小于10kb)的场景，但是具体使用中不做限制;
 
 ---
 
-创建一个通信节点。每个通信节点包含一个接收fifo（fifo_buff，buffer_size）和解析用的缓冲区（prase_buff, prase_buff_len)。同时也包含一个有map_len长度的om_com_map_item_t数组（map，map_len），用来存放topic的信息。
+创建一个通信节点。每个通信节点包含一个接收fifo(fifo_buff，buffer_size)和解析用的缓冲区(prase_buff, prase_buff_len)。同时也包含一个有map_len长度的om_com_map_item_t数组(map，map_len)，用来存放topic的信息。
 
 buffer_size和prase_buff_len应当大于接收topic的最大数据长度+10，加大buff能够更好的应对组包的情况。
 
@@ -319,7 +319,9 @@ buffer_size和prase_buff_len应当大于接收topic的最大数据长度+10，�
 
 为通信节点添加topic。请确保在添加之前需要的topic已经创建完毕。
 
-    om_status_t om_com_add_topic(om_com_t* com, const char* topic_name);
+    om_status_t om_com_add_topic(om_com_t* com, om_topic_t* topic);
+
+    om_status_t om_com_add_topic_with_name(om_com_t* com, const char* topic_name);
 
 利用topic内的信息打包pack。因为加入了校验和topic信息，buff的长度应当比topic消息的长度多10个字节，我们提供了OM_COM_TYPE宏来快速创建缓冲区。
 
@@ -376,7 +378,7 @@ buffer_size和prase_buff_len应当大于接收topic的最大数据长度+10，�
     om_com_create(&com, 128, 5, 128);
 
     /* 添加接收topic */
-    om_com_add_topic(&com, "source");
+    om_com_add_topic(&com, source);
 
     /* 使用任何一种方式接收数据 */
     //user_recv_data(user_recv_buff, sizeof(user_recv_buff));

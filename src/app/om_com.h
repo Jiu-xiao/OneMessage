@@ -62,7 +62,9 @@ om_status_t om_com_create_static(om_com_t* com, void* fifo_buff,
 om_status_t om_com_create(om_com_t* com, uint32_t buffer_size, uint16_t map_len,
                           uint32_t prase_buff_len);
 
-om_status_t om_com_add_topic(om_com_t* com, const char* topic_name);
+om_status_t om_com_add_topic(om_com_t* com, om_topic_t* topic);
+
+om_status_t om_com_add_topic_with_name(om_com_t* com, const char* topic_name);
 
 om_status_t om_com_generate_pack(om_topic_t* topic, void* buff);
 

@@ -322,9 +322,9 @@ START_TEST(_COM) {
 
   om_com_create(&com, 128, 5, 128);
 
-  om_com_add_topic(&com, "source1");
+  om_com_add_topic_with_name(&com, "source1");
 
-  om_com_add_topic(&com, "source");
+  om_com_add_topic(&com, source);
 
   OM_COM_TYPE(om_com_test_t) trans_buffer;
 
