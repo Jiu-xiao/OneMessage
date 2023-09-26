@@ -131,7 +131,7 @@ om_status_t om_publish(om_topic_t* topic, void* buff, uint32_t size, bool block,
   return res;
 }
 
-om_suber_t* om_subscript(om_topic_t* topic, void* buff, uint32_t max_size) {
+om_suber_t* om_subscribe(om_topic_t* topic, void* buff, uint32_t max_size) {
   OM_ASSERT(topic);
   OM_ASSERT(buff);
 

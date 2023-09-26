@@ -156,11 +156,11 @@ block参数决定同时有其他线程发布这个话题时是否等待，in_isr
 
 ## 订阅话题
 
-    om_suber_t om_subscript(om_topic_t *topic, void *buff, uint32_t max_size)
+    om_suber_t om_subscribe(om_topic_t *topic, void *buff, uint32_t max_size)
 
     om_status_t om_suber_export(om_suber_t* suber, bool in_isr)
 
-* om_subscript会返回一个可导出话题数据的订阅者
+* om_subscribe会返回一个可导出话题数据的订阅者
 * 当订阅者接收到新数据时,调用om_suber_export会将数据写入buff,并返回OM_OK.
 
 ## log

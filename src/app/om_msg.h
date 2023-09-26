@@ -28,7 +28,7 @@ om_status_t om_publish(om_topic_t* topic, void* buff, uint32_t size, bool block,
 
 om_status_t om_sync(bool in_isr);
 
-om_suber_t* om_subscript(om_topic_t* topic, void* buff, uint32_t max_size);
+om_suber_t* om_subscribe(om_topic_t* topic, void* buff, uint32_t max_size);
 
 bool om_suber_available(om_suber_t* suber);
 
