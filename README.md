@@ -25,7 +25,7 @@ OneMessage核心为订阅发布的消息框架，包含了红黑树，链表，�
   * [example for linux(use cmake)](https://gitee.com/jiu-xiao/msg-example.git)
   * [example for stm32f103(use makefile)](https://gitee.com/jiu-xiao/om-example-mcu.git)
 * 使用本框架的开源项目
-  * [XRobot](https://gitee.com/qdu-rm-2022/qdu-rm-mcu)
+  * [XRobot](https://github.com/xrobot-org/XRobot)
 
 ## 特性
 
@@ -120,3 +120,7 @@ OneMessage
 > [使用说明](doc/user.md)
 
 > [开发文档](doc/dev.md)
+
+## C++
+
+C++兼容层[OneMessageCPP](https://github.com/Jiu-xiao/OneMessageCPP)
