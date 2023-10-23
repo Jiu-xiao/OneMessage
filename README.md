@@ -17,6 +17,14 @@ OneMessage核心为订阅发布的消息框架，包含了红黑树，链表，�
 
 本项目旨在为跨线程和跨设备通信提供一个通用解决方案，以较小的性能代价换取数倍的开发效率。
 
+## 文档
+
+> [配置文件](https://github.com/Jiu-xiao/OneMessage/blob/master/doc/config.md)
+
+> [使用说明](https://github.com/Jiu-xiao/OneMessage/blob/master/doc/user.md)
+
+> [开发文档](https://github.com/Jiu-xiao/OneMessage/blob/master/doc/dev.md)
+
 ## 系统支持
 
 已在Linux,FreeRTOS上成功运行，欢迎适配到其他平台。
@@ -77,19 +85,19 @@ OneMessage核心为订阅发布的消息框架，包含了红黑树，链表，�
 
 [Github](https://github.com/Jiu-xiao/OneMessage.git)
 
-```
+```shell
 git clone https://github.com/Jiu-xiao/OneMessage.gitt
 ```
 
 或者使用 `git submodule`将其包含在你的仓库中
 
-```
+```shell
 git submodule add https://github.com/Jiu-xiao/OneMessage.git <path>
 ```
 
 ## 代码结构
 
-```
+```c
 OneMessage
 ├─config
 ├─src
@@ -98,8 +106,6 @@ OneMessage
 │  └─core
 └─test
 ```
-
----
 
 | 文件夹   | 功能         |
 | -------- | ------------ |
@@ -112,14 +118,6 @@ OneMessage
 | test     | 单元测试     |
 | example  | 例程         |
 | utils    | 工具         |
-
-## 文档
-
-> [配置文件](doc/config.md)
-
-> [使用说明](doc/user.md)
-
-> [开发文档](doc/dev.md)
 
 ## C++
 
