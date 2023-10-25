@@ -202,6 +202,14 @@ block参数决定同时有其他线程发布这个话题时是否等待，in_isr
 
     uint16_t om_msg_get_suber_num(om_topic_t* topic)
 
+## 给话题加锁
+
+    bool OM_TOPIC_LOCK(om_topic_t*);
+
+    void OM_TOPIC_UNLOCK(om_topic_t*);
+
+如果使用om_suber_export方式获取话题数据，而且传递的是数据的原始指针，发布线程可以在写入数据时给话题加锁，防止订阅者读取到不完整的数据。
+
 ## 用户函数遍历网络
 
     om_status_t om_msg_for_each_topic(om_status_t (*fun)(om_topic_t*, void* arg),

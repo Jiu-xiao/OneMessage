@@ -61,5 +61,9 @@
 /* 话题名称最大长度 */
 #define OM_TOPIC_MAX_NAME_LEN (15)
 
+/* for OneMessageCPP:https://github.com/Jiu-xiao/OneMessageCPP */
+
+/*
 #include <stdbool.h>
 static inline bool om_in_isr() { return false; }
+*/
