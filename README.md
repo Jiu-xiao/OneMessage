@@ -73,7 +73,7 @@ OneMessage核心为订阅发布的消息框架，包含了红黑树，链表，�
 
 * 话题共享
 
-  * 提供topic数据打包与解析api，可通过任意协议共享多个topic数据，实现跨进程和。通过fifo与crc校验保证数据完成性，在拆包/组包/错位和夹杂无效数据的情况下也能确保正确解析。
+  * 提供topic数据打包与解析api，可通过任意协议共享多个topic数据，实现跨进程和跨设备通信。通过fifo与crc校验保证数据完成性，在拆包/组包/错位和夹杂无效数据的情况下也能确保正确解析。
 
 * 日志框架
 
@@ -88,7 +88,7 @@ OneMessage核心为订阅发布的消息框架，包含了红黑树，链表，�
 [Github](https://github.com/Jiu-xiao/OneMessage.git)
 
 ```shell
-git clone https://github.com/Jiu-xiao/OneMessage.gitt
+git clone https://github.com/Jiu-xiao/OneMessage.git
 ```
 
 或者使用 `git submodule`将其包含在你的仓库中
@@ -119,7 +119,6 @@ OneMessage
 | src      | 用户接口     |
 | test     | 单元测试     |
 | example  | 例程         |
-| utils    | 工具         |
 
 ## C++
 
