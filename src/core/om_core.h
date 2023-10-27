@@ -10,7 +10,7 @@
 #include "om_rbt.h"
 
 #define OM_TOPIC_LOCK(_topic) om_mutex_lock(_topic->mutex)
-#define OM_TOPIC_UNLOCK(_topic) pthread_mutex_unlock(_topic->mutex)
+#define OM_TOPIC_UNLOCK(_topic) om_mutex_unlock(_topic->mutex)
 
 typedef struct {
   bool virtual_mode;
