@@ -33,11 +33,11 @@ om_status_t om_fifo_pop_batch(om_fifo_t* fifo, uint32_t item_num);
 
 om_status_t om_fifo_push(om_fifo_t* fifo, const void* data);
 
+om_status_t om_fifo_jump_peek(om_fifo_t* fifo, uint32_t num, void* data);
+
 om_status_t om_fifo_peek(om_fifo_t* fifo, void* data);
 
 om_status_t om_fifo_peek_batch(om_fifo_t* fifo, void* data, uint32_t item_num);
-
-om_status_t om_fifo_peeks(om_fifo_t* fifo, void* data, uint32_t item_num);
 
 om_status_t om_fifo_reads(om_fifo_t* fifo, void* data, uint32_t item_num);
 
@@ -48,5 +48,10 @@ uint32_t om_fifo_writeable_item_count(om_fifo_t* fifo);
 om_status_t om_fifo_reset(om_fifo_t* fifo);
 
 om_status_t om_fifo_overwrite(om_fifo_t* fifo, const void* data);
+
+void om_fifo_foreach(om_fifo_t* fifo, bool (*fun)(void* data, void* arg),
+                     void* arg);
+
+void* om_fifo_foreach_dist(om_fifo_t* fifo, void* data);
 
 #endif

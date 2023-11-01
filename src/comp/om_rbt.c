@@ -324,18 +324,52 @@ uint32_t om_rbtree_get_num(om_rbt_root_t *root) {
   return num;
 }
 
-static void _om_rbtree_foreach(om_rbt_node_t *node,
+static bool _om_rbtree_foreach(om_rbt_node_t *node,
                                bool (*fun)(om_rbt_node_t *node, void *arg),
                                void *arg) {
-  if (node == NULL) return;
-
-  if (fun(node, arg)) {
-    _om_rbtree_foreach(node->left, fun, arg);
-    _om_rbtree_foreach(node->right, fun, arg);
+  if (node == NULL) {
+    return false;
   }
+
+  if (_om_rbtree_foreach(node->left, fun, arg) && fun(node, arg)) {
+    return _om_rbtree_foreach(node->right, fun, arg);
+  }
+
+  return false;
 }
 
 void om_rbtree_foreach(om_rbt_root_t *root,
                        bool (*fun)(om_rbt_node_t *node, void *arg), void *arg) {
   _om_rbtree_foreach(root->node, fun, arg);
+}
+
+om_rbt_node_t *om_rbtree_foreach_disc(om_rbt_root_t *rbt, om_rbt_node_t *node) {
+  if (node == NULL) {
+    node = rbt->node;
+    while (node->left != NULL) {
+      node = node->left;
+    }
+    return node;
+  }
+
+  if (node->right != NULL) {
+    node = node->right;
+    while (node->left != NULL) {
+      node = node->left;
+    }
+    return node;
+  }
+
+  if (node->parent != NULL) {
+    if (node == node->parent->left) {
+      return node->parent;
+    } else {
+      while (node->parent != NULL && node == node->parent->right) {
+        node = node->parent;
+      }
+      return node->parent;
+    }
+  }
+
+  return NULL;
 }

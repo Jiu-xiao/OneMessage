@@ -42,13 +42,32 @@ START_TEST(_FIFO) {
 
   om_fifo_create(&fifo, data, 10, sizeof(char));
 
-  for (int i = 0; i < 4; i++) {
-    ck_assert_msg(fifo.ptr_write == i, "写指针错误");
-    om_fifo_write(&fifo, "0");
+  for (int i = 0; i < 8; i++) {
+    om_fifo_write(&fifo, &i);
+    om_fifo_pop(&fifo);
   }
 
   for (int i = 0; i < 4; i++) {
-    ck_assert_msg(fifo.ptr_read == i, "读指针错误");
+    om_fifo_write(&fifo, &i);
+  }
+
+  for (int i = 0; i < 4; i++) {
+    char tmp = 0;
+    om_fifo_jump_peek(&fifo, i, &tmp);
+    ck_assert_msg(tmp == i, "数据损坏，应为%d，实际为%d", i, tmp);
+  }
+
+  void* tmp = NULL;
+  for (int i = 0; i < 100; i++) {
+    tmp = om_fifo_foreach_dist(&fifo, tmp);
+    if (tmp == NULL) {
+      break;
+    }
+    ck_assert_msg(*((char*)tmp) == i, "数据损坏，应为%d，实际为%d", i,
+                  *((char*)tmp));
+  }
+
+  for (int i = 0; i < 4; i++) {
     om_fifo_read(&fifo, buff);
   }
 
@@ -66,9 +85,6 @@ START_TEST(_FIFO) {
   for (int i = 0; i < 10; i++) {
     buff[i] = '0' + i;
   }
-
-  ck_assert_msg(fifo.ptr_write == 4, "写指针错误");
-  ck_assert_msg(fifo.ptr_read == 4, "读指针错误");
 
   om_fifo_writes(&fifo, buff, 10);
 
@@ -90,6 +106,27 @@ START_TEST(_FIFO) {
 }
 END_TEST
 
+START_TEST(_RBT) {
+  RBT_ROOT(rbt);
+  om_rbt_node_t node[50] = {};
+  for (int i = 0; i < 50; i++) {
+    char* tmp = malloc(50);
+    memset(tmp, 0, 50);
+    tmp[0] = i + 'A';
+    node[i].key = tmp;
+    om_rbtree_insert(&rbt, &node[i]);
+  }
+
+  om_rbt_node_t* tmp = NULL;
+
+  for (int i = 0; i < 50; i++) {
+    tmp = om_rbtree_foreach_disc(&rbt, tmp);
+    ck_assert_msg(tmp->key[0] == 'A' + i, "遍历第%d个数据错误，为%d", i,
+                  tmp->key[0] - 'A');
+  }
+}
+END_TEST
+
 Suite* make_om_base_suite(void) {
   Suite* om_base = suite_create("底层API测试");
 
@@ -104,6 +141,10 @@ Suite* make_om_base_suite(void) {
   TCase* tc_fifo = tcase_create("队列测试");
   suite_add_tcase(om_base, tc_fifo);
   tcase_add_test(tc_fifo, _FIFO);
+
+  TCase* tc_rbt = tcase_create("红黑树测试");
+  suite_add_tcase(om_base, tc_rbt);
+  tcase_add_test(tc_rbt, _RBT);
 
   return om_base;
 }

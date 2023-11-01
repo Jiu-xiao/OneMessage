@@ -33,4 +33,5 @@ uint32_t om_rbtree_get_num(om_rbt_root_t *root);
 void om_rbtree_foreach(om_rbt_root_t *root,
                        bool (*fun)(om_rbt_node_t *node, void *arg), void *arg);
 
+om_rbt_node_t *om_rbtree_foreach_disc(om_rbt_root_t *rbt, om_rbt_node_t *node);
 #endif

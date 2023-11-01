@@ -132,6 +132,23 @@ inline om_status_t om_fifo_peek(om_fifo_t* fifo, void* data) {
   return OM_OK;
 }
 
+inline om_status_t om_fifo_jump_peek(om_fifo_t* fifo, uint32_t num,
+                                     void* data) {
+  if (om_fifo_readable_item_count(fifo) < num) {
+    return OM_ERROR_EMPTY;
+  }
+
+  uint32_t index = fifo->ptr_read + num;
+
+  if (index >= fifo->item_sum) {
+    index -= fifo->item_sum;
+  }
+
+  memcpy(data, (uint8_t*)(fifo->fifo_ptr) + index * fifo->item_size,
+         fifo->item_size);
+  return OM_OK;
+}
+
 inline om_status_t om_fifo_peek_batch(om_fifo_t* fifo, void* data,
                                       uint32_t item_num) {
   if (om_fifo_readable_item_count(fifo) < item_num) {
@@ -213,4 +230,39 @@ inline om_status_t om_fifo_overwrite(om_fifo_t* fifo, const void* data) {
   om_fifo_reset(fifo);
 
   return om_fifo_write(fifo, data);
+}
+
+void om_fifo_foreach(om_fifo_t* fifo, bool (*fun)(void* data, void* arg),
+                     void* arg) {
+  uint32_t index = fifo->ptr_read, num = om_fifo_readable_item_count(fifo);
+
+  for (int i = 0; i < num; i++) {
+    if (!fun((uint8_t*)(fifo->fifo_ptr) + fifo->item_size * index, arg)) {
+      return;
+    }
+    index++;
+    if (index >= fifo->item_sum) {
+      index -= fifo->item_sum;
+    }
+  }
+}
+
+void* om_fifo_foreach_dist(om_fifo_t* fifo, void* data) {
+  uint32_t index = fifo->ptr_read, num = om_fifo_readable_item_count(fifo);
+
+  if (num == 0) {
+    return NULL;
+  }
+
+  if (data == NULL) {
+    return (uint8_t*)(fifo->fifo_ptr) + fifo->item_size * fifo->ptr_read;
+  }
+
+  index = ((data - fifo->fifo_ptr) / fifo->item_size + 1) % fifo->item_sum;
+
+  if (index == fifo->ptr_write) {
+    return NULL;
+  } else {
+    return (uint8_t*)(fifo->fifo_ptr) + fifo->item_size * index;
+  }
 }
