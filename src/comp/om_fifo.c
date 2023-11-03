@@ -1,5 +1,7 @@
 #include "om_fifo.h"
 
+#include <stdint.h>
+
 #include "om_def.h"
 
 inline void om_fifo_create(om_fifo_t* fifo, void* fifo_ptr, uint32_t item_sum,
@@ -236,7 +238,7 @@ void om_fifo_foreach(om_fifo_t* fifo, bool (*fun)(void* data, void* arg),
                      void* arg) {
   uint32_t index = fifo->ptr_read, num = om_fifo_readable_item_count(fifo);
 
-  for (int i = 0; i < num; i++) {
+  for (uint32_t i = 0; i < num; i++) {
     if (!fun((uint8_t*)(fifo->fifo_ptr) + fifo->item_size * index, arg)) {
       return;
     }
