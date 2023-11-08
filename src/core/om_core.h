@@ -9,8 +9,8 @@
 #include "om_list.h"
 #include "om_rbt.h"
 
-#define OM_TOPIC_LOCK(_topic) om_mutex_lock(_topic->mutex)
-#define OM_TOPIC_UNLOCK(_topic) om_mutex_unlock(_topic->mutex)
+#define OM_TOPIC_LOCK(_topic) om_mutex_lock(&((_topic)->mutex))
+#define OM_TOPIC_UNLOCK(_topic) om_mutex_unlock(&((_topic)->mutex))
 
 typedef struct {
   bool virtual_mode;
@@ -33,6 +33,7 @@ typedef enum {
   OM_SUBER_MODE_UNKNOW,
   OM_SUBER_MODE_LINK,
   OM_SUBER_MODE_EXPORT,
+  OM_SUBER_MODE_FIFO,
   OM_SUBER_MODE_DEFAULT,
 } om_suber_mode_t;
 
@@ -53,10 +54,12 @@ typedef struct {
     } as_link;
 
     struct {
-      uint32_t max_size;
-      uint8_t* buff;
       bool new_data;
     } as_export;
+
+    struct {
+      om_fifo_t* fifo;
+    } as_queue;
   } data;
 } om_suber_t;
 
@@ -90,6 +93,14 @@ om_link_t* om_core_link_create_static(om_link_t* link, om_suber_t* sub,
 
 om_status_t om_core_add_link(om_topic_t* topic, om_link_t* link);
 
+om_status_t om_core_queue_init_fifo_static(om_topic_t* topic, om_fifo_t* fifo,
+                                           void* buff, uint32_t len);
+
+om_fifo_t* om_core_queue_add(om_topic_t* topic, uint32_t len);
+
+om_fifo_t* om_core_queue_add_static(om_topic_t* topic, om_suber_t* sub,
+                                    om_fifo_t* fifo);
+
 om_status_t om_core_link(om_topic_t* source, om_topic_t* target);
 
 om_status_t om_core_link_static(om_suber_t* suber, om_link_t* link,
@@ -101,8 +112,7 @@ om_status_t om_core_del_suber(om_list_head_t* head);
 
 om_status_t om_core_del_topic(om_rbt_node_t* node);
 
-om_status_t om_core_set_export_target(om_suber_t* suber, void* target,
-                                      uint32_t max_size);
+om_status_t om_core_set_export_target(om_suber_t* suber);
 
 om_topic_t* om_core_find_topic(const char* name, uint32_t timeout);
 

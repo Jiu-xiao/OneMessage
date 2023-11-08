@@ -88,17 +88,60 @@ START_TEST(_PUBLISH_STATIC) {
 }
 END_TEST
 
+START_TEST(_QUEUE) {
+  om_topic_t* topic = om_config_topic(NULL, "a", "topic", 1u);
+  om_fifo_t* queue = om_queue_add(topic, 10);
+  for (uint8_t i = 0; i < 5; i++) {
+    om_publish(topic, &i, sizeof(i), true, false);
+  }
+  OM_TOPIC_LOCK(topic);
+  ck_assert_msg(om_fifo_readable_item_count(queue) == 5, "队列元素数量错误");
+
+  for (uint8_t i = 0; i < 5; i++) {
+    uint8_t tmp;
+
+    om_fifo_read(queue, &tmp);
+    ck_assert_msg(tmp == i, "队列元素数据损坏");
+  }
+  OM_TOPIC_UNLOCK(topic);
+}
+END_TEST
+
+START_TEST(_QUEUE_STATIC) {
+  om_topic_t topic;
+  om_fifo_t queue;
+  om_suber_t suber;
+  uint8_t buff[10];
+  om_create_topic_static(&topic, "static_topic", 1u);
+  om_queue_init_fifo_static(&topic, &queue, buff, 10);
+  om_queue_add_static(&topic, &suber, &queue);
+  for (uint8_t i = 0; i < 5; i++) {
+    om_publish(&topic, &i, sizeof(i), true, false);
+  }
+  OM_TOPIC_LOCK(&topic);
+  ck_assert_msg(om_fifo_readable_item_count(&queue) == 5, "队列元素数量错误");
+
+  for (uint8_t i = 0; i < 5; i++) {
+    uint8_t tmp;
+
+    om_fifo_read(&queue, &tmp);
+    ck_assert_msg(tmp == i, "队列元素数据损坏");
+  }
+  OM_TOPIC_UNLOCK(&topic);
+}
+END_TEST
+
 START_TEST(_LOG) {
   char str_log[] = {"Log test."};
   om_init();
   char buff[100] = {0};
   om_topic_t* topic_log = om_get_log_handle();
 
-  om_suber_t* sub = om_subscribe(topic_log, buff, sizeof(buff));
+  om_suber_t* sub = om_subscribe(topic_log);
 
   ck_assert_msg(topic_log, "获取不到log话题。");
   om_print_log("init", OM_LOG_LEVEL_DEFAULT, true, false, "%s", str_log);
-  om_suber_export(sub, false);
+  om_suber_export(sub, buff, false);
   ck_assert_msg(!strcmp(buff, "[init]\033[mLog test.\r\n"), "LOG数据错误:%s",
                 buff);
 }
@@ -131,7 +174,8 @@ START_TEST(_EVENT) {
   om_event_active(evt_group, EVENT_2, true, false);
 
   ck_assert_msg(event_counter == 2, "事件触发失败");
-  ck_assert_msg(last_event == EVENT_1, "触发了错误的事件,应为%d,实际为%d", EVENT_1, last_event);
+  ck_assert_msg(last_event == EVENT_1, "触发了错误的事件,应为%d,实际为%d",
+                EVENT_1, last_event);
 }
 END_TEST
 
@@ -157,7 +201,8 @@ START_TEST(_EVENT_STATIC) {
   om_event_active(&group, EVENT_2, true, false);
 
   ck_assert_msg(event_counter == 2, "事件触发失败");
-  ck_assert_msg(last_event == EVENT_1, "触发了错误的事件,应为%d,实际为%d", EVENT_1, last_event);
+  ck_assert_msg(last_event == EVENT_1, "触发了错误的事件,应为%d,实际为%d",
+                EVENT_1, last_event);
 }
 END_TEST
 
@@ -181,10 +226,9 @@ START_TEST(_FILTER) {
   om_topic_t* decompose =
       om_config_topic(NULL, NULL, "decompose", sizeof(om_afl_test_t));
 
-  om_suber_t* list_sub = om_subscribe(list, &(ans1), sizeof(ans1));
-  om_suber_t* range_sub = om_subscribe(range, &(ans2), sizeof(ans2));
-  om_suber_t* decompose_sub =
-      om_subscribe(decompose, &(ans3.decompose), sizeof(ans3.decompose));
+  om_suber_t* list_sub = om_subscribe(list);
+  om_suber_t* range_sub = om_subscribe(range);
+  om_suber_t* decompose_sub = om_subscribe(decompose);
 
   om_config_filter(source, "LDR", list, OM_PRASE_STRUCT(om_afl_test_t, list),
                    fl_template, decompose,
@@ -193,19 +237,18 @@ START_TEST(_FILTER) {
 
   memcpy(&test.list, fl_template, sizeof(fl_template));
   om_publish(source, &test, sizeof(test), true, false);
-  om_suber_export(list_sub, false);
+  om_suber_export(list_sub, &ans1, false);
   ck_assert_msg(!memcmp(&test.list, &ans1.list, sizeof(ans1.list)),
                 "过滤器list模式数据错误");
   test.list[1] = 0;
   om_publish(source, &test, sizeof(test), true, false);
-  om_suber_export(list_sub, false);
   ck_assert_msg(memcmp(&test.list, &ans1.list, sizeof(ans1.list)),
                 "过滤器list模式失效");
 
   for (uint32_t i = 0; i < 100; i++) {
     test.range = 213 + i;
     om_publish(source, &test, sizeof(test), true, false);
-    om_suber_export(range_sub, false);
+    om_suber_export(range_sub, &ans2, false);
     ck_assert_msg(test.range == ans2.range,
                   "过滤器range模式数据错误在%d,应为%d,实际为%d", i, test.range,
                   ans2.range);
@@ -214,7 +257,7 @@ START_TEST(_FILTER) {
   for (uint32_t i = 1000; i < 2000; i++) {
     test.range = 213 + i;
     om_publish(source, &test, sizeof(test), true, false);
-    om_suber_export(range_sub, false);
+    om_suber_export(range_sub, &ans2, false);
     ck_assert_msg(test.range != ans2.range,
                   "过滤器range模式失效在%d,应为%d,实际为%d", i, test.range,
                   ans2.range);
@@ -222,7 +265,7 @@ START_TEST(_FILTER) {
 
   test.decompose = 5.63f;
   om_publish(source, &test, sizeof(test), true, false);
-  om_suber_export(decompose_sub, false);
+  om_suber_export(decompose_sub, &ans3.decompose, false);
   ck_assert_msg(test.decompose == ans3.decompose,
                 "过滤器decompose模式数据错误");
 }
@@ -241,10 +284,9 @@ START_TEST(_FILTER_STATIC) {
   om_create_topic_static(&range, "range", sizeof(om_afl_test_t));
   om_create_topic_static(&decompose, "decompose", sizeof(om_afl_test_t));
 
-  om_suber_t* list_sub = om_subscribe(&list, &(ans1), sizeof(ans1));
-  om_suber_t* range_sub = om_subscribe(&range, &(ans2), sizeof(ans2));
-  om_suber_t* decompose_sub =
-      om_subscribe(&decompose, &(ans3.decompose), sizeof(ans3.decompose));
+  om_suber_t* list_sub = om_subscribe(&list);
+  om_suber_t* range_sub = om_subscribe(&range);
+  om_suber_t* decompose_sub = om_subscribe(&decompose);
 
   om_afl_t afl;
   om_afl_filter_t f_list, f_range, f_decompose;
@@ -257,19 +299,19 @@ START_TEST(_FILTER_STATIC) {
 
   memcpy(&test.list, fl_template, sizeof(fl_template));
   om_publish(&source, &test, sizeof(test), true, false);
-  om_suber_export(list_sub, false);
+  om_suber_export(list_sub, &ans1, false);
   ck_assert_msg(!memcmp(&test.list, &ans1.list, sizeof(ans1.list)),
                 "过滤器list模式数据错误");
   test.list[1] = 0;
   om_publish(&source, &test, sizeof(test), true, false);
-  om_suber_export(list_sub, false);
+  om_suber_export(list_sub, &ans1, false);
   ck_assert_msg(memcmp(&test.list, &ans1.list, sizeof(ans1.list)),
                 "过滤器list模式失效");
 
   for (uint32_t i = 0; i < 100; i++) {
     test.range = 213 + i;
     om_publish(&source, &test, sizeof(test), true, false);
-    om_suber_export(range_sub, false);
+    om_suber_export(range_sub, &ans2, false);
     ck_assert_msg(test.range == ans2.range,
                   "过滤器range模式数据错误在%d,应为%d,实际为%d", i, test.range,
                   ans2.range);
@@ -278,7 +320,7 @@ START_TEST(_FILTER_STATIC) {
   for (uint32_t i = 1000; i < 2000; i++) {
     test.range = 213 + i;
     om_publish(&source, &test, sizeof(test), true, false);
-    om_suber_export(range_sub, false);
+    om_suber_export(range_sub, &ans2, false);
     ck_assert_msg(test.range != ans2.range,
                   "过滤器range模式失效在%d,应为%d,实际为%d", i, test.range,
                   ans2.range);
@@ -286,7 +328,7 @@ START_TEST(_FILTER_STATIC) {
 
   test.decompose = 5.63f;
   om_publish(&source, &test, sizeof(test), true, false);
-  om_suber_export(decompose_sub, false);
+  om_suber_export(decompose_sub, &ans3.decompose, false);
   ck_assert_msg(test.decompose == ans3.decompose,
                 "过滤器decompose模式数据错误");
 }
@@ -394,6 +436,14 @@ Suite* make_om_module_suite(void) {
   TCase* tc_public_static = tcase_create("静态订阅发布测试");
   suite_add_tcase(om_module, tc_public_static);
   tcase_add_test(tc_public_static, _PUBLISH_STATIC);
+
+  TCase* tc_queue = tcase_create("队列测试");
+  suite_add_tcase(om_module, tc_queue);
+  tcase_add_test(tc_queue, _QUEUE);
+
+  TCase* tc_queue_static = tcase_create("静态队列测试");
+  suite_add_tcase(om_module, tc_queue_static);
+  tcase_add_test(tc_queue_static, _QUEUE);
 
   TCase* tc_event = tcase_create("事件触发测试");
   suite_add_tcase(om_module, tc_event);

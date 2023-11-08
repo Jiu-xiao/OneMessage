@@ -38,6 +38,9 @@ inline om_status_t _om_publish_to_suber(om_suber_t* sub, om_topic_t* topic,
     case OM_SUBER_MODE_EXPORT:
       sub->data.as_export.new_data = true;
       break;
+    case OM_SUBER_MODE_FIFO:
+      om_fifo_write(sub->data.as_queue.fifo, topic->msg.buff);
+      break;
     case OM_SUBER_MODE_UNKNOW:
       break;
     default:
@@ -131,12 +134,21 @@ om_status_t om_publish(om_topic_t* topic, void* buff, uint32_t size, bool block,
   return res;
 }
 
-om_suber_t* om_subscribe(om_topic_t* topic, void* buff, uint32_t max_size) {
+om_suber_t* om_subscribe(om_topic_t* topic) {
   OM_ASSERT(topic);
-  OM_ASSERT(buff);
 
   om_suber_t* sub = om_core_suber_create(NULL);
-  om_core_set_export_target(sub, buff, max_size);
+  om_core_set_export_target(sub);
+  om_core_add_suber(topic, sub);
+
+  return sub;
+}
+
+om_suber_t* om_subscribe_static(om_topic_t* topic, om_suber_t* sub) {
+  OM_ASSERT(topic);
+  OM_ASSERT(sub);
+
+  om_core_set_export_target(sub);
   om_core_add_suber(topic, sub);
 
   return sub;
@@ -146,12 +158,11 @@ inline bool om_suber_available(om_suber_t* suber) {
   return suber->data.as_export.new_data;
 }
 
-om_status_t om_suber_export(om_suber_t* suber, bool in_isr) {
+om_status_t om_suber_export(om_suber_t* suber, void* buff, bool in_isr) {
   OM_ASSERT(suber);
   OM_ASSERT(suber->mode == OM_SUBER_MODE_EXPORT);
 
-  if (suber->data.as_export.new_data &&
-      (suber->master->msg.size <= suber->data.as_export.max_size)) {
+  if (suber->data.as_export.new_data) {
     if (!in_isr)
       om_mutex_lock(&suber->master->mutex);
     else {
@@ -161,8 +172,7 @@ om_status_t om_suber_export(om_suber_t* suber, bool in_isr) {
 
     suber->data.as_export.new_data = false;
 
-    memcpy(suber->data.as_export.buff, suber->master->msg.buff,
-           suber->master->msg.size);
+    memcpy(buff, suber->master->msg.buff, suber->master->msg.size);
 
     if (!in_isr)
       om_mutex_unlock(&suber->master->mutex);
@@ -213,7 +223,6 @@ uint32_t om_msg_get_topic_num() { return om_rbtree_get_num(&_topic_list); }
 uint32_t om_msg_get_suber_num(om_topic_t* topic) {
   return om_list_get_num(&topic->suber);
 }
-
 
 uint32_t om_msg_get_link_num(om_topic_t* topic) {
   return om_list_get_num(&topic->link);

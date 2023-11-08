@@ -115,6 +115,39 @@ om_status_t om_core_add_link(om_topic_t* topic, om_link_t* link) {
   return OM_OK;
 }
 
+om_status_t om_core_queue_init_fifo_static(om_topic_t* topic, om_fifo_t* fifo,
+                                           void* buff, uint32_t len) {
+  OM_ASSERT(topic);
+  OM_ASSERT(fifo);
+  OM_ASSERT(buff);
+  OM_ASSERT(len);
+
+  om_fifo_create(fifo, buff, len, topic->buff_len);
+
+  return OM_OK;
+}
+
+om_fifo_t* om_core_queue_add(om_topic_t* topic, uint32_t len) {
+  om_fifo_t* fifo = om_malloc(sizeof(om_fifo_t));
+  om_suber_t* suber = om_malloc(sizeof(om_suber_t));
+  om_core_queue_init_fifo_static(topic, fifo, om_malloc(topic->buff_len * len),
+                                 len);
+  om_core_queue_add_static(topic, suber, fifo);
+
+  return fifo;
+}
+
+om_fifo_t* om_core_queue_add_static(om_topic_t* topic, om_suber_t* sub,
+                                    om_fifo_t* fifo) {
+  om_core_suber_create_static(sub, NULL);
+  sub->mode = OM_SUBER_MODE_FIFO;
+  sub->data.as_queue.fifo = fifo;
+
+  om_core_add_suber(topic, sub);
+
+  return fifo;
+}
+
 om_status_t om_core_link(om_topic_t* source, om_topic_t* target) {
   OM_ASSERT(source);
   OM_ASSERT(target);
@@ -174,6 +207,8 @@ om_status_t om_core_del_suber(om_list_head_t* head) {
         break;
       }
     }
+  } else if (sub->mode == OM_SUBER_MODE_FIFO) {
+    om_free(sub->data.as_queue.fifo);
   }
 
   om_free(sub);
@@ -216,14 +251,11 @@ om_topic_t* om_core_find_topic(const char* name, uint32_t timeout) {
   return NULL;
 }
 
-om_status_t om_core_set_export_target(om_suber_t* suber, void* target,
-                                      uint32_t max_size) {
-  OM_ASSERT(target);
+om_status_t om_core_set_export_target(om_suber_t* suber) {
   OM_ASSERT(suber);
 
   suber->mode = OM_SUBER_MODE_EXPORT;
-  suber->data.as_export.max_size = max_size;
-  suber->data.as_export.buff = target;
+  suber->data.as_export.new_data = false;
   return OM_OK;
 }
 

@@ -34,15 +34,137 @@
 
     om_topic_t* om_create_topic(const char* name,size_t buff_len)
     om_suber_t* om_create_suber(om_topic_t* link)
-    om_link_t* om_link_create(om_suber_t* sub, om_topic_t* topic)
+    om_status_t om_topic_link(om_topic_t* source, om_topic_t* target);
 
 静态内存
 
     om_topic_t* om_create_topic_static(om_topic_t* topic, const char* name,size_t buff_len)
     om_suber_t* om_create_suber_static(om_suber_t* suber, om_topic_t* link)
-    om_link_t* om_link_create(om_link_t* link, om_suber_t* sub, om_topic_t* topic)
+    om_status_t om_topic_link_static(om_suber_t* suber, om_link_t* link,
+                                    om_topic_t* source, om_topic_t* target);
 
-## 配置
+## 发布消息
+
+    om_status_t om_publish(om_topic_t* topic, void* buff, uint32_t size, bool block, bool in_isr)
+
+block参数决定同时有其他线程发布这个话题时是否等待，in_isr取决于是否在中断中调用
+
+## 异步订阅话题
+
+    om_suber_t* om_subscribe(om_topic_t* topic);
+
+    om_suber_t* om_subscribe_static(om_topic_t* topic, om_suber_t* sub);
+
+    om_status_t om_suber_export(om_suber_t* suber, void* buff, bool in_isr);
+
+    bool om_suber_available(om_suber_t* suber);
+
+* om_subscribe会返回一个可导出话题数据的订阅者
+* 当订阅者接收到新数据时,调用om_suber_export会将数据写入buff,并返回OM_OK.
+* om_suber_available判断是否有新数据
+
+## 为话题添加订阅队列
+
+与普通订阅者不同，使用队列可以存储一个topic上的多个消息，但是无法使用回调函数。
+
+动态分配内存
+
+    om_fifo_t* om_queue_add(om_topic_t* topic, uint32_t len);
+
+example:
+
+    /* 创建topic */
+    om_topic_t* topic = om_create_topic("topic", 1u);
+    /* 添加队列 */
+    om_fifo_t* queue = om_queue_add(topic, 10);
+    /* 发布消息 */
+    //om_publish(...)
+
+    /* 获取消息数量 */
+    uint32_t count = om_fifo_readable_item_count(queue);
+
+    /* 弹出数据 */
+    for(int i=0;i<count;i++){
+        om_fifo_pop(queue);
+    }
+
+静态内存
+
+    om_status_t om_queue_init_fifo_static(om_topic_t* topic, om_fifo_t* fifo,
+                                        void* buff, uint32_t len);
+
+    om_fifo_t* om_queue_add_static(om_topic_t* topic, om_suber_t* sub,
+                                        om_fifo_t* fifo);
+
+example:
+
+    om_topic_t topic;
+    om_fifo_t queue;
+    om_suber_t suber;
+    uint8_t buff[10];
+
+    /* 创建话题 */
+    om_create_topic_static(&topic, "topic", 1u);
+    /* 初始化队列 */
+    om_queue_init_fifo_static(&topic, &queue, buff, 10);
+    /* 添加队列 */
+    om_queue_add_static(&topic, &suber, &queue);
+
+    /* 发布消息 */
+    //om_publish(...)
+
+    /* 获取消息数量 */
+    uint32_t count = om_fifo_readable_item_count(queue);
+
+    /* 弹出数据 */
+    for(int i=0;i<count;i++){
+        om_fifo_pop(queue);
+    }
+
+### 队列API
+
+    void om_fifo_create(om_fifo_t* fifo, void* fifo_ptr, uint32_t item_sum,
+                        uint32_t item_size);
+
+    bool om_fifo_writeable(om_fifo_t* fifo);
+
+    om_status_t om_fifo_write(om_fifo_t* fifo, const void* data);
+
+    om_status_t om_fifo_writes(om_fifo_t* fifo, const void* data,
+                            uint32_t item_num);
+
+    bool om_fifo_readable(om_fifo_t* fifo);
+
+    om_status_t om_fifo_read(om_fifo_t* fifo, void* data);
+
+    om_status_t om_fifo_pop(om_fifo_t* fifo);
+
+    om_status_t om_fifo_pop_batch(om_fifo_t* fifo, uint32_t item_num);
+
+    om_status_t om_fifo_push(om_fifo_t* fifo, const void* data);
+
+    om_status_t om_fifo_jump_peek(om_fifo_t* fifo, uint32_t num, void* data);
+
+    om_status_t om_fifo_peek(om_fifo_t* fifo, void* data);
+
+    om_status_t om_fifo_peek_batch(om_fifo_t* fifo, void* data, uint32_t item_num);
+
+    om_status_t om_fifo_reads(om_fifo_t* fifo, void* data, uint32_t item_num);
+
+    uint32_t om_fifo_readable_item_count(om_fifo_t* fifo);
+
+    uint32_t om_fifo_writeable_item_count(om_fifo_t* fifo);
+
+    om_status_t om_fifo_reset(om_fifo_t* fifo);
+
+    om_status_t om_fifo_overwrite(om_fifo_t* fifo, const void* data);
+
+    void om_fifo_foreach(om_fifo_t* fifo, bool (*fun)(void* data, void* arg),
+                        void* arg);
+
+    void* om_fifo_foreach_dist(om_fifo_t* fifo, void* data);
+
+## 格式化配置
 
     om_topic_t* om_config_topic(om_topic_t* topic, const char* format, ...)
 
@@ -148,20 +270,6 @@
 * OM_ERROR_FULL,
 * OM_ERROR_EMPTY,
 * OM_ERROR_NOT_INIT
-
-## 发布消息
-
-    om_status_t om_publish(om_topic_t* topic, void* buff, uint32_t size, bool block, bool in_isr)
-block参数决定同时有其他线程发布这个话题时是否等待，in_isr取决于是否在中断中调用
-
-## 订阅话题
-
-    om_suber_t* om_subscribe(om_topic_t *topic, void *buff, uint32_t max_size)
-
-    om_status_t om_suber_export(om_suber_t* suber, bool in_isr)
-
-* om_subscribe会返回一个可导出话题数据的订阅者
-* 当订阅者接收到新数据时,调用om_suber_export会将数据写入buff,并返回OM_OK.
 
 ## log
 

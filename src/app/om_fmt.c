@@ -14,7 +14,6 @@
 #define SUBER_FLAG ('S')
 #define TOPIC_FLAG ('T')
 #define STATIC_TOPIC_FLAG ('E')
-#define FREQ_FLAG ('Q')
 #define CACHE_FLAG ('C')
 #define STATIC_CACHE_FLAG ('X')
 
