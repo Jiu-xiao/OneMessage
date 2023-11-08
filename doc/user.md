@@ -80,6 +80,9 @@ example:
     /* 发布消息 */
     //om_publish(...)
 
+    /* 加锁 */
+    OM_TOPIC_LOCK(topic);
+
     /* 获取消息数量 */
     uint32_t count = om_fifo_readable_item_count(queue);
 
@@ -87,6 +90,9 @@ example:
     for(int i=0;i<count;i++){
         om_fifo_pop(queue);
     }
+
+    /* 解锁 */
+    OM_TOPIC_UNLOCK(topic);
 
 静态内存
 
@@ -113,6 +119,9 @@ example:
     /* 发布消息 */
     //om_publish(...)
 
+    /* 加锁 */
+    OM_TOPIC_LOCK(&topic);
+
     /* 获取消息数量 */
     uint32_t count = om_fifo_readable_item_count(queue);
 
@@ -120,6 +129,9 @@ example:
     for(int i=0;i<count;i++){
         om_fifo_pop(queue);
     }
+
+    /* 解锁 */
+    OM_TOPIC_UNLOCK(&topic);
 
 ### 队列API
 
