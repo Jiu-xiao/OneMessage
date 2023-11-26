@@ -401,9 +401,9 @@ status决定了调用回调函数的条件
 | r    | `om_afl_filter_t* filter,om_topic_t* target,uint32_t length,uint32_t offset,uint32_t scope,uint32_t start,uint32_t range` | 设置过滤器范围模式 |
 | d    | `om_afl_filter_t* filter,om_topic_t* target,uint32_t length,uint32_t offset,uint32_t scope`                               | 设置过滤器分解模式 |
 
-在列表模式下,会从offset开始检测收到的消息是否与template相同,直到offset+scope为止,然后把整包发布到target话题。
+在列表模式下,会在内存地址offset到offset+scope内匹配是否与template相同,然后把整包发布到target话题。
 
-在范围模式下,会从offset到offset+scope视为一个整形数,然后判断其大于等于start且小于start+range,`暂时只支持uint32_t类型`,再将整包发布到target。
+在范围模式下,会把内存offset到offset+scope视为一个无符号整形数,然后判断其值大于等于start且小于start+range,`暂时只支持uint32_t类型`,再将整包发布到target。
 
 在分解模式下,会将offset到offset+scope这一段数据发布到target。
 
@@ -432,8 +432,6 @@ status决定了调用回调函数的条件
 ## 通信收发器
 
 为了满足跨进程和跨设备通信的需要，我们设计了这个通信收发器。它能够将任意一个topic中的数据连同topic的身份信息一同打包到一个数据包当中，同时能够处理其他设备通过任意方式传递来的数据包。
-
-设计上为了保证通信可靠性而放弃了一部分解析性能，因此建议用于接收频率不是很高(小于10Khz)且包长度不大(小于10kb)的场景，但是具体使用中不做限制;
 
 ---
 
@@ -513,3 +511,8 @@ buffer_size和prase_buff_len应当大于接收topic的最大数据长度+10，�
 
     /* 解析接收到的数据 */
     om_com_prase_recv(&com, (uint8_t*)&user_recv_buff, user_recv_len, true, false);
+
+### 存在的问题
+
+1. 包数据段较长（>10kb）时，解析性能可能较低。
+2. 为了提高带宽利用率和打包速度，使用crc32作为topic的id，存在重复的可能性，出现此情况时请给topic更名。后续考虑使用分布更均匀的生成算法。
