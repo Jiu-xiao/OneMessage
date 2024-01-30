@@ -67,7 +67,25 @@
 >>#define om_mutex_unlock_isr(arg) xSemaphoreGiveFromISR(*arg, NULL)
 >>
 >>#define om_mutex_delete(arg) vSemaphoreDelete(*arg)
-
+>
+>ThreadX示例
+>>#include "tx_api.h"
+>>
+>>#define om_mutex_t TX_MUTEX
+>>
+>>#define om_mutex_init(arg) tx_mutex_create(arg, NULL, TX_NO_INHERIT)
+>>
+>>#define om_mutex_lock(arg) tx_mutex_get(arg, TX_WAIT_FOREVER)
+>>
+>>#define om_mutex_trylock(arg) tx_mutex_get(arg, TX_NO_WAIT) == TX_SUCCESS ? OM_OK:OM_ERROR
+>>
+>>#define om_mutex_unlock(arg) tx_mutex_put(arg)
+>>
+>>#define om_mutex_lock_isr(arg) tx_mutex_get(arg, TX_NO_WAIT) == TX_SUCCESS ? OM_OK:OM_ERROR
+>>
+>>#define om_mutex_unlock_isr(arg) tx_mutex_put(arg)
+>>
+>>#define om_mutex_delete(arg) tx_mutex_delete(arg)
 
 ## OM_TIME
 
