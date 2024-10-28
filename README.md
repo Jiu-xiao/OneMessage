@@ -44,6 +44,7 @@ PS:不定长消息为实验功能，强烈建议每个话题的消息长度为�
 已在Linux,FreeRTOS,ThreadX上成功运行，欢迎适配到其他平台。
 
 * 简单示例
+  * [example for stm32f103(use cmake)](https://github.com/Jiu-xiao/STM32F1_OneMessage)
   * [example for linux(use cmake)](https://gitee.com/jiu-xiao/msg-example.git)
   * [example for stm32f103(use makefile)](https://gitee.com/jiu-xiao/om-example-mcu.git)
 * 使用本框架的开源项目
