@@ -1,6 +1,14 @@
 #include "om.h"
 #include "om_test.h"
 
+static bool _rbt_foreach_once(om_rbt_node_t* node, void* arg) {
+  int* count = (int*)arg;
+  (*count)++;
+  ck_assert_msg(node->key[0] == 'B', "遍历回调节点错误，应为B，实际为%c",
+                node->key[0]);
+  return true;
+}
+
 START_TEST(_MALLOC) {
   void* ptr = NULL;
 
@@ -127,6 +135,18 @@ START_TEST(_RBT) {
 }
 END_TEST
 
+START_TEST(_RBT_FOREACH) {
+  RBT_ROOT(rbt);
+  om_rbt_node_t node = {.key = "B"};
+  int count = 0;
+
+  om_rbtree_insert(&rbt, &node);
+  om_rbtree_foreach(&rbt, _rbt_foreach_once, &count);
+
+  ck_assert_msg(count == 1, "单节点遍历应执行1次回调，实际执行%d次", count);
+}
+END_TEST
+
 Suite* make_om_base_suite(void) {
   Suite* om_base = suite_create("底层API测试");
 
@@ -145,6 +165,7 @@ Suite* make_om_base_suite(void) {
   TCase* tc_rbt = tcase_create("红黑树测试");
   suite_add_tcase(om_base, tc_rbt);
   tcase_add_test(tc_rbt, _RBT);
+  tcase_add_test(tc_rbt, _RBT_FOREACH);
 
   return om_base;
 }

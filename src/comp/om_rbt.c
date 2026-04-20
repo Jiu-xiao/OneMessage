@@ -328,14 +328,18 @@ static bool _om_rbtree_foreach(om_rbt_node_t *node,
                                bool (*fun)(om_rbt_node_t *node, void *arg),
                                void *arg) {
   if (node == NULL) {
+    return true;
+  }
+
+  if (!_om_rbtree_foreach(node->left, fun, arg)) {
     return false;
   }
 
-  if (_om_rbtree_foreach(node->left, fun, arg) && fun(node, arg)) {
-    return _om_rbtree_foreach(node->right, fun, arg);
+  if (!fun(node, arg)) {
+    return false;
   }
 
-  return false;
+  return _om_rbtree_foreach(node->right, fun, arg);
 }
 
 void om_rbtree_foreach(om_rbt_root_t *root,
